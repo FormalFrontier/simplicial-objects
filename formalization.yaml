@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/99c678e569c7c4c0772db297c5ddd5e4c9b6322e/schema/v0.4.schema.json
+version: "v0.4"
+project:
+  name: Simplicial Objects
+  description: >-
+    Functorial augmented left decalage of any simplicial object, its natural
+    zeroth-face projection and canonical native five-law extra degeneracy.
+  authors:
+    - Formal Frontier Agents
+  responsible_maintainers:
+    - Prism
+  license: Apache-2.0
+sources:
+  - title: Standard ordinal and simplicial identities
+    type: folklore
+    relationship: background
+    note: >-
+      Mathematical input for this original Formal Frontier Lean construction;
+      no named source, book chapter or source-specific coverage is asserted.
+related_formalizations:
+  - id: https://github.com/leanprover-community/mathlib4
+    relationship: builds-on
+    note: >-
+      Uses mathlib's simplex categories, augmented-object equivalence and native
+      extra-degeneracy section, split-epimorphism, homotopy and transport API.
+automation:
+  methods:
+    - method: agent
+      framework: Formal Frontier Hive Tasks and Lean 4
+      tool_setup: >-
+        Original project formal proof, independent isolated review and static
+        namespace/import transfer into a standalone package.
+      prompting_notes: >-
+        The mathematical Lean proof is from the prior project Task; this
+        destination assembly adds no new mathematical implementation.
+status:
+  scope: >-
+    Twenty-four original public declarations and a private maintained client
+    are mapped into this package. The initial destination revision received
+    independent code review, a successful native both-root build and complete
+    transitive standard-three axiom audit including private/generated
+    declarations, and maintainer acceptance as code on 2026-09-29. This does
+    not assert acceptance of an exact release candidate, publication, source
+    coverage or a topological result.
+review:
+  status: agent-reviewed
+  reviewers:
+    - Formalization Worker A (independent initial destination-code reviewer)
+  notes: >-
+    The isolated donor code received independent review and focused successful
+    cache-first build plus standard-three transitive-axiom evidence. Separately,
+    worker-a independently approved initial destination revision
+    cdbbde4f237d09ff1f3afbf107b71106fec29fe8, and a native check of that
+    revision passed the two-root build and full transitive standard-axiom audit.
+    Prism accepted that revision as code, not as a reviewed release or verified
+    publication; see CONTRIBUTORS.md for separate author and reviewer credit.
+alignment:
+  namespace: SimplicialObjects.LeftDecalage
+  note: >-
+    Public API inventory, not a source-specific passage or coverage mapping;
+    every item below is an original project declaration in this one module.
+  statements:
+    - lean: SimplicialObjects.LeftDecalage.prependMap
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.prependMap_id
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.prependMap_comp
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.index
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.prependMap_δ
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.prependMap_σ
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.prependMap_comp_δ_zero
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.augmented
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.augmentation_point
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.path_obj
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.path_face
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.path_degeneracy
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.augmentation_app
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.augmentation_zero
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.extraDegeneracy
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.projection
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.projection_zero
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.functor
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.functor_obj
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.functor_map_left_app
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.functor_map_right
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.extraDegeneracy_s'_naturality
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.extraDegeneracy_s_naturality
+      module: SimplicialObjects/LeftDecalage.lean
+    - lean: SimplicialObjects.LeftDecalage.naturalProjection
+      module: SimplicialObjects/LeftDecalage.lean
+acknowledgements: >-
+  Mathlib supplies the underlying categorical structures and native generic
+  homotopy; exact project authorship and transfer credit are in CONTRIBUTORS.md.
