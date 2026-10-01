@@ -67,25 +67,24 @@ lake exe cache get
 lake build SimplicialObjects SimplicialObjectsTest
 ```
 
-**Initial destination-code evidence (2026-09-29):** The isolated donor had its
-own independent review and focused checks. Separately, the exact initial
-destination revision `cdbbde4f237d09ff1f3afbf107b71106fec29fe8` received
-author-distinct independent review and a successful native check of both roots
-and the complete transitive axiom inventory, including private/generated
-declarations; only `propext`, `Classical.choice` and `Quot.sound` occur. Prism
-accepted that revision as **destination code**. This historical code acceptance
-does not assert acceptance of any later exact release candidate, a release, or
-private or public publication. See
-[`CONTRIBUTORS.md`](CONTRIBUTORS.md) for precise origin and contributors;
-[`formalization.yaml`](formalization.yaml) lists all 24 mapped public names.
-The complete license is [Apache-2.0](LICENSE); mathlib remains a separately
-licensed dependency and its own definitions retain upstream attribution.
+**Artifact and verification:** The initial published artifact has a parentless
+release history, separate from the development history, with the same file tree
+as its independently reviewed internal release candidate. Its native checks
+built both maintained roots and audited the complete transitive axiom inventory,
+including private/generated declarations; only `propext`, `Classical.choice`
+and `Quot.sound` occur. This is historical evidence for that artifact, not
+review or release of subsequent documentation edits. See
+[`CONTRIBUTORS.md`](CONTRIBUTORS.md) for distinct author, reviewer and
+packaging credit; [`formalization.yaml`](formalization.yaml) inventories the
+24 public names, not source-passage coverage. The complete license is
+[Apache-2.0](LICENSE); mathlib remains a separately licensed dependency and
+its own definitions retain upstream attribution.
 
 **Expected cost and resources:** In that native check, with pinned Lean and the
 matching *precompiled* mathlib cache, fetching/decompressing the cache took
 40.565 s, checking it with a no-build Mathlib target took 5.637 s, and building
-both library roots took 6.337 s (1,328 jobs). The entire run from 17:01:46 to
-17:03:34 UTC also included setup and axiom audits; these are measurements of
+both library roots took 6.337 s (1,328 jobs). The 108 s total run also
+included setup and axiom audits; these are measurements of
 one cached workflow, **not** a clean-machine benchmark or a promise for other
 hardware/network conditions. Cache evidence recorded 8,892 decompressed files
 and 127,865 artifact paths totaling 6,674,961,684 *logical file bytes*
@@ -93,4 +92,5 @@ and 127,865 artifact paths totaling 6,674,961,684 *logical file bytes*
 As a conservative *planning estimate*, allow at least 15 GiB of free disk for
 the cache, checkout, downloads and intermediate build files; actual peak disk
 use and peak memory were not measured. Choose memory and build parallelism to
-fit the machine rather than treating these receipts as a RAM requirement.
+fit the machine rather than treating these receipts as a RAM requirement;
+runtime thread counts do not bound aggregate processes or memory.

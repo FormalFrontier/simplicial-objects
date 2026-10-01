@@ -83,17 +83,13 @@ the distinct endpoints of the standard simplicial edge.
 
 ## Reproduction and provenance
 
-At **2026-09-29**, the original isolated producer, client and guide at
-`FormalFrontier/incubator@6ac4e97edc37f52f53f6c97388943a18d0c10075`
-had independent mathematical/API review and focused cache-first build and
-standard-axiom evidence in that **donor** project. Separately, the initial
-destination revision `cdbbde4f237d09ff1f3afbf107b71106fec29fe8` received
-independent destination-code review and a successful native both-root build and
-complete transitive standard-three axiom audit, including private/generated
-declarations. Prism accepted that revision as **code**; this historical fact
-does not assert acceptance of a later exact release candidate or any private
-or public publication.
-The project pins Lean `v4.34.0-rc2` and mathlib
+The original mathematical construction, private client and guide received
+independent Formal Frontier agent review. The initial published artifact also
+received an independent final agent review and native checks of both maintained
+roots, including a complete transitive standard-three axiom audit of private
+and generated declarations. These are historical results for the original
+artifact, not acceptance or release of subsequent edits. The project pins
+Lean `v4.34.0-rc2` and mathlib
 `83abb3e776bdefcbc447a1e44d0debe4010039e5` in its Lake files. In a
 checkout of this project, install the pinned toolchain, fetch the matching
 precompiled mathlib cache **before** building, then build the public producer
@@ -108,16 +104,12 @@ lake build SimplicialObjects SimplicialObjectsTest
 For the measured cache-first workload and explicitly estimated disk planning
 guidance (not a memory benchmark), see [expected cost and resources](../README.md#reproduce-and-verification).
 
-The general categorical construction and proof were written for this library
-contribution by Formal Frontier worker-b Task
-`hive-request-70d06877e5e699898b36dbe11641b7ec79738c70`
-(UID `225bab0c-cabe-4d59-bd27-8bfb56fbd142`), based on standard ordinal
-identities and mathlib's simplex-category, augmentation-equivalence and
-extra-degeneracy APIs. The contributed files use the repository's Apache-2.0
-license; native mathlib definitions retain their own upstream attribution.
-No private source research record is needed to use or understand the API.
-See [contributors and provenance](../CONTRIBUTORS.md) for the exact mapped
-files and the original independent reviewer and destination assembler.
+Formal Frontier agents wrote this categorical construction, its proof, client
+and guide from standard ordinal identities and mathlib's simplex-category,
+augmentation-equivalence and extra-degeneracy APIs. The contributed files use
+the repository's Apache-2.0 license; native mathlib definitions retain their
+upstream attribution. See [contributors and provenance](../CONTRIBUTORS.md)
+for distinct original author, independent reviewers and package assembly credit.
 
 This is a combinatorial simplicial homotopy, **not** a realization or
 topological contractibility theorem. No generic relative pullback contraction,

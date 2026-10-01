@@ -26,34 +26,33 @@ related_formalizations:
 automation:
   methods:
     - method: agent
-      framework: Formal Frontier Hive Tasks and Lean 4
+      framework: Formal Frontier agents and Lean 4
       tool_setup: >-
-        Original project formal proof, independent isolated review and static
-        namespace/import transfer into a standalone package.
+        AI-assisted original mathematical proof and ordinary-import private
+        client, independently agent-reviewed and packaged as a standalone library.
       prompting_notes: >-
-        The mathematical Lean proof is from the prior project Task; this
-        destination assembly adds no new mathematical implementation.
+        The original proof and client were adapted through namespace/import
+        relocation; package assembly added no mathematical implementation.
 status:
   scope: >-
-    Twenty-four original public declarations and a private maintained client
-    are mapped into this package. The initial destination revision received
-    independent code review, a successful native both-root build and complete
-    transitive standard-three axiom audit including private/generated
-    declarations, and maintainer acceptance as code on 2026-09-29. This does
-    not assert acceptance of an exact release candidate, publication, source
-    coverage or a topological result.
+    Twenty-four original public declarations and a maintained private client
+    form the initial published library. Its mathematics and release artifacts
+    received independent Formal Frontier agent review; the native both-root
+    build and complete transitive standard-three axiom audit include private
+    and generated declarations. These historical results do not review or
+    release subsequent edits, establish source-specific coverage or imply a
+    topological realization theorem.
 review:
   status: agent-reviewed
   reviewers:
-    - Formalization Worker A (independent initial destination-code reviewer)
+    - Independent Formal Frontier agent reviewers
   notes: >-
-    The isolated donor code received independent review and focused successful
-    cache-first build plus standard-three transitive-axiom evidence. Separately,
-    worker-a independently approved initial destination revision
-    cdbbde4f237d09ff1f3afbf107b71106fec29fe8, and a native check of that
-    revision passed the two-root build and full transitive standard-axiom audit.
-    Prism accepted that revision as code, not as a reviewed release or verified
-    publication; see CONTRIBUTORS.md for separate author and reviewer credit.
+    Independent agent reviews addressed the original mathematics, initial
+    destination code and exact first-release artifacts. Historical native
+    checks built both roots and audited all transitive standard axioms,
+    including private/generated declarations. This is agent review, not
+    independent human review or review of later edits; see CONTRIBUTORS.md
+    for separate author, reviewer and maintainer roles.
 alignment:
   namespace: SimplicialObjects.LeftDecalage
   note: >-
@@ -109,5 +108,8 @@ alignment:
     - lean: SimplicialObjects.LeftDecalage.naturalProjection
       module: SimplicialObjects/LeftDecalage.lean
 acknowledgements: >-
-  Mathlib supplies the underlying categorical structures and native generic
-  homotopy; exact project authorship and transfer credit are in CONTRIBUTORS.md.
+  Formal Frontier agents wrote the original proof, client and guide; independent
+  agents reviewed the original and destination artifacts, and separate agents
+  packaged and edited them. Mathlib supplies the underlying categorical
+  structures, section, split-epimorphism, generic homotopy and transport;
+  authorship and role credit are in CONTRIBUTORS.md.
