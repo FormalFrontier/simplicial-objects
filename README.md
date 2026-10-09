@@ -10,16 +10,16 @@ exports `SimplicialObjects.LeftDecalage` but no private test declarations.
 
 ## Headline results
 
-- [`augmented X`](SimplicialObjects/LeftDecalage.lean) has ordinary degree
+- **Augmented left décalage.** [`augmented X`](SimplicialObjects/LeftDecalage.lean) has ordinary degree
   `P(X)ₙ = Xₙ₊₁` and augmentation target `X₀`. Its augmentation takes the
   new initial vertex: at degree zero `ε₀ = X.δ 1`, **not** `X.δ 0`.
-- [`extraDegeneracy X`](SimplicialObjects/LeftDecalage.lean) builds mathlib's
+- **Canonical extra degeneracy.** [`extraDegeneracy X`](SimplicialObjects/LeftDecalage.lean) builds mathlib's
   native `SimplicialObject.Augmented.ExtraDegeneracy (augmented X)` from the
   original zeroth degeneracies. All five defining equations, including the
   exceptional degree-zero face, hold. Mathlib then supplies `.section_`,
   `.splitEpi`, `.homotopy` and postcomposition `.map F`; these are not new
   implementations in this repository.
-- [`functor C`](SimplicialObjects/LeftDecalage.lean) makes the augmented
+- **Functoriality and naturality.** [`functor C`](SimplicialObjects/LeftDecalage.lean) makes the augmented
   construction functorial; [`projection X`](SimplicialObjects/LeftDecalage.lean)
   is the natural ordinary simplicial `X.δ 0` projection, distinct in general
   from the augmentation. The section, higher extra-degeneracy components and
@@ -31,6 +31,19 @@ equations, native construction and example clients. The homotopy is
 exactness, spectra, K-theory theorem or source-coverage claim follows here.
 
 ## Use
+
+Add the library to your `lakefile.toml`:
+
+```toml
+[[require]]
+name = "simplicial-objects"
+git = "https://github.com/FormalFrontier/simplicial-objects.git"
+rev = "main"
+```
+
+Lake records the resolved release commit in `lake-manifest.json` until you
+update the dependency. Replace `main` with a particular release commit to pin
+it explicitly.
 
 ```lean
 import SimplicialObjects.LeftDecalage
@@ -67,13 +80,9 @@ lake exe cache get
 lake build SimplicialObjects SimplicialObjectsTest
 ```
 
-**Artifact and verification:** The initial published artifact has a parentless
-release history, separate from the development history, with the same file tree
-as its independently reviewed internal release candidate. Its native checks
-built both maintained roots and audited the complete transitive axiom inventory,
-including private/generated declarations; only `propext`, `Classical.choice`
-and `Quot.sound` occur. This is historical evidence for that artifact, not
-review or release of subsequent documentation edits. See
+**Verification scope:** The recorded checks built both maintained roots and
+audited the complete transitive axiom inventory, including private/generated
+declarations; only `propext`, `Classical.choice` and `Quot.sound` occur. See
 [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for distinct author, reviewer and
 packaging credit; [`formalization.yaml`](formalization.yaml) inventories the
 24 public names, not source-passage coverage. The complete license is
@@ -92,5 +101,5 @@ and 127,865 artifact paths totaling 6,674,961,684 *logical file bytes*
 As a conservative *planning estimate*, allow at least 15 GiB of free disk for
 the cache, checkout, downloads and intermediate build files; actual peak disk
 use and peak memory were not measured. Choose memory and build parallelism to
-fit the machine rather than treating these receipts as a RAM requirement;
+fit the machine rather than treating these file counts as a RAM requirement;
 runtime thread counts do not bound aggregate processes or memory.
