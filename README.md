@@ -47,6 +47,17 @@ pullback base change and coefficient maps.
   two-sheet integral generator, its coordinates and its pushforward, and
   computes the six-sheet two-step transfer through three sheets, and checks empty
   sheets, zero coefficients and independent coefficient/index universes.
+- **Change of coefficient category.**
+  [`SSet.chainComplexTransfer_mapHomologicalComplex`](SimplicialObjects/FiniteFiberTransfer.lean)
+  proves compatibility of the all-simplex chain transfer with Mathlib's
+  coefficient-comparison isomorphism for an additive functor `C ⥤ D` preserving
+  coproducts indexed by types in the simplex universe. The source and target
+  categories are preadditive and have those coproducts; only vertex fibers of
+  the equifibered simplicial map need be finite.
+  No preservation of homology or exactness is assumed. The private two-sheet
+  client tensors integral coefficients with `ZMod 4`: both coordinates are
+  `1 ⊗ 1`, nonzero by the left unitor, and pushforward gives two modulo four.
+  These generator computations are independent of the compatibility theorem.
 
 - **Normalized descent.** [`Normalization`](SimplicialObjects/Normalization.lean)
   constructs maps between mathlib's normalized complexes for any morphism

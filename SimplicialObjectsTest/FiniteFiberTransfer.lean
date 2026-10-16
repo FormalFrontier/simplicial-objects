@@ -8,13 +8,21 @@ import SimplicialObjects
 import Mathlib.Algebra.Category.ModuleCat.Abelian
 import Mathlib.Algebra.Category.ModuleCat.Colimits
 import Mathlib.Algebra.Module.ULift
+import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
+import Mathlib.CategoryTheory.Monoidal.Closed.Braided
+import Mathlib.Data.ZMod.Basic
 
-/-! Integral constant-sheet, composite and empty-sheet clients for finite-fiber transfer. -/
+/-!
+Integral constant-sheet, composite and empty-sheet clients for finite-fiber transfer,
+and coefficient change by tensoring with the cyclic group of order four.
+-/
 
 open CategoryTheory Limits Opposite
 open scoped Simplicial
 
 namespace SimplicialObjectsTest.FiniteFiberTransfer
+
+universe u
 
 private abbrev twoSheets : SSet.{0} := (Functor.const _).obj (Fin 2)
 private abbrev point : SSet.{0} := (Functor.const _).obj PUnit
@@ -36,9 +44,9 @@ private theorem twoSheets_distinct : (0 : Fin 2) ≠ 1 := by decide
 
 private abbrev integralModule : ModuleCat ℤ := ModuleCat.of ℤ ℤ
 
-private noncomputable def twoSheetTransfer :
-    point.chainComplex integralModule ⟶ twoSheets.chainComplex integralModule :=
-  SSet.chainComplexTransfer twoSheetMap twoSheetMap_equifibered twoSheetMap_finite integralModule
+private noncomputable def twoSheetTransfer {R : ModuleCat.{u} ℤ} :
+    point.chainComplex R ⟶ twoSheets.chainComplex R :=
+  SSet.chainComplexTransfer twoSheetMap twoSheetMap_equifibered twoSheetMap_finite R
 
 private def twoSheetFiberEquiv :
     {f : twoSheets _⦋0⦌ // twoSheetMap.app _ f = PUnit.unit} ≃ Fin 2 where
@@ -48,8 +56,8 @@ private def twoSheetFiberEquiv :
   right_inv _ := rfl
 
 /-- Both distinct coprojections occur in the image under the constructed transfer. -/
-private theorem twoSheetTransfer_generator :
-    point.ιChainComplex PUnit.unit ≫ twoSheetTransfer.f 0 =
+private theorem twoSheetTransfer_generator {R : ModuleCat.{u} ℤ} :
+    point.ιChainComplex PUnit.unit ≫ (twoSheetTransfer (R := R)).f 0 =
       twoSheets.ιChainComplex (0 : Fin 2) + twoSheets.ιChainComplex (1 : Fin 2) := by
   rw [twoSheetTransfer, SSet.ι_chainComplexTransfer_f]
   calc
@@ -59,13 +67,13 @@ private theorem twoSheetTransfer_generator :
 
 /-- Coordinates are coproduct eliminators; no identification of a coproduct with pairs
 is presumed. -/
-private noncomputable def coordinate (i : Fin 2) :
-    (twoSheets.chainComplex integralModule).X 0 ⟶ integralModule :=
+private noncomputable def coordinate (i : Fin 2) {R : ModuleCat.{u} ℤ} :
+    (twoSheets.chainComplex R).X 0 ⟶ R :=
   Sigma.desc fun j : Fin 2 ↦ if j = i then 𝟙 _ else 0
 
-private theorem twoSheetTransfer_coordinate (i : Fin 2) :
-    point.ιChainComplex PUnit.unit ≫ twoSheetTransfer.f 0 ≫ coordinate i =
-      𝟙 integralModule := by
+private theorem twoSheetTransfer_coordinate {R : ModuleCat.{u} ℤ} (i : Fin 2) :
+    point.ιChainComplex PUnit.unit ≫ (twoSheetTransfer (R := R)).f 0 ≫ coordinate i =
+      𝟙 R := by
   rw [← Category.assoc, twoSheetTransfer_generator, Preadditive.add_comp]
   fin_cases i <;> simp [coordinate, SSet.ιChainComplex, Cofan.mk_ι_app]
 
@@ -77,8 +85,8 @@ private theorem twoSheetTransfer_coordinate_one (i : Fin 2) :
     (twoSheetTransfer_coordinate i)
   exact h
 
-private noncomputable def foldPoint :
-    (point.chainComplex integralModule).X 0 ⟶ integralModule :=
+private noncomputable def foldPoint {R : ModuleCat ℤ} :
+    (point.chainComplex R).X 0 ⟶ R :=
   Sigma.desc fun _ : PUnit ↦ 𝟙 _
 
 private theorem twoSheetTransfer_push_generator :
@@ -319,21 +327,153 @@ private theorem integralHomologyTransfer_comp :
           projectionMap_finite integralModule 0 :=
   SSet.homologyTransfer_comp _ _ _ _ _ _ _ _
 
-universe u
+open MonoidalCategory
+open scoped TensorProduct
+
+private abbrev cyclicModule : ModuleCat.{0} ℤ := ModuleCat.of ℤ (ZMod 4)
+
+/-- Tensoring with a torsion module is an additive coefficient functor; its
+coproduct preservation comes from the closed symmetric monoidal structure. -/
+private noncomputable abbrev cyclicTensor : ModuleCat.{0} ℤ ⥤ ModuleCat.{0} ℤ :=
+  tensorRight cyclicModule
+
+private noncomputable abbrev tensorCoefficient : ModuleCat.{0} ℤ := cyclicTensor.obj integralModule
+
+private noncomputable def tensorOne : tensorCoefficient := (1 : ℤ) ⊗ₜ[ℤ] (1 : ZMod 4)
+
+private theorem tensorOne_unitor : (λ_ cyclicModule).hom tensorOne = (1 : ZMod 4) :=
+  (ModuleCat.MonoidalCategory.leftUnitor_hom_apply (1 : ℤ) (1 : cyclicModule)).trans
+    (one_smul ℤ (1 : ZMod 4))
+
+private theorem tensorOne_ne_zero : tensorOne ≠ 0 := by
+  intro h
+  apply (show (1 : ZMod 4) ≠ 0 from by decide)
+  exact tensorOne_unitor.symm.trans
+    ((congrArg (fun x ↦ (λ_ cyclicModule).hom x) h).trans (map_zero _))
+
+/-- The functor is not the identity: it kills a nonzero endomorphism of the
+integral coefficient object. No flatness or exactness assumption is involved. -/
+private theorem cyclicTensor_kills_four :
+    cyclicTensor.map ((4 : ℕ) • 𝟙 integralModule) = 0 ∧
+      ((4 : ℕ) • 𝟙 integralModule) ≠ 0 := by
+  constructor
+  · rw [cyclicTensor.map_nsmul, cyclicTensor.map_id]
+    apply (cancel_mono (λ_ cyclicModule).hom).1
+    rw [Preadditive.nsmul_comp, Category.id_comp, zero_comp]
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    change (4 : ℕ) • ((λ_ cyclicModule).hom x) = 0
+    exact ZModModule.char_nsmul_eq_zero 4 _
+  · intro h
+    have := congrArg (fun k : integralModule ⟶ integralModule ↦ k (1 : ℤ)) h
+    norm_num at this
+
+private noncomputable def tensorTwoSheetTransfer :
+    point.chainComplex tensorCoefficient ⟶ twoSheets.chainComplex tensorCoefficient :=
+  twoSheetTransfer
+
+/-- Each transferred coordinate is the nonzero tensor `1 ⊗ 1`, identified with
+one by the left unitor. This computation is independent of the coherence theorem. -/
+private theorem tensorTwoSheetTransfer_coordinate_one (i : Fin 2) :
+    (λ_ cyclicModule).hom ((coordinate i) (tensorTwoSheetTransfer.f 0
+      (point.ιChainComplex (R := tensorCoefficient) (n := 0) PUnit.unit tensorOne))) =
+        (1 : ZMod 4) := by
+  have h : (coordinate i) (tensorTwoSheetTransfer.f 0
+      (point.ιChainComplex (R := tensorCoefficient) (n := 0) PUnit.unit tensorOne)) =
+        tensorOne :=
+    congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne)
+      (twoSheetTransfer_coordinate (R := tensorCoefficient) i)
+  exact (congrArg (fun x ↦ (λ_ cyclicModule).hom x) h).trans tensorOne_unitor
+
+/-- Pushing the two separate tensor coefficients gives two modulo four, not zero. -/
+private theorem tensorTwoSheetTransfer_push_one :
+    (λ_ cyclicModule).hom (foldPoint
+      ((SSet.chainComplexMap twoSheetMap tensorCoefficient).f 0
+        (tensorTwoSheetTransfer.f 0
+          (point.ιChainComplex (R := tensorCoefficient) (n := 0) PUnit.unit tensorOne)))) =
+        (2 : ZMod 4) ∧ (2 : ZMod 4) ≠ 0 := by
+  constructor
+  · have h := SSet.ι_chainComplexTransfer_push twoSheetMap twoSheetMap_equifibered
+      twoSheetMap_finite tensorCoefficient (n := 0) PUnit.unit
+    rw [twoSheetMap_card] at h
+    have h' : foldPoint ((SSet.chainComplexMap twoSheetMap tensorCoefficient).f 0
+        (tensorTwoSheetTransfer.f 0
+          (point.ιChainComplex (R := tensorCoefficient) (n := 0) PUnit.unit tensorOne))) =
+        (2 : ℕ) • tensorOne := by
+      have e := congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne)
+        (congrArg (fun k ↦ k ≫ foldPoint) h)
+      simpa [foldPoint, tensorTwoSheetTransfer, twoSheetTransfer, SSet.ιChainComplex,
+        Preadditive.nsmul_comp, Cofan.mk_ι_app] using e
+    calc
+      _ = (λ_ cyclicModule).hom ((2 : ℕ) • tensorOne) :=
+        congrArg (fun x ↦ (λ_ cyclicModule).hom x) h'
+      _ = (2 : ℕ) • (1 : ZMod 4) :=
+        (map_nsmul (λ_ cyclicModule).hom.hom 2 tensorOne).trans
+          (congrArg (fun x ↦ (2 : ℕ) • x) tensorOne_unitor)
+      _ = 2 := by decide
+  · decide
+
+/-- On the two-sheet model the mapped transfer is computed using only additivity
+and Mathlib's generator formula. -/
+private theorem tensorMappedTransfer_generator :
+    cyclicTensor.map (point.ιChainComplex (R := integralModule) (n := 0) PUnit.unit) ≫
+        cyclicTensor.map (twoSheetTransfer.f 0) ≫
+        ((SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app
+          twoSheets).f 0 =
+      twoSheets.ιChainComplex (R := tensorCoefficient) (0 : Fin 2) +
+        twoSheets.ιChainComplex (1 : Fin 2) := by
+  rw [← cyclicTensor.map_comp_assoc, twoSheetTransfer_generator, cyclicTensor.map_add,
+    Preadditive.add_comp]
+  rw [SSet.map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f,
+    SSet.map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f]
+
+/-- Pushforward after the mapped two-sheet transfer is computed with the stock
+comparison's naturality, without a separate pushforward-coherence API. -/
+private theorem tensorMappedTransfer_push_generator :
+    cyclicTensor.map (point.ιChainComplex (R := integralModule) (n := 0) PUnit.unit) ≫
+        cyclicTensor.map (twoSheetTransfer.f 0) ≫
+        cyclicTensor.map ((SSet.chainComplexMap twoSheetMap integralModule).f 0) ≫
+        ((SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app point).f 0 =
+      (2 : ℕ) • point.ιChainComplex (R := tensorCoefficient) PUnit.unit := by
+  have hpush :
+      cyclicTensor.map ((SSet.chainComplexMap twoSheetMap integralModule).f 0) ≫
+          ((SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app point).f 0 =
+        ((SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app
+          twoSheets).f 0 ≫ (SSet.chainComplexMap twoSheetMap tensorCoefficient).f 0 :=
+    congrArg (fun k ↦ k.f 0)
+      ((SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.naturality
+        twoSheetMap)
+  calc
+    _ = (cyclicTensor.map (point.ιChainComplex (R := integralModule) (n := 0) PUnit.unit) ≫
+          cyclicTensor.map (twoSheetTransfer.f 0) ≫
+          ((SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app
+            twoSheets).f 0) ≫
+          (SSet.chainComplexMap twoSheetMap tensorCoefficient).f 0 := by
+      simp only [Category.assoc]
+      rw [hpush]
+    _ = _ := by
+      rw [tensorMappedTransfer_generator, Preadditive.add_comp]
+      simp [SSet.ι_chainComplexMap_f, twoSheetMap, twoSheets, point, two_nsmul]
+
+-- Instantiation follows the independent generator and nonzero computations above.
+private theorem tensorTwoSheetTransfer_coherence :
+    (cyclicTensor.mapHomologicalComplex (.down ℕ)).map twoSheetTransfer ≫
+        (SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app twoSheets =
+      (SSet.chainComplexFunctorObjCompMapIso cyclicTensor integralModule).hom.app point ≫
+        tensorTwoSheetTransfer :=
+  SSet.chainComplexTransfer_mapHomologicalComplex twoSheetMap twoSheetMap_equifibered
+    cyclicTensor twoSheetMap_finite integralModule
 
 /-- The coefficient's carrier and hom universes need not equal the simplex universe. -/
 private noncomputable def liftedIntegralTransfer :
     point.chainComplex (ModuleCat.of ℤ (ULift.{u} ℤ)) ⟶
       twoSheets.chainComplex (ModuleCat.of ℤ (ULift.{u} ℤ)) :=
-  SSet.chainComplexTransfer twoSheetMap twoSheetMap_equifibered twoSheetMap_finite _
+  twoSheetTransfer
 
 private theorem liftedIntegralTransfer_generator :
     point.ιChainComplex PUnit.unit ≫ liftedIntegralTransfer.{u}.f 0 =
-      twoSheets.ιChainComplex (0 : Fin 2) + twoSheets.ιChainComplex (1 : Fin 2) := by
-  rw [liftedIntegralTransfer, SSet.ι_chainComplexTransfer_f]
-  calc
-    _ = ∑ᶠ i : Fin 2, twoSheets.ιChainComplex i :=
-      finsum_eq_of_bijective twoSheetFiberEquiv twoSheetFiberEquiv.bijective (fun _ ↦ rfl)
-    _ = _ := by rw [finsum_eq_sum_of_fintype, Fin.sum_univ_two]
+      twoSheets.ιChainComplex (0 : Fin 2) + twoSheets.ιChainComplex (1 : Fin 2) :=
+  twoSheetTransfer_generator
 
 end SimplicialObjectsTest.FiniteFiberTransfer

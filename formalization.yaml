@@ -46,6 +46,11 @@ status:
     identity and reverse-order composition, pullback base change, coefficient
     naturality and fiber-counting laws.
     A fixed vertex-fiber cardinal gives the sheet identity on chains and homology.
+    Additive coefficient functors preserving the indexed coproducts commute with
+    all-simplex chain transfers via the chain-complex coefficient comparison;
+    no preservation of homology or exactness is required.
+    Tensoring with the cyclic group of order four gives a nonzero two-sheet client
+    computed independently of that compatibility theorem.
 review:
   status: unchecked
 alignment:
@@ -146,6 +151,8 @@ alignment:
     - lean: SSet.chainComplexTransfer_coefficient
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.chainComplexTransfer_comp_map
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.chainComplexTransfer_mapHomologicalComplex
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.homologyTransfer
       module: SimplicialObjects/FiniteFiberTransfer.lean

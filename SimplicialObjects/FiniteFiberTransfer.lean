@@ -4,7 +4,7 @@ Authors: Formal Frontier Agents
 -/
 module
 
-public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.Basic
+public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.MapHomologicalComplex
 public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Equifibered
 public import Mathlib.CategoryTheory.Limits.Types.Pullbacks
 public import Mathlib.Algebra.BigOperators.Finprod
@@ -17,7 +17,9 @@ public import Mathlib.Basic.Finite.Sigma
 Finite fibers define a contravariant map on coproducts of a coefficient object in a
 preadditive category. Cartesian naturality assembles these maps on diagrams, and the
 alternating face map functor gives a map on simplicial chains. Vertex fibers suffice
-for an equifibered map of simplicial sets.
+for an equifibered map of simplicial sets. The coefficient-functor compatibility
+statement uses the chain comparison for additive functors preserving the indexed
+coproducts of the simplex universe.
 
 The complexes here include all simplices. No comparison with normalized, topological,
 or twisted-coefficient chains is asserted.
@@ -368,6 +370,36 @@ theorem chainComplexTransfer_comp_map
   simpa only [HomologicalComplex.comp_f, HomologicalComplex.nsmul_f_apply,
     HomologicalComplex.id_f, Preadditive.comp_nsmul, Category.comp_id, hcard] using
     ι_chainComplexTransfer_push p hp hf R g
+
+/-- Additive functors preserving coproducts indexed in the simplex universe commute
+with the all-simplex chain transfer, via the chain-complex coefficient comparison.
+Only vertex fibers need be finite. This is a chain-level statement and requires no
+preservation of homology or exactness of the coefficient functor. -/
+theorem chainComplexTransfer_mapHomologicalComplex
+    {D : Type uD} [Category.{vD} D] [Preadditive D] [HasCoproducts.{w} D]
+    (L : C ⥤ D) [L.Additive]
+    [∀ (T : Type w), PreservesColimitsOfShape (Discrete T) L]
+    (hf : ∀ g : G _⦋0⦌, Finite {f : F _⦋0⦌ // p.app _ f = g}) (R : C) :
+    (L.mapHomologicalComplex (.down ℕ)).map (chainComplexTransfer p hp hf R) ≫
+        (chainComplexFunctorObjCompMapIso L R).hom.app F =
+      (chainComplexFunctorObjCompMapIso L R).hom.app G ≫
+        chainComplexTransfer p hp hf (L.obj R) := by
+  classical
+  ext n : 1
+  apply (isColimitOfPreserves L (G.isColimitChainComplexXCofan R n)).hom_ext
+  rintro ⟨g⟩
+  change L.map (G.ιChainComplex g) ≫ L.map ((chainComplexTransfer p hp hf R).f n) ≫
+      ((chainComplexFunctorObjCompMapIso L R).hom.app F).f n =
+    L.map (G.ιChainComplex g) ≫
+      ((chainComplexFunctorObjCompMapIso L R).hom.app G).f n ≫
+      (chainComplexTransfer p hp hf (L.obj R)).f n
+  let := finite_fiber_of_finite_vertices p hp hf (op ⦋n⦌) g
+  let := Fintype.ofFinite {f : F _⦋n⦌ // p.app _ f = g}
+  rw [← L.map_comp_assoc, ι_chainComplexTransfer_f,
+    map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f_assoc,
+    ι_chainComplexTransfer_f]
+  simp only [finsum_eq_sum_of_fintype, L.map_sum, Preadditive.sum_comp,
+    map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f]
 
 variable [CategoryWithHomology C]
 
