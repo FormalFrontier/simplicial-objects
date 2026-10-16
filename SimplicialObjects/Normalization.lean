@@ -6,6 +6,7 @@ module
 
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.Nondegenerate
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.MapHomologicalComplex
+public import SimplicialObjects.FiniteFiberTransfer
 
 /-!
 # Normalized maps for arbitrary morphisms of split simplicial objects
@@ -19,6 +20,13 @@ nondegenerate summands.
 A supplied splitting contains the coproduct data; the construction needs only
 preadditivity. The projection equation characterizes descent, and its degreewise
 quotient property is expressed by vanishing on elementary degeneracies.
+
+For additive coefficient functors preserving coproducts indexed in the simplex
+universe, the normalized coefficient comparison is coherent with arbitrary
+coefficient-valued simplicial morphisms, finite-fiber equifibered transfer, and
+natural transformations of coefficient functors. These coherence laws follow from
+the splitting retract and Mathlib's all-simplex coproduct comparison; they are not
+additional exactness or homology-preservation assertions.
 
 ## References
 
@@ -202,6 +210,56 @@ theorem nondegComplexMap_eq_normalizedChainComplexMap :
     (Functor.whiskerRight f (sigmaConst.obj R)) _).2
   exact toNormalizedChainComplex_normalizedChainComplexMap f R
 
+/-- Changing the coefficient of a normalized simplex is coefficientwise, including
+for a degenerate simplex whose normalized class is zero. -/
+@[reassoc]
+theorem ιNormalizedChainComplex_nondegComplexMap_coefficient
+    (S : SSet.{w}) {R' : C} (a : R ⟶ R') {n : ℕ} (x : S _⦋n⦌) :
+    S.ιNormalizedChainComplex x ≫
+        ((S.splitting.map (sigmaConst.obj R)).nondegComplexMap
+          (S.splitting.map (sigmaConst.obj R'))
+          (Functor.whiskerLeft S (sigmaConst.map a))).f n =
+      a ≫ S.ιNormalizedChainComplex x := by
+  let N : S.normalizedChainComplex R ⟶ S.normalizedChainComplex R' :=
+    (S.splitting.map (sigmaConst.obj R)).nondegComplexMap
+      (S.splitting.map (sigmaConst.obj R')) (Functor.whiskerLeft S (sigmaConst.map a))
+  have hq : (S.toNormalizedChainComplex R).f n ≫ N.f n =
+      (sigmaConst.map a).app (S.obj (op ⦋n⦌)) ≫
+        (S.toNormalizedChainComplex R').f n :=
+    HomologicalComplex.congr_hom
+      ((S.splitting.map (sigmaConst.obj R)).toNondegComplex_nondegComplexMap
+        (S.splitting.map (sigmaConst.obj R'))
+        (Functor.whiskerLeft S (sigmaConst.map a))) n
+  have hι : S.ιChainComplex (R := R) x ≫ (S.toNormalizedChainComplex R).f n =
+      S.ιNormalizedChainComplex (R := R) x :=
+    S.ιChainComplex_toNormalizedChainComplex_f x
+  have ha : S.ιChainComplex (R := R) x ≫
+      (sigmaConst.map a).app (S.obj (op ⦋n⦌)) =
+        a ≫ S.ιChainComplex (R := R') x :=
+    Sigma.ι_map (fun _ : S _⦋n⦌ ↦ a) x
+  calc
+    S.ιNormalizedChainComplex (R := R) x ≫ N.f n =
+        (S.ιChainComplex (R := R) x ≫ (S.toNormalizedChainComplex R).f n) ≫ N.f n :=
+      congrArg (fun k : R ⟶ (S.normalizedChainComplex R).X n ↦ k ≫ N.f n) hι.symm
+    _ = S.ιChainComplex (R := R) x ≫ ((S.toNormalizedChainComplex R).f n ≫ N.f n) :=
+      Category.assoc _ _ _
+    _ = S.ιChainComplex (R := R) x ≫
+        ((sigmaConst.map a).app (S.obj (op ⦋n⦌)) ≫
+          (S.toNormalizedChainComplex R').f n) :=
+      congrArg (fun k : (S.chainComplex R).X n ⟶ (S.normalizedChainComplex R').X n ↦
+        S.ιChainComplex (R := R) x ≫ k) hq
+    _ = (S.ιChainComplex (R := R) x ≫
+        (sigmaConst.map a).app (S.obj (op ⦋n⦌))) ≫
+          (S.toNormalizedChainComplex R').f n := (Category.assoc _ _ _).symm
+    _ = (a ≫ S.ιChainComplex (R := R') x) ≫ (S.toNormalizedChainComplex R').f n :=
+      congrArg (fun k : R ⟶ (S.chainComplex R').X n ↦
+        k ≫ (S.toNormalizedChainComplex R').f n) ha
+    _ = a ≫ (S.ιChainComplex (R := R') x ≫ (S.toNormalizedChainComplex R').f n) :=
+      Category.assoc _ _ _
+    _ = a ≫ S.ιNormalizedChainComplex (R := R') x :=
+      congrArg (fun k : R' ⟶ (S.normalizedChainComplex R').X n ↦ a ≫ k)
+        (S.ιChainComplex_toNormalizedChainComplex_f (R := R') x)
+
 section CoefficientComparison
 
 variable {D : Type u'} [Category.{v'} D] [Preadditive D] [HasCoproducts.{w} D]
@@ -345,6 +403,256 @@ theorem map_ιNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_
       rw [map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f_assoc,
         ιChainComplex_toNormalizedChainComplex_f]
 
+section UnderlyingCoefficientMorphisms
+
+/-- In each degree, the all-simplex comparison is the coproduct comparison. -/
+@[simp]
+theorem chainComplexFunctorObjCompMapIso_hom_app_f (S : SSet.{w}) (n : ℕ) :
+    ((chainComplexFunctorObjCompMapIso L R).hom.app S).f n =
+      (sigmaConstObjCompIso L R).hom.app (S.obj (op ⦋n⦌)) := by
+  apply (isColimitOfPreserves L (S.isColimitChainComplexXCofan R n)).hom_ext
+  rintro ⟨x⟩
+  change L.map (S.ιChainComplex (R := R) x) ≫
+      ((chainComplexFunctorObjCompMapIso L R).hom.app S).f n =
+    L.map (S.ιChainComplex (R := R) x) ≫
+      (sigmaConstObjCompIso L R).hom.app (S.obj (op ⦋n⦌))
+  exact (map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f S L (R := R) x).trans
+    (map_ι_sigmaConstObjCompIso_hom_app L R x).symm
+
+private theorem normalizedChainComplex_comparison_of_chainComplex
+    (S T : SSet.{w}) (Φ : S ⋙ sigmaConst.obj R ⟶ T ⋙ sigmaConst.obj R)
+    (Ψ : S ⋙ sigmaConst.obj (L.obj R) ⟶ T ⋙ sigmaConst.obj (L.obj R))
+    (h : (L.mapHomologicalComplex (.down ℕ)).map
+        ((alternatingFaceMapComplex C).map Φ) ≫
+          (chainComplexFunctorObjCompMapIso L R).hom.app T =
+      (chainComplexFunctorObjCompMapIso L R).hom.app S ≫
+        (alternatingFaceMapComplex D).map Ψ) :
+    (L.mapHomologicalComplex (.down ℕ)).map
+        ((S.splitting.map (sigmaConst.obj R)).nondegComplexMap
+          (T.splitting.map (sigmaConst.obj R)) Φ) ≫
+        (normalizedChainComplexFunctorObjCompMapIso R L).hom.app T =
+      (normalizedChainComplexFunctorObjCompMapIso R L).hom.app S ≫
+        (S.splitting.map (sigmaConst.obj (L.obj R))).nondegComplexMap
+          (T.splitting.map (sigmaConst.obj (L.obj R))) Ψ := by
+  let K := L.mapHomologicalComplex (.down ℕ)
+  let NΦ : S.normalizedChainComplex R ⟶ T.normalizedChainComplex R :=
+    (S.splitting.map (sigmaConst.obj R)).nondegComplexMap
+      (T.splitting.map (sigmaConst.obj R)) Φ
+  let NΨ : S.normalizedChainComplex (L.obj R) ⟶ T.normalizedChainComplex (L.obj R) :=
+    (S.splitting.map (sigmaConst.obj (L.obj R))).nondegComplexMap
+      (T.splitting.map (sigmaConst.obj (L.obj R))) Ψ
+  let bS : K.obj (S.normalizedChainComplex R) ⟶ S.normalizedChainComplex (L.obj R) :=
+    (normalizedChainComplexFunctorObjCompMapIso R L).hom.app S
+  let bT : K.obj (T.normalizedChainComplex R) ⟶ T.normalizedChainComplex (L.obj R) :=
+    (normalizedChainComplexFunctorObjCompMapIso R L).hom.app T
+  let aS : K.obj (S.chainComplex R) ⟶ S.chainComplex (L.obj R) :=
+    (chainComplexFunctorObjCompMapIso L R).hom.app S
+  let aT : K.obj (T.chainComplex R) ⟶ T.chainComplex (L.obj R) :=
+    (chainComplexFunctorObjCompMapIso L R).hom.app T
+  have hqΦ : S.toNormalizedChainComplex R ≫ NΦ =
+      (alternatingFaceMapComplex C).map Φ ≫ T.toNormalizedChainComplex R :=
+    (S.splitting.map (sigmaConst.obj R)).toNondegComplex_nondegComplexMap
+      (T.splitting.map (sigmaConst.obj R)) Φ
+  have hqΨ : S.toNormalizedChainComplex (L.obj R) ≫ NΨ =
+      (alternatingFaceMapComplex D).map Ψ ≫ T.toNormalizedChainComplex (L.obj R) :=
+    (S.splitting.map (sigmaConst.obj (L.obj R))).toNondegComplex_nondegComplexMap
+      (T.splitting.map (sigmaConst.obj (L.obj R))) Ψ
+  have hbS : K.map (S.toNormalizedChainComplex R) ≫ bS =
+      aS ≫ S.toNormalizedChainComplex (L.obj R) :=
+    toNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app R L S
+  have hbT : K.map (T.toNormalizedChainComplex R) ≫ bT =
+      aT ≫ T.toNormalizedChainComplex (L.obj R) :=
+    toNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app R L T
+  have hmap : K.map (S.toNormalizedChainComplex R) ≫ K.map NΦ =
+      K.map ((alternatingFaceMapComplex C).map Φ) ≫
+        K.map (T.toNormalizedChainComplex R) :=
+    (K.map_comp (S.toNormalizedChainComplex R) NΦ).symm.trans
+      ((congrArg (fun k : S.chainComplex R ⟶ T.normalizedChainComplex R ↦ K.map k)
+        hqΦ).trans
+        (K.map_comp ((alternatingFaceMapComplex C).map Φ) (T.toNormalizedChainComplex R)))
+  -- The projection remains a split epimorphism after applying any functor.
+  apply (cancel_epi (K.map (S.toNormalizedChainComplex R))).1
+  calc
+    K.map (S.toNormalizedChainComplex R) ≫ (K.map NΦ ≫ bT) =
+        (K.map (S.toNormalizedChainComplex R) ≫ K.map NΦ) ≫ bT :=
+      (Category.assoc _ _ _).symm
+    _ = (K.map ((alternatingFaceMapComplex C).map Φ) ≫
+        K.map (T.toNormalizedChainComplex R)) ≫ bT :=
+      congrArg (fun k : K.obj (S.chainComplex R) ⟶ K.obj (T.normalizedChainComplex R) ↦
+        k ≫ bT) hmap
+    _ = K.map ((alternatingFaceMapComplex C).map Φ) ≫
+        (K.map (T.toNormalizedChainComplex R) ≫ bT) := Category.assoc _ _ _
+    _ = K.map ((alternatingFaceMapComplex C).map Φ) ≫
+        (aT ≫ T.toNormalizedChainComplex (L.obj R)) :=
+      congrArg (fun k : K.obj (T.chainComplex R) ⟶ T.normalizedChainComplex (L.obj R) ↦
+        K.map ((alternatingFaceMapComplex C).map Φ) ≫ k) hbT
+    _ = (K.map ((alternatingFaceMapComplex C).map Φ) ≫ aT) ≫
+        T.toNormalizedChainComplex (L.obj R) := (Category.assoc _ _ _).symm
+    _ = (aS ≫ (alternatingFaceMapComplex D).map Ψ) ≫
+        T.toNormalizedChainComplex (L.obj R) :=
+      congrArg (fun k : K.obj (S.chainComplex R) ⟶ T.chainComplex (L.obj R) ↦
+        k ≫ T.toNormalizedChainComplex (L.obj R)) h
+    _ = aS ≫ ((alternatingFaceMapComplex D).map Ψ ≫
+        T.toNormalizedChainComplex (L.obj R)) := Category.assoc _ _ _
+    _ = aS ≫ (S.toNormalizedChainComplex (L.obj R) ≫ NΨ) :=
+      congrArg (fun k : S.chainComplex (L.obj R) ⟶ T.normalizedChainComplex (L.obj R) ↦
+        aS ≫ k) hqΨ.symm
+    _ = (aS ≫ S.toNormalizedChainComplex (L.obj R)) ≫ NΨ := (Category.assoc _ _ _).symm
+    _ = (K.map (S.toNormalizedChainComplex R) ≫ bS) ≫ NΨ :=
+      congrArg (fun k : K.obj (S.chainComplex R) ⟶ S.normalizedChainComplex (L.obj R) ↦
+        k ≫ NΨ) hbS.symm
+    _ = K.map (S.toNormalizedChainComplex R) ≫ (bS ≫ NΨ) := Category.assoc _ _ _
+
+/-- The normalized coefficient comparison commutes with every coefficient-valued
+simplicial morphism, not only those induced by simplicial-set maps or compatible
+with the chosen nondegenerate summands. The target morphism is transported through
+the coproduct comparison. -/
+theorem normalizedChainComplexFunctorObjCompMapIso_nondegComplexMap
+    (S T : SSet.{w}) (Φ : S ⋙ sigmaConst.obj R ⟶ T ⋙ sigmaConst.obj R) :
+    let ΦD : S ⋙ sigmaConst.obj (L.obj R) ⟶ T ⋙ sigmaConst.obj (L.obj R) :=
+      Functor.whiskerLeft S (sigmaConstObjCompIso L R).inv ≫
+        Functor.whiskerRight Φ L ≫
+          Functor.whiskerLeft T (sigmaConstObjCompIso L R).hom
+    (L.mapHomologicalComplex (.down ℕ)).map
+        ((S.splitting.map (sigmaConst.obj R)).nondegComplexMap
+          (T.splitting.map (sigmaConst.obj R)) Φ) ≫
+        (normalizedChainComplexFunctorObjCompMapIso R L).hom.app T =
+      (normalizedChainComplexFunctorObjCompMapIso R L).hom.app S ≫
+        (S.splitting.map (sigmaConst.obj (L.obj R))).nondegComplexMap
+          (T.splitting.map (sigmaConst.obj (L.obj R))) ΦD := by
+  dsimp only
+  apply normalizedChainComplex_comparison_of_chainComplex R L
+  ext n : 1
+  simp
+
+/-- Normalized transfer for an equifibered simplicial map with finite vertex fibers
+commutes with any additive coefficient functor preserving coproducts indexed in
+the simplex universe. No constant fiber cardinal or exactness is required. -/
+@[reassoc]
+theorem normalizedChainComplexFunctorObjCompMapIso_finiteFiberTransfer
+    {F G : SSet.{w}} (p : F ⟶ G) (hp : NatTrans.Equifibered p)
+    (hf : ∀ g : G _⦋0⦌, Finite {f : F _⦋0⦌ // p.app _ f = g}) :
+    (L.mapHomologicalComplex (.down ℕ)).map
+        ((G.splitting.map (sigmaConst.obj R)).nondegComplexMap
+          (F.splitting.map (sigmaConst.obj R))
+          (equifiberedSigmaTransfer p hp (finite_fiber_of_finite_vertices p hp hf) R)) ≫
+        (normalizedChainComplexFunctorObjCompMapIso R L).hom.app F =
+      (normalizedChainComplexFunctorObjCompMapIso R L).hom.app G ≫
+        (G.splitting.map (sigmaConst.obj (L.obj R))).nondegComplexMap
+          (F.splitting.map (sigmaConst.obj (L.obj R)))
+          (equifiberedSigmaTransfer p hp
+            (finite_fiber_of_finite_vertices p hp hf) (L.obj R)) := by
+  apply normalizedChainComplex_comparison_of_chainComplex R L
+  exact chainComplexTransfer_mapHomologicalComplex p hp L hf R
+
+end UnderlyingCoefficientMorphisms
+
 end CoefficientComparison
+
+section CoefficientFunctorNaturality
+
+variable {D : Type u'} [Category.{v'} D] [Preadditive D] [HasCoproducts.{w} D]
+  (L M : C ⥤ D) [L.Additive] [M.Additive]
+  [∀ (T : Type w), PreservesColimitsOfShape (Discrete T) L]
+  [∀ (T : Type w), PreservesColimitsOfShape (Discrete T) M]
+
+/-- The all-simplex coefficient comparison is natural in a transformation of
+additive coproduct-preserving coefficient functors. -/
+@[reassoc]
+theorem chainComplexFunctorObjCompMapIso_naturality (θ : L ⟶ M) (S : SSet.{w}) :
+    (θ.mapHomologicalComplex (.down ℕ)).app (S.chainComplex R) ≫
+        (chainComplexFunctorObjCompMapIso M R).hom.app S =
+      (chainComplexFunctorObjCompMapIso L R).hom.app S ≫
+        (alternatingFaceMapComplex D).map
+          (Functor.whiskerLeft S (sigmaConst.map (θ.app R))) := by
+  ext n : 1
+  apply (isColimitOfPreserves L (S.isColimitChainComplexXCofan R n)).hom_ext
+  rintro ⟨x⟩
+  change L.map (S.ιChainComplex x) ≫ θ.app _ ≫
+      ((chainComplexFunctorObjCompMapIso M R).hom.app S).f n =
+    L.map (S.ιChainComplex x) ≫
+      ((chainComplexFunctorObjCompMapIso L R).hom.app S).f n ≫
+        (sigmaConst.map (θ.app R)).app _
+  rw [θ.naturality_assoc,
+    map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f,
+    map_ιChainComplex_chainComplexFunctorObjCompMapIso_hom_app_f_assoc]
+  exact (Sigma.ι_map (fun _ ↦ θ.app R) x).symm
+
+/-- The normalized coefficient comparison is natural in a transformation of
+additive coproduct-preserving coefficient functors. The transformation acts on the
+normalized source complex; on the target it acts coefficientwise on the
+coproducts and then descends to normalization. -/
+@[reassoc]
+theorem normalizedChainComplexFunctorObjCompMapIso_naturality
+    (θ : L ⟶ M) (S : SSet.{w}) :
+    (θ.mapHomologicalComplex (.down ℕ)).app (S.normalizedChainComplex R) ≫
+        (normalizedChainComplexFunctorObjCompMapIso R M).hom.app S =
+      (normalizedChainComplexFunctorObjCompMapIso R L).hom.app S ≫
+        (S.splitting.map (sigmaConst.obj (L.obj R))).nondegComplexMap
+          (S.splitting.map (sigmaConst.obj (M.obj R)))
+          (Functor.whiskerLeft S (sigmaConst.map (θ.app R))) := by
+  let K := L.mapHomologicalComplex (.down ℕ)
+  let K' := M.mapHomologicalComplex (.down ℕ)
+  let N : S.normalizedChainComplex (L.obj R) ⟶ S.normalizedChainComplex (M.obj R) :=
+    (S.splitting.map (sigmaConst.obj (L.obj R))).nondegComplexMap
+      (S.splitting.map (sigmaConst.obj (M.obj R)))
+      (Functor.whiskerLeft S (sigmaConst.map (θ.app R)))
+  let bL : K.obj (S.normalizedChainComplex R) ⟶ S.normalizedChainComplex (L.obj R) :=
+    (normalizedChainComplexFunctorObjCompMapIso R L).hom.app S
+  let bM : K'.obj (S.normalizedChainComplex R) ⟶ S.normalizedChainComplex (M.obj R) :=
+    (normalizedChainComplexFunctorObjCompMapIso R M).hom.app S
+  let aL : K.obj (S.chainComplex R) ⟶ S.chainComplex (L.obj R) :=
+    (chainComplexFunctorObjCompMapIso L R).hom.app S
+  let aM : K'.obj (S.chainComplex R) ⟶ S.chainComplex (M.obj R) :=
+    (chainComplexFunctorObjCompMapIso M R).hom.app S
+  let tN : K.obj (S.normalizedChainComplex R) ⟶ K'.obj (S.normalizedChainComplex R) :=
+    (θ.mapHomologicalComplex (.down ℕ)).app (S.normalizedChainComplex R)
+  let tK : K.obj (S.chainComplex R) ⟶ K'.obj (S.chainComplex R) :=
+    (θ.mapHomologicalComplex (.down ℕ)).app (S.chainComplex R)
+  let A : S.chainComplex (L.obj R) ⟶ S.chainComplex (M.obj R) :=
+    (alternatingFaceMapComplex D).map
+      (Functor.whiskerLeft S (sigmaConst.map (θ.app R)))
+  have htq : K.map (S.toNormalizedChainComplex R) ≫ tN =
+      tK ≫ K'.map (S.toNormalizedChainComplex R) :=
+    (θ.mapHomologicalComplex (.down ℕ)).naturality (S.toNormalizedChainComplex R)
+  have hbL : K.map (S.toNormalizedChainComplex R) ≫ bL =
+      aL ≫ S.toNormalizedChainComplex (L.obj R) :=
+    toNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app R L S
+  have hbM : K'.map (S.toNormalizedChainComplex R) ≫ bM =
+      aM ≫ S.toNormalizedChainComplex (M.obj R) :=
+    toNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app R M S
+  have hq : S.toNormalizedChainComplex (L.obj R) ≫ N =
+      A ≫ S.toNormalizedChainComplex (M.obj R) :=
+    (S.splitting.map (sigmaConst.obj (L.obj R))).toNondegComplex_nondegComplexMap
+      (S.splitting.map (sigmaConst.obj (M.obj R)))
+      (Functor.whiskerLeft S (sigmaConst.map (θ.app R)))
+  have hA : tK ≫ aM = aL ≫ A :=
+    chainComplexFunctorObjCompMapIso_naturality R L M θ S
+  apply (cancel_epi (K.map (S.toNormalizedChainComplex R))).1
+  calc
+    K.map (S.toNormalizedChainComplex R) ≫ (tN ≫ bM) =
+        (K.map (S.toNormalizedChainComplex R) ≫ tN) ≫ bM := (Category.assoc _ _ _).symm
+    _ = (tK ≫ K'.map (S.toNormalizedChainComplex R)) ≫ bM :=
+      congrArg (fun k : K.obj (S.chainComplex R) ⟶ K'.obj (S.normalizedChainComplex R) ↦
+        k ≫ bM) htq
+    _ = tK ≫ (K'.map (S.toNormalizedChainComplex R) ≫ bM) := Category.assoc _ _ _
+    _ = tK ≫ (aM ≫ S.toNormalizedChainComplex (M.obj R)) :=
+      congrArg (fun k : K'.obj (S.chainComplex R) ⟶ S.normalizedChainComplex (M.obj R) ↦
+        tK ≫ k) hbM
+    _ = (tK ≫ aM) ≫ S.toNormalizedChainComplex (M.obj R) := (Category.assoc _ _ _).symm
+    _ = (aL ≫ A) ≫ S.toNormalizedChainComplex (M.obj R) :=
+      congrArg (fun k : K.obj (S.chainComplex R) ⟶ S.chainComplex (M.obj R) ↦
+        k ≫ S.toNormalizedChainComplex (M.obj R)) hA
+    _ = aL ≫ (A ≫ S.toNormalizedChainComplex (M.obj R)) := Category.assoc _ _ _
+    _ = aL ≫ (S.toNormalizedChainComplex (L.obj R) ≫ N) :=
+      congrArg (fun k : S.chainComplex (L.obj R) ⟶ S.normalizedChainComplex (M.obj R) ↦
+        aL ≫ k) hq.symm
+    _ = (aL ≫ S.toNormalizedChainComplex (L.obj R)) ≫ N := (Category.assoc _ _ _).symm
+    _ = (K.map (S.toNormalizedChainComplex R) ≫ bL) ≫ N :=
+      congrArg (fun k : K.obj (S.chainComplex R) ⟶ S.normalizedChainComplex (L.obj R) ↦
+        k ≫ N) hbL.symm
+    _ = K.map (S.toNormalizedChainComplex R) ≫ (bL ≫ N) := Category.assoc _ _ _
+
+end CoefficientFunctorNaturality
 
 end SSet

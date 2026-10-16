@@ -9,6 +9,7 @@ import SimplicialObjects.FiniteFiberTransfer
 import Mathlib.Algebra.Category.ModuleCat.Abelian
 import Mathlib.Algebra.Category.ModuleCat.Colimits
 import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
+import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
 import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
 import Mathlib.CategoryTheory.Monoidal.Closed.Braided
 import Mathlib.Data.ZMod.Basic
@@ -469,5 +470,517 @@ private theorem comparison_sourceEdge_coordinate :
       (intervalCoefficientComparison.hom.f 1 sourceEdge)) = (1 : ZMod 4) := by
   rw [comparison_sourceEdge]
   exact targetEdge_unitor_coordinate
+
+/-! ## Coefficient-valued maps and the two-sheet interval cover -/
+
+private noncomputable def mixedCoefficientMorphism : coefficientInterval ⟶ coefficientInterval :=
+  coefficientScalar 2 +
+    (show coefficientInterval ⟶ coefficientInterval from
+      Functor.whiskerRight (SSet.const (X := interval) (vertex 0)) (sigmaConst.obj integralModule))
+
+private noncomputable def mixedTransportedCoefficientMorphism :
+    interval ⋙ sigmaConst.obj tensorCoefficient ⟶ interval ⋙ sigmaConst.obj tensorCoefficient :=
+  Functor.whiskerLeft interval (sigmaConstObjCompIso cyclicTensor integralModule).inv ≫
+    Functor.whiskerRight mixedCoefficientMorphism cyclicTensor ≫
+      Functor.whiskerLeft interval (sigmaConstObjCompIso cyclicTensor integralModule).hom
+
+private theorem mixedCoefficientComparison :
+  (cyclicTensor.mapHomologicalComplex (.down ℕ)).map
+      (intervalSplitting.nondegComplexMap intervalSplitting mixedCoefficientMorphism) ≫
+      intervalCoefficientComparison.hom =
+    intervalCoefficientComparison.hom ≫
+      (interval.splitting.map (sigmaConst.obj tensorCoefficient)).nondegComplexMap
+        (interval.splitting.map (sigmaConst.obj tensorCoefficient))
+        mixedTransportedCoefficientMorphism :=
+  SSet.normalizedChainComplexFunctorObjCompMapIso_nondegComplexMap
+    integralModule cyclicTensor interval interval mixedCoefficientMorphism
+
+private abbrev twoSheetInterval : SSet.{0} :=
+  ((Functor.const _).obj (Fin 2) : SSet.{0}) ⊗ interval
+
+private def twoSheetIntervalMap : twoSheetInterval ⟶ interval :=
+  CartesianMonoidalCategory.snd _ _
+
+private def twoSheetSimplex {n : SimplexCategoryᵒᵖ} (i : Fin 2) (x : interval.obj n) :
+    twoSheetInterval.obj n :=
+  (i, x)
+
+private def twoSheetIndex {n : SimplexCategoryᵒᵖ} (x : twoSheetInterval.obj n) : Fin 2 :=
+  x.1
+
+private theorem twoSheetIndex_simplex {n : SimplexCategoryᵒᵖ} (i : Fin 2)
+    (x : interval.obj n) : twoSheetIndex (twoSheetSimplex i x) = i := rfl
+
+private theorem twoSheetIntervalMap_simplex {n : SimplexCategoryᵒᵖ} (i : Fin 2)
+    (x : interval.obj n) : twoSheetIntervalMap.app n (twoSheetSimplex i x) = x := rfl
+
+private theorem twoSheetSimplex_eta {n : SimplexCategoryᵒᵖ} (x : twoSheetInterval.obj n) :
+    twoSheetSimplex (twoSheetIndex x) (twoSheetIntervalMap.app n x) = x := rfl
+
+private theorem twoSheetIntervalMap_equifibered : NatTrans.Equifibered twoSheetIntervalMap := by
+  intro i j α
+  apply (Types.isPullback_iff _ _ _ _).2
+  refine ⟨rfl, ?_, ?_⟩
+  · intro x y h
+    exact Prod.ext (congrArg (twoSheetIndex (n := j)) h.1) h.2
+  · intro y x h
+    exact ⟨twoSheetSimplex (twoSheetIndex y) x, Prod.ext rfl h.symm,
+      twoSheetIntervalMap_simplex _ _⟩
+
+private def twoSheetIntervalFiberEquiv {n : ℕ} (x : interval _⦋n⦌) :
+    {y : twoSheetInterval _⦋n⦌ // twoSheetIntervalMap.app _ y = x} ≃ Fin 2 where
+  toFun y := twoSheetIndex y.val
+  invFun i := ⟨twoSheetSimplex i x, twoSheetIntervalMap_simplex i x⟩
+  left_inv y := Subtype.ext
+    ((congrArg (twoSheetSimplex (twoSheetIndex y.val)) y.property.symm).trans
+      (twoSheetSimplex_eta y.val))
+  right_inv i := twoSheetIndex_simplex i x
+
+private theorem twoSheetIntervalMap_finite (x : interval _⦋0⦌) :
+    Finite {y : twoSheetInterval _⦋0⦌ // twoSheetIntervalMap.app _ y = x} :=
+  Finite.of_equiv (Fin 2) (twoSheetIntervalFiberEquiv x).symm
+
+private theorem twoSheetInterval_lift_nondegenerate (i : Fin 2) :
+    twoSheetSimplex i edge ∈ twoSheetInterval.nonDegenerate 1 :=
+  SSet.nonDegenerate_of_app_apply twoSheetIntervalMap edge_nondegenerate
+
+private noncomputable def twoSheetIntervalNormalizedMap (R : ModuleCat ℤ) :
+    interval.normalizedChainComplex R ⟶ twoSheetInterval.normalizedChainComplex R :=
+  (interval.splitting.map (sigmaConst.obj R)).nondegComplexMap
+    (twoSheetInterval.splitting.map (sigmaConst.obj R))
+    (equifiberedSigmaTransfer twoSheetIntervalMap twoSheetIntervalMap_equifibered
+      (SSet.finite_fiber_of_finite_vertices twoSheetIntervalMap
+        twoSheetIntervalMap_equifibered twoSheetIntervalMap_finite) R)
+
+private theorem twoSheetIntervalTransfer_generator (R : ModuleCat ℤ) :
+    interval.ιChainComplex edge ≫
+        (SSet.chainComplexTransfer twoSheetIntervalMap twoSheetIntervalMap_equifibered
+          twoSheetIntervalMap_finite R).f 1 =
+      twoSheetInterval.ιChainComplex (R := R) (n := 1) (twoSheetSimplex (0 : Fin 2) edge) +
+        twoSheetInterval.ιChainComplex (R := R) (n := 1) (twoSheetSimplex (1 : Fin 2) edge) := by
+  rw [SSet.ι_chainComplexTransfer_f]
+  calc
+    _ = ∑ᶠ i : Fin 2, twoSheetInterval.ιChainComplex (twoSheetSimplex i edge) :=
+      finsum_eq_of_bijective (twoSheetIntervalFiberEquiv edge)
+        (twoSheetIntervalFiberEquiv edge).bijective
+        (fun y ↦ congrArg
+          (fun z : twoSheetInterval _⦋1⦌ ↦ twoSheetInterval.ιChainComplex (R := R) z)
+          ((twoSheetSimplex_eta y.val).symm.trans
+            (congrArg (twoSheetSimplex (twoSheetIndex y.val)) y.property)))
+    _ = _ := by rw [finsum_eq_sum_of_fintype, Fin.sum_univ_two]
+
+private theorem twoSheetIntervalNormalizedMap_generator (R : ModuleCat ℤ) :
+    interval.ιNormalizedChainComplex edge ≫ (twoSheetIntervalNormalizedMap R).f 1 =
+      twoSheetInterval.ιNormalizedChainComplex (R := R) (n := 1)
+          (twoSheetSimplex (0 : Fin 2) edge) +
+        twoSheetInterval.ιNormalizedChainComplex (R := R) (n := 1)
+          (twoSheetSimplex (1 : Fin 2) edge) := by
+  have hq := HomologicalComplex.congr_hom
+    ((interval.splitting.map (sigmaConst.obj R)).toNondegComplex_nondegComplexMap
+      (twoSheetInterval.splitting.map (sigmaConst.obj R))
+      (equifiberedSigmaTransfer twoSheetIntervalMap twoSheetIntervalMap_equifibered
+        (SSet.finite_fiber_of_finite_vertices twoSheetIntervalMap
+          twoSheetIntervalMap_equifibered twoSheetIntervalMap_finite) R)) 1
+  change (interval.toNormalizedChainComplex R).f 1 ≫
+      (twoSheetIntervalNormalizedMap R).f 1 =
+    (SSet.chainComplexTransfer twoSheetIntervalMap twoSheetIntervalMap_equifibered
+      twoSheetIntervalMap_finite R).f 1 ≫
+        (twoSheetInterval.toNormalizedChainComplex R).f 1 at hq
+  calc
+    _ = interval.ιChainComplex edge ≫ (interval.toNormalizedChainComplex R).f 1 ≫
+        (twoSheetIntervalNormalizedMap R).f 1 := by
+      rw [← Category.assoc, SSet.ιChainComplex_toNormalizedChainComplex_f]
+    _ = (interval.ιChainComplex edge ≫
+        (SSet.chainComplexTransfer twoSheetIntervalMap twoSheetIntervalMap_equifibered
+          twoSheetIntervalMap_finite R).f 1) ≫
+            (twoSheetInterval.toNormalizedChainComplex R).f 1 := by
+      simpa only [Category.assoc] using interval.ιChainComplex edge ≫= hq
+    _ = _ := by
+      rw [twoSheetIntervalTransfer_generator, Preadditive.add_comp,
+        SSet.ιChainComplex_toNormalizedChainComplex_f,
+        SSet.ιChainComplex_toNormalizedChainComplex_f]
+
+private noncomputable def twoSheetIntervalCoordinate (i : Fin 2) {R : ModuleCat ℤ} :
+    (twoSheetInterval.normalizedChainComplex R).X 1 ⟶ R :=
+  normalizedDesc twoSheetInterval (n := 1) fun x ↦ if twoSheetIndex x.val = i then 𝟙 R else 0
+
+private theorem twoSheetInterval_lift_coordinate (i j : Fin 2) {R : ModuleCat ℤ} :
+    twoSheetInterval.ιNormalizedChainComplex (R := R) (twoSheetSimplex j edge) ≫
+        twoSheetIntervalCoordinate i = if j = i then 𝟙 R else 0 := by
+  have h :
+      twoSheetInterval.ιNormalizedChainComplex (R := R) (n := 1)
+          (twoSheetSimplex j edge) ≫ twoSheetIntervalCoordinate (R := R) i =
+        if twoSheetIndex (twoSheetSimplex j edge) = i then 𝟙 R else 0 :=
+    ι_normalizedDesc twoSheetInterval (R := R) (n := 1) (T := R)
+      (fun (x : twoSheetInterval.nonDegenerate 1) ↦
+        (if twoSheetIndex x.val = i then 𝟙 R else 0 : R ⟶ R))
+      ⟨twoSheetSimplex j edge, twoSheetInterval_lift_nondegenerate j⟩
+  exact h.trans
+    (congrArg (fun k : Fin 2 ↦ if k = i then (𝟙 R : R ⟶ R) else 0)
+      (twoSheetIndex_simplex j edge))
+
+private theorem twoSheetIntervalNormalizedMap_coordinate (i : Fin 2) {R : ModuleCat ℤ} :
+    interval.ιNormalizedChainComplex edge ≫ (twoSheetIntervalNormalizedMap R).f 1 ≫
+        twoSheetIntervalCoordinate i = 𝟙 R := by
+  rw [← Category.assoc, twoSheetIntervalNormalizedMap_generator, Preadditive.add_comp,
+    twoSheetInterval_lift_coordinate, twoSheetInterval_lift_coordinate]
+  fin_cases i <;> simp
+
+private noncomputable def transferredSourceEdge :
+    cyclicTensor.obj ((twoSheetInterval.normalizedChainComplex integralModule).X 1) :=
+  cyclicTensor.map ((twoSheetIntervalNormalizedMap integralModule).f 1) sourceEdge
+
+private noncomputable def transferredTargetEdge :
+    (twoSheetInterval.normalizedChainComplex tensorCoefficient).X 1 :=
+  (twoSheetIntervalNormalizedMap tensorCoefficient).f 1 targetEdge
+
+private noncomputable def coverCoefficientComparison :=
+  (SSet.normalizedChainComplexFunctorObjCompMapIso integralModule cyclicTensor).app
+    twoSheetInterval
+
+private noncomputable def coverCoefficientComparisonOne :
+    cyclicTensor.obj ((twoSheetInterval.normalizedChainComplex integralModule).X 1) ⟶
+      (twoSheetInterval.normalizedChainComplex tensorCoefficient).X 1 :=
+  coverCoefficientComparison.hom.f 1
+
+private theorem coverCoefficientComparisonOne_generator (x : twoSheetInterval _⦋1⦌) :
+    cyclicTensor.map (twoSheetInterval.ιNormalizedChainComplex (R := integralModule) x) ≫
+        coverCoefficientComparisonOne =
+      twoSheetInterval.ιNormalizedChainComplex (R := tensorCoefficient) x :=
+  SSet.map_ιNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app_f
+    integralModule cyclicTensor twoSheetInterval x
+
+private noncomputable def comparedTransferredSourceEdge :
+    (twoSheetInterval.normalizedChainComplex tensorCoefficient).X 1 :=
+  coverCoefficientComparisonOne transferredSourceEdge
+
+private theorem transferredSourceEdge_coordinate_one (i : Fin 2) :
+    (λ_ cyclicModule).hom
+      (cyclicTensor.map (twoSheetIntervalCoordinate i) transferredSourceEdge) = (1 : ZMod 4) := by
+  have h := cyclicTensor.congr_map
+    (twoSheetIntervalNormalizedMap_coordinate i (R := integralModule))
+  rw [cyclicTensor.map_comp, cyclicTensor.map_comp, cyclicTensor.map_id] at h
+  exact (congrArg (fun x ↦ (λ_ cyclicModule).hom x)
+    (congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne) h)).trans
+      tensorOne_unitor
+
+private theorem transferredTargetEdge_coordinate_one (i : Fin 2) :
+    (λ_ cyclicModule).hom (twoSheetIntervalCoordinate i transferredTargetEdge) = (1 : ZMod 4) :=
+  (congrArg (fun x ↦ (λ_ cyclicModule).hom x)
+    (congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne)
+      (twoSheetIntervalNormalizedMap_coordinate i (R := tensorCoefficient)))).trans
+    tensorOne_unitor
+
+private theorem comparedTransfer_generator :
+    cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) ≫
+        cyclicTensor.map ((twoSheetIntervalNormalizedMap integralModule).f 1) ≫
+        coverCoefficientComparisonOne =
+      twoSheetInterval.ιNormalizedChainComplex (R := tensorCoefficient) (n := 1)
+          (twoSheetSimplex (0 : Fin 2) edge) +
+        twoSheetInterval.ιNormalizedChainComplex (R := tensorCoefficient) (n := 1)
+          (twoSheetSimplex (1 : Fin 2) edge) := by
+  have h := HomologicalComplex.congr_hom
+    (SSet.normalizedChainComplexFunctorObjCompMapIso_finiteFiberTransfer
+      integralModule cyclicTensor twoSheetIntervalMap twoSheetIntervalMap_equifibered
+      twoSheetIntervalMap_finite) 1
+  change cyclicTensor.map ((twoSheetIntervalNormalizedMap integralModule).f 1) ≫
+      coverCoefficientComparisonOne = intervalCoefficientComparison.hom.f 1 ≫
+        (twoSheetIntervalNormalizedMap tensorCoefficient).f 1 at h
+  have hι :=
+    SSet.map_ιNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app_f
+      integralModule cyclicTensor interval edge
+  change cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) ≫
+    intervalCoefficientComparison.hom.f 1 =
+      interval.ιNormalizedChainComplex (R := tensorCoefficient) edge at hι
+  calc
+    _ = cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) ≫
+        (intervalCoefficientComparison.hom.f 1 ≫
+          (twoSheetIntervalNormalizedMap tensorCoefficient).f 1) :=
+      congrArg (fun k : cyclicTensor.obj ((interval.normalizedChainComplex integralModule).X 1) ⟶
+          (twoSheetInterval.normalizedChainComplex tensorCoefficient).X 1 ↦
+        cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) ≫ k) h
+    _ = (cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) ≫
+        intervalCoefficientComparison.hom.f 1) ≫
+          (twoSheetIntervalNormalizedMap tensorCoefficient).f 1 :=
+      (Category.assoc _ _ _).symm
+    _ = interval.ιNormalizedChainComplex (R := tensorCoefficient) edge ≫
+        (twoSheetIntervalNormalizedMap tensorCoefficient).f 1 :=
+      congrArg (fun k : tensorCoefficient ⟶
+          (interval.normalizedChainComplex tensorCoefficient).X 1 ↦
+        k ≫ (twoSheetIntervalNormalizedMap tensorCoefficient).f 1) hι
+    _ = _ := twoSheetIntervalNormalizedMap_generator tensorCoefficient
+
+private theorem comparedTransferredSourceEdge_coordinate_one (i : Fin 2) :
+    (λ_ cyclicModule).hom (twoSheetIntervalCoordinate i comparedTransferredSourceEdge) =
+      (1 : ZMod 4) := by
+  have h : (cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) ≫
+        cyclicTensor.map ((twoSheetIntervalNormalizedMap integralModule).f 1) ≫
+        coverCoefficientComparisonOne) ≫
+          twoSheetIntervalCoordinate (R := tensorCoefficient) i = 𝟙 tensorCoefficient := by
+    rw [comparedTransfer_generator]
+    rw [Preadditive.add_comp, twoSheetInterval_lift_coordinate, twoSheetInterval_lift_coordinate]
+    fin_cases i <;> simp
+  exact (congrArg (fun x ↦ (λ_ cyclicModule).hom x)
+    (congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne) h)).trans
+      tensorOne_unitor
+
+private theorem twoSheetInterval_lifts_push_coordinate (R : ModuleCat ℤ) :
+    (twoSheetInterval.ιNormalizedChainComplex (R := R) (n := 1) (twoSheetSimplex (0 : Fin 2) edge) +
+        twoSheetInterval.ιNormalizedChainComplex (R := R) (n := 1)
+          (twoSheetSimplex (1 : Fin 2) edge)) ≫
+      (SSet.normalizedChainComplexMap twoSheetIntervalMap R).f 1 ≫ degreeOneCoordinates =
+        (2 : ℕ) • 𝟙 R := by
+  rw [Preadditive.add_comp, SSet.ι_normalizedChainComplexMap_f_assoc,
+    SSet.ι_normalizedChainComplexMap_f_assoc,
+    twoSheetIntervalMap_simplex, twoSheetIntervalMap_simplex]
+  simp only [edge_coordinates, two_nsmul]
+
+private theorem transferredEdges_push_coordinate :
+    (λ_ cyclicModule).hom (degreeOneCoordinates
+      ((SSet.normalizedChainComplexMap twoSheetIntervalMap tensorCoefficient).f 1
+        transferredTargetEdge)) = (2 : ZMod 4) ∧
+    (λ_ cyclicModule).hom (degreeOneCoordinates
+      ((SSet.normalizedChainComplexMap twoSheetIntervalMap tensorCoefficient).f 1
+        comparedTransferredSourceEdge)) = (2 : ZMod 4) ∧ (2 : ZMod 4) ≠ 0 := by
+  have htarget := twoSheetIntervalNormalizedMap_generator tensorCoefficient
+  have hsource := comparedTransfer_generator
+  have evaluate (k : tensorCoefficient ⟶
+      (twoSheetInterval.normalizedChainComplex tensorCoefficient).X 1)
+      (hk : k = twoSheetInterval.ιNormalizedChainComplex (R := tensorCoefficient) (n := 1)
+          (twoSheetSimplex (0 : Fin 2) edge) +
+        twoSheetInterval.ιNormalizedChainComplex (R := tensorCoefficient) (n := 1)
+          (twoSheetSimplex (1 : Fin 2) edge)) :
+      (λ_ cyclicModule).hom (degreeOneCoordinates
+        ((SSet.normalizedChainComplexMap twoSheetIntervalMap tensorCoefficient).f 1
+          (k tensorOne))) = (2 : ZMod 4) := by
+    have hcomp : k ≫
+        (SSet.normalizedChainComplexMap twoSheetIntervalMap tensorCoefficient).f 1 ≫
+          degreeOneCoordinates = (2 : ℕ) • 𝟙 tensorCoefficient := by
+      rw [hk]
+      exact twoSheetInterval_lifts_push_coordinate tensorCoefficient
+    have h := congrArg (fun f : tensorCoefficient ⟶ tensorCoefficient ↦ f tensorOne) hcomp
+    calc
+      _ = (λ_ cyclicModule).hom ((2 : ℕ) • tensorOne) :=
+        congrArg (fun x ↦ (λ_ cyclicModule).hom x) h
+      _ = (2 : ℕ) • (1 : ZMod 4) :=
+        (map_nsmul (λ_ cyclicModule).hom.hom 2 tensorOne).trans
+          (congrArg (fun x ↦ (2 : ℕ) • x) tensorOne_unitor)
+      _ = 2 := by decide
+  exact ⟨evaluate _ htarget, evaluate _ hsource, by decide⟩
+
+/-! ## Changing the tensor coefficient by multiplication by two -/
+
+private noncomputable def cyclicDouble : cyclicModule ⟶ cyclicModule :=
+  (2 : ℕ) • 𝟙 cyclicModule
+
+/-- The stock tensoring functor turns a coefficient morphism into a natural transformation. -/
+private noncomputable def tensorDouble : cyclicTensor ⟶ cyclicTensor :=
+  (tensoringRight (ModuleCat.{0} ℤ)).map cyclicDouble
+
+private theorem tensorDouble_tensorOne :
+    (tensorDouble.app integralModule) tensorOne = (1 : ℤ) ⊗ₜ[ℤ] (2 : ZMod 4) := by
+  change (integralModule ◁ cyclicDouble) ((1 : ℤ) ⊗ₜ[ℤ] (1 : ZMod 4)) = _
+  rw [ModuleCat.MonoidalCategory.whiskerLeft_apply]
+  change (1 : ℤ) ⊗ₜ[ℤ] ((2 : ℕ) • (1 : ZMod 4)) = _
+  exact congrArg (fun a : ZMod 4 ↦ (1 : ℤ) ⊗ₜ[ℤ] a)
+    (show (2 : ℕ) • (1 : ZMod 4) = (2 : ZMod 4) from by decide)
+
+private theorem tensorDouble_tensorOne_unitor :
+    (λ_ cyclicModule).hom ((tensorDouble.app integralModule) tensorOne) = (2 : ZMod 4) := by
+  rw [tensorDouble_tensorOne]
+  exact (ModuleCat.MonoidalCategory.leftUnitor_hom_apply (1 : ℤ) (2 : cyclicModule)).trans
+    (one_smul ℤ (2 : ZMod 4))
+
+private theorem tensorDouble_ne_id : tensorDouble ≠ 𝟙 cyclicTensor := by
+  intro h
+  have hc := tensorDouble_tensorOne_unitor
+  rw [h] at hc
+  change (λ_ cyclicModule).hom tensorOne = (2 : ZMod 4) at hc
+  rw [tensorOne_unitor] at hc
+  exact (show (1 : ZMod 4) ≠ 2 from by decide) hc
+
+private noncomputable def doubledSourceEdge : cyclicTensor.obj (intervalComplex.X 1) :=
+  (tensorDouble.app (intervalComplex.X 1)) sourceEdge
+
+private noncomputable def doubledTargetEdge :
+    (interval.normalizedChainComplex tensorCoefficient).X 1 :=
+  interval.ιNormalizedChainComplex (R := tensorCoefficient) edge
+    ((tensorDouble.app integralModule) tensorOne)
+
+/-- The changed source coordinate is computed from naturality of the stock tensor map. -/
+private theorem doubledSourceEdge_coordinate :
+    cyclicTensor.map degreeOneCoordinates doubledSourceEdge =
+      (tensorDouble.app integralModule) tensorOne := by
+  have h := congrArg
+    (fun k : cyclicTensor.obj (intervalComplex.X 1) ⟶ tensorCoefficient ↦ k sourceEdge)
+    (tensorDouble.naturality degreeOneCoordinates).symm
+  change cyclicTensor.map degreeOneCoordinates doubledSourceEdge =
+    (tensorDouble.app integralModule) (cyclicTensor.map degreeOneCoordinates sourceEdge) at h
+  exact h.trans (congrArg (fun x ↦ (tensorDouble.app integralModule) x) sourceEdge_coordinate)
+
+private theorem doubledTargetEdge_coordinate :
+    degreeOneCoordinates doubledTargetEdge = (tensorDouble.app integralModule) tensorOne :=
+  congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦
+    k ((tensorDouble.app integralModule) tensorOne))
+      (edge_coordinates (R := tensorCoefficient))
+
+private theorem doubledSourceEdge_unitor_coordinate :
+    (λ_ cyclicModule).hom (cyclicTensor.map degreeOneCoordinates doubledSourceEdge) =
+      (2 : ZMod 4) :=
+  (congrArg (fun x ↦ (λ_ cyclicModule).hom x) doubledSourceEdge_coordinate).trans
+    tensorDouble_tensorOne_unitor
+
+private theorem doubledTargetEdge_unitor_coordinate :
+    (λ_ cyclicModule).hom (degreeOneCoordinates doubledTargetEdge) = (2 : ZMod 4) :=
+  (congrArg (fun x ↦ (λ_ cyclicModule).hom x) doubledTargetEdge_coordinate).trans
+    tensorDouble_tensorOne_unitor
+
+private theorem doubledSourceEdge_ne_zero : doubledSourceEdge ≠ 0 := by
+  intro h
+  have hc := doubledSourceEdge_unitor_coordinate
+  rw [h, map_zero, map_zero] at hc
+  exact (show (0 : ZMod 4) ≠ 2 from by decide) hc
+
+private theorem doubledTargetEdge_ne_zero : doubledTargetEdge ≠ 0 := by
+  intro h
+  have hc := doubledTargetEdge_unitor_coordinate
+  rw [h, map_zero, map_zero] at hc
+  exact (show (0 : ZMod 4) ≠ 2 from by decide) hc
+
+/-- The coefficient-functor naturality equation on the standard normalized interval. -/
+private theorem tensorDoubleComparisonNaturality :
+  (tensorDouble.mapHomologicalComplex (.down ℕ)).app intervalComplex ≫
+      intervalCoefficientComparison.hom =
+    intervalCoefficientComparison.hom ≫
+      (interval.splitting.map (sigmaConst.obj tensorCoefficient)).nondegComplexMap
+        (interval.splitting.map (sigmaConst.obj tensorCoefficient))
+        (Functor.whiskerLeft interval (sigmaConst.map (tensorDouble.app integralModule))) :=
+  SSet.normalizedChainComplexFunctorObjCompMapIso_naturality
+    integralModule cyclicTensor cyclicTensor tensorDouble interval
+
+/-- The same naturality square sends the changed original edge to its
+coefficientwise changed normalized edge, of coordinate two modulo four. -/
+private theorem comparison_doubledSourceEdge :
+    intervalCoefficientComparison.hom.f 1 doubledSourceEdge = doubledTargetEdge := by
+  have h := congrArg
+    (fun k : cyclicTensor.obj (intervalComplex.X 1) ⟶
+        (interval.normalizedChainComplex tensorCoefficient).X 1 ↦ k sourceEdge)
+    (HomologicalComplex.congr_hom tensorDoubleComparisonNaturality 1)
+  change intervalCoefficientComparison.hom.f 1 doubledSourceEdge =
+    ((interval.splitting.map (sigmaConst.obj tensorCoefficient)).nondegComplexMap
+      (interval.splitting.map (sigmaConst.obj tensorCoefficient))
+      (Functor.whiskerLeft interval (sigmaConst.map (tensorDouble.app integralModule)))).f 1
+        (intervalCoefficientComparison.hom.f 1 sourceEdge) at h
+  rw [comparison_sourceEdge] at h
+  exact h.trans (congrArg
+    (fun k : tensorCoefficient ⟶
+        (interval.normalizedChainComplex tensorCoefficient).X 1 ↦ k tensorOne)
+    (SSet.ιNormalizedChainComplex_nondegComplexMap_coefficient
+      tensorCoefficient interval (tensorDouble.app integralModule) edge))
+
+private theorem comparison_doubledSourceEdge_unitor_coordinate :
+    (λ_ cyclicModule).hom (degreeOneCoordinates
+      (intervalCoefficientComparison.hom.f 1 doubledSourceEdge)) = (2 : ZMod 4) := by
+  rw [comparison_doubledSourceEdge]
+  exact doubledTargetEdge_unitor_coordinate
+
+private theorem coefficientScalar_app (m n : ℕ) :
+    (coefficientScalar m).app (op ⦋n⦌) = m • 𝟙 (coefficientInterval _⦋n⦌) := by
+  simpa only [coefficientScalar, NatTrans.id_app] using
+    (NatTrans.app_nsmul (op ⦋n⦌) (𝟙 coefficientInterval) m)
+
+private noncomputable def intervalCoefficientSimplex {n : ℕ} (x : interval _⦋n⦌) :
+    integralModule ⟶ coefficientInterval _⦋n⦌ :=
+  Sigma.ι (fun _ : interval _⦋n⦌ ↦ integralModule) x
+
+private noncomputable def intervalRawBasis (x : interval.splitting.N 1) :
+    integralModule ⟶ intervalSplitting.N 1 :=
+  Sigma.ι (fun _ : interval.splitting.N 1 ↦ integralModule) x
+
+private theorem intervalRawBasis_ι (x : interval.splitting.N 1) :
+    intervalRawBasis x ≫ intervalSplitting.ι 1 =
+      intervalCoefficientSimplex (interval.splitting.ι 1 x) :=
+  (Sigma.ι_comp_map'
+    (f := fun _ : interval.splitting.N 1 ↦ integralModule)
+    (g := fun _ : interval _⦋1⦌ ↦ integralModule)
+    (interval.splitting.ι 1) (fun _ ↦ 𝟙 integralModule) x).trans (Category.id_comp _)
+
+/-- The mixed coefficient map does not preserve the raw nondegenerate summand in degree one. -/
+private theorem mixedCoefficientMorphism_not_compatible :
+    ¬ ∃ f : intervalSplitting.N 1 ⟶ intervalSplitting.N 1,
+      intervalSplitting.ι 1 ≫ mixedCoefficientMorphism.app (op ⦋1⦌) =
+        f ≫ intervalSplitting.ι 1 := by
+  let c : coefficientInterval _⦋1⦌ ⟶ integralModule :=
+    Sigma.desc fun x : interval _⦋1⦌ ↦ if x 1 = 0 then 𝟙 integralModule else 0
+  have hb (x : interval _⦋1⦌) : intervalCoefficientSimplex x ≫ c =
+      if x 1 = 0 then 𝟙 integralModule else 0 :=
+    Sigma.ι_desc (fun x : interval _⦋1⦌ ↦ if x 1 = 0 then 𝟙 integralModule else 0) x
+  have hι : intervalSplitting.ι 1 ≫ c = 0 := by
+    apply Sigma.hom_ext (f := fun _ : interval.splitting.N 1 ↦ integralModule)
+    intro x
+    change intervalRawBasis x ≫ (intervalSplitting.ι 1 ≫ c) =
+      intervalRawBasis x ≫ (0 : intervalSplitting.N 1 ⟶ integralModule)
+    calc
+      _ = (intervalRawBasis x ≫ intervalSplitting.ι 1) ≫ c :=
+        (Category.assoc _ _ _).symm
+      _ = intervalCoefficientSimplex (interval.splitting.ι 1 x) ≫ c :=
+        congrArg (fun k : integralModule ⟶ coefficientInterval _⦋1⦌ ↦ k ≫ c)
+          (intervalRawBasis_ι x)
+      _ = 0 := by
+        have hx : interval.splitting.ι 1 x ∈ interval.nonDegenerate 1 := x.property
+        rw [hb, edge_unique _ hx]
+        rfl
+      _ = _ := (comp_zero (f := intervalRawBasis x)).symm
+  have hm : intervalCoefficientSimplex edge ≫
+      mixedCoefficientMorphism.app (op ⦋1⦌) ≫ c = 𝟙 integralModule := by
+    let d : coefficientInterval _⦋1⦌ ⟶ coefficientInterval _⦋1⦌ :=
+      (Functor.whiskerRight (SSet.const (X := interval) (vertex 0))
+        (sigmaConst.obj integralModule)).app (op ⦋1⦌)
+    have hd : intervalCoefficientSimplex edge ≫ d =
+        intervalCoefficientSimplex
+          ((SSet.const (X := interval) (vertex 0)).app (op ⦋1⦌) edge) :=
+      (Sigma.ι_comp_map'
+        (f := fun _ : interval _⦋1⦌ ↦ integralModule)
+        (g := fun _ : interval _⦋1⦌ ↦ integralModule)
+        ((SSet.const (X := interval) (vertex 0)).app (op ⦋1⦌))
+        (fun _ ↦ 𝟙 integralModule) edge).trans (Category.id_comp _)
+    change intervalCoefficientSimplex edge ≫
+      ((coefficientScalar 2).app (op ⦋1⦌) + d) ≫ c = _
+    rw [coefficientScalar_app, Preadditive.add_comp, Preadditive.comp_add,
+      Preadditive.nsmul_comp, Category.id_comp, Preadditive.comp_nsmul,
+      ← Category.assoc, hd, hb, hb]
+    change (2 : ℕ) • (0 : integralModule ⟶ integralModule) + 𝟙 integralModule = _
+    rw [smul_zero, zero_add]
+  let e : integralModule ⟶ intervalSplitting.N 1 :=
+    intervalRawBasis ⟨edge, edge_nondegenerate⟩
+  have he : e ≫ intervalSplitting.ι 1 = intervalCoefficientSimplex edge :=
+    intervalRawBasis_ι ⟨edge, edge_nondegenerate⟩
+  rintro ⟨f, hf⟩
+  have hpost := congrArg
+    (fun k : intervalSplitting.N 1 ⟶ coefficientInterval _⦋1⦌ ↦ e ≫ k ≫ c) hf
+  have hleft : e ≫ (intervalSplitting.ι 1 ≫ mixedCoefficientMorphism.app (op ⦋1⦌)) ≫ c =
+      𝟙 integralModule := by
+    calc
+      _ = e ≫ intervalSplitting.ι 1 ≫ mixedCoefficientMorphism.app (op ⦋1⦌) ≫ c :=
+        congrArg (fun k : intervalSplitting.N 1 ⟶ integralModule ↦ e ≫ k)
+          (Category.assoc (intervalSplitting.ι 1) (mixedCoefficientMorphism.app (op ⦋1⦌)) c)
+      _ = (e ≫ intervalSplitting.ι 1) ≫ mixedCoefficientMorphism.app (op ⦋1⦌) ≫ c :=
+        (Category.assoc e (intervalSplitting.ι 1)
+          (mixedCoefficientMorphism.app (op ⦋1⦌) ≫ c)).symm
+      _ = intervalCoefficientSimplex edge ≫ mixedCoefficientMorphism.app (op ⦋1⦌) ≫ c :=
+        congrArg (fun k : integralModule ⟶ coefficientInterval _⦋1⦌ ↦
+          k ≫ mixedCoefficientMorphism.app (op ⦋1⦌) ≫ c) he
+      _ = _ := hm
+  have hright : e ≫ (f ≫ intervalSplitting.ι 1) ≫ c = 0 := by
+    calc
+      _ = e ≫ f ≫ (intervalSplitting.ι 1 ≫ c) :=
+        congrArg (fun k : intervalSplitting.N 1 ⟶ integralModule ↦ e ≫ k)
+          (Category.assoc f (intervalSplitting.ι 1) c)
+      _ = e ≫ f ≫ (0 : intervalSplitting.N 1 ⟶ integralModule) :=
+        congrArg (fun k : intervalSplitting.N 1 ⟶ integralModule ↦ e ≫ f ≫ k) hι
+      _ = 0 := by simp only [comp_zero]
+  have hc : 𝟙 integralModule = 0 := hleft.symm.trans (hpost.trans hright)
+  exact (one_ne_zero : (1 : ℤ) ≠ 0)
+    (congrArg (fun k : integralModule ⟶ integralModule ↦ k (1 : ℤ)) hc)
 
 end SimplicialObjectsTest.Normalization

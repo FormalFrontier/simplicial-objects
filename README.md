@@ -42,7 +42,8 @@ pullback base change and coefficient maps.
   Transfer followed by pushforward counts the fiber. If every vertex
   fiber has cardinality `d`, this composite is `d` times the identity on chains
   and on natural-number-graded homology, when the coefficient category has
-  homology. No normalized or topological comparison is asserted.
+  homology. Normalized coefficient compatibility is supplied by the
+  normalization module below; no topological comparison is asserted.
   The private client `SimplicialObjectsTest.FiniteFiberTransfer` computes the
   two-sheet integral generator, its coordinates and its pushforward, and
   computes the six-sheet two-step transfer through three sheets, and checks empty
@@ -91,8 +92,28 @@ pullback base change and coefficient maps.
   its target coefficient object is `ℤ ⊗[ℤ] ZMod 4`. Independent coordinates of
   both degree-one edges are `1 ⊗ 1`, sent to `1 mod 4` by the left unitor, so both
   edges are nonzero; collapse annihilates both. The generator law sends the
-  source edge to the target edge. No normalized-transfer compatibility or full
-  arbitrary-Abelian tensor/Finsupp dictionary is asserted.
+  source edge to the target edge.
+- **Coherence of normalized coefficient comparison.**
+  [`Normalization`](SimplicialObjects/Normalization.lean) proves three further
+  equalities with the same coefficient-category and coproduct hypotheses:
+  `normalizedChainComplexFunctorObjCompMapIso_nondegComplexMap` commutes with
+  an arbitrary coefficient-valued simplicial morphism, transported through the
+  coproduct comparison, without a `Split.Hom` compatibility assumption;
+  `normalizedChainComplexFunctorObjCompMapIso_finiteFiberTransfer` commutes with
+  normalized transfer for an equifibered simplicial map with finite vertex fibers;
+  and `normalizedChainComplexFunctorObjCompMapIso_naturality` commutes with any
+  natural transformation `θ : L ⟶ M`, where both functors are additive and preserve
+  exactly the same indexed coproducts. The transformation acts on the normalized
+  source and coefficientwise on the target. These laws are consequences of
+  Mathlib's splitting retract and all-simplex comparison, not extra exactness or
+  homology-preservation results.
+  The private tensor client applies the first law to `2 • id + const(v₀)` on the
+  coefficient-valued interval, which does not preserve the raw nondegenerate
+  summand. The second compares the two-sheet interval transfer, with both sheet
+  coordinates one modulo four and pushforward two modulo four, nonzero. The third
+  uses the tensor transformation induced by multiplication by two on `ZMod 4`:
+  it is not the identity, and the changed original edge has coordinate two modulo
+  four, nonzero. No full arbitrary-Abelian tensor/Finsupp dictionary is asserted.
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is

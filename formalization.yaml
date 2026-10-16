@@ -6,7 +6,9 @@ project:
     Functorial augmented left decalage of simplicial objects with a canonical
     extra degeneracy, and finite-fiber coproduct, diagram and simplicial chain
     transfers with induced homology maps, coefficient naturality and sheet identities,
-    together with normalized-chain descent and additive coefficient comparisons.
+    together with normalized-chain descent and coefficient comparisons coherent
+    with arbitrary coefficient-valued maps, finite-fiber transfers and transformations
+    of additive coproduct-preserving functors.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -64,9 +66,15 @@ status:
     interval, tensoring integral coefficients with ZMod 4 sends the nonzero source
     edge to the nonzero target edge with coefficient object Z tensor[Z] ZMod 4;
     independent edge coordinates are 1 tensor 1, and collapse annihilates both edges.
-    No normalized-transfer compatibility, full arbitrary-Abelian tensor/Finsupp
-    dictionary or comparison with topological chains is asserted. This inventory
-    is not a source-passage coverage map.
+    The normalized comparison also commutes with arbitrary coefficient-valued
+    simplicial morphisms, normalized finite-vertex-fiber equifibered transfers,
+    and natural transformations between additive functors with the same coproduct
+    preservation hypotheses. The transformation acts on the normalized source and
+    coefficientwise on the target. The mixed interval map 2 id plus the constant
+    vertex map, the two-sheet interval cover, and multiplication by two on the
+    tensor coefficient instantiate these laws. No full arbitrary-Abelian
+    tensor/Finsupp dictionary or comparison with topological chains is asserted.
+    This inventory is not a source-passage coverage map.
 review:
   status: unchecked
 alignment:
@@ -205,6 +213,18 @@ alignment:
     - lean: SSet.normalizedChainComplexFunctorObjCompMapIso_hom_app_fromNormalizedChainComplex
       module: SimplicialObjects/Normalization.lean
     - lean: SSet.map_ιNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app_f
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.ιNormalizedChainComplex_nondegComplexMap_coefficient
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.chainComplexFunctorObjCompMapIso_hom_app_f
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.chainComplexFunctorObjCompMapIso_naturality
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.normalizedChainComplexFunctorObjCompMapIso_nondegComplexMap
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.normalizedChainComplexFunctorObjCompMapIso_finiteFiberTransfer
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.normalizedChainComplexFunctorObjCompMapIso_naturality
       module: SimplicialObjects/Normalization.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
