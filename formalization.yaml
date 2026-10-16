@@ -5,7 +5,8 @@ project:
   description: >-
     Functorial augmented left decalage of simplicial objects with a canonical
     extra degeneracy, and finite-fiber coproduct, diagram and simplicial chain
-    transfers with induced homology maps, coefficient naturality and sheet identities.
+    transfers with induced homology maps, coefficient naturality and sheet identities,
+    together with normalized-chain descent and additive coefficient comparisons.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -51,6 +52,21 @@ status:
     no preservation of homology or exactness is required.
     Tensoring with the cyclic group of order four gives a nonzero two-sheet client
     computed independently of that compatibility theorem.
+    Normalized chains with any coefficient object R : C commute naturally with
+    an additive functor L from C to D preserving coproducts indexed by every T : Type w.
+    The categories C : Type u and D : Type u' have Category.{v} and Category.{v'}
+    structures, are preadditive and have HasCoproducts.{w}; all five universes are
+    independent. The preservation hypothesis is exactly
+    ∀ T : Type w, PreservesColimitsOfShape (Discrete T) L.
+    The comparison respects the normalization projection and section and has the
+    canonical coefficient formula on all simplex generators, including degenerate
+    zero classes. Naturality includes simplicial collapse maps. On the normalized
+    interval, tensoring integral coefficients with ZMod 4 sends the nonzero source
+    edge to the nonzero target edge with coefficient object Z tensor[Z] ZMod 4;
+    independent edge coordinates are 1 tensor 1, and collapse annihilates both edges.
+    No normalized-transfer compatibility, full arbitrary-Abelian tensor/Finsupp
+    dictionary or comparison with topological chains is asserted. This inventory
+    is not a source-passage coverage map.
 review:
   status: unchecked
 alignment:
@@ -59,6 +75,8 @@ alignment:
     maps between normalized complexes of split simplicial objects, including
     projection equations, functoriality, the degreewise degeneracy-quotient property
     and agreement with the normalized functor on compatible split morphisms.
+    The normalized-chain coefficient natural isomorphism is indexed together with
+    its projection, section and all-simplex generator characteristic equations.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -179,6 +197,14 @@ alignment:
     - lean: CategoryTheory.SimplicialObject.Split.nondegComplexMap_eq_nondegComplexFunctor_map
       module: SimplicialObjects/Normalization.lean
     - lean: SSet.nondegComplexMap_eq_normalizedChainComplexMap
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.normalizedChainComplexFunctorObjCompMapIso
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.toNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.normalizedChainComplexFunctorObjCompMapIso_hom_app_fromNormalizedChainComplex
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.map_ιNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app_f
       module: SimplicialObjects/Normalization.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see

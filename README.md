@@ -73,6 +73,26 @@ pullback base change and coefficient maps.
   `Δ[1]` model has normalized groups `ℤ ⊞ ℤ` and `ℤ` in degrees zero and one,
   boundary `a ↦ (-a,a)`, and collapse to `Δ[0]` zero in degree one but nonzero in
   degree zero.
+- **Normalized change of coefficient category.**
+  [`SSet.normalizedChainComplexFunctorObjCompMapIso`](SimplicialObjects/Normalization.lean)
+  identifies normalized chains with coefficients `R`, followed by
+  `L.mapHomologicalComplex (.down ℕ)`, with normalized chains with coefficient
+  object `L.obj R`, naturally on `SSet.{w}`.
+  Here `C : Type u` and `D : Type u'` have `Category.{v}` and `Category.{v'}`
+  structures, are preadditive and have `HasCoproducts.{w}`; `R : C` and `L : C ⥤ D`
+  is additive with exactly
+  `[∀ T : Type w, PreservesColimitsOfShape (Discrete T) L]`.
+  All five universes `u`, `v`, `u'`, `v'`, `w` are independent; no exactness or
+  Abelian assumption is needed. The comparison respects the normalization
+  projection `q` and section `j`, and has the canonical coefficient formula on
+  every simplex generator, including degenerate zero classes. Its naturality
+  includes collapse maps, without preservation of nondegenerate simplices.
+  The private `Δ[1]` client tensors the integral normalized interval with `ZMod 4`;
+  its target coefficient object is `ℤ ⊗[ℤ] ZMod 4`. Independent coordinates of
+  both degree-one edges are `1 ⊗ 1`, sent to `1 mod 4` by the left unitor, so both
+  edges are nonzero; collapse annihilates both. The generator law sends the
+  source edge to the target edge. No normalized-transfer compatibility or full
+  arbitrary-Abelian tensor/Finsupp dictionary is asserted.
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is

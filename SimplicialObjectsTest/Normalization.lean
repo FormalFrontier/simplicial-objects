@@ -9,6 +9,9 @@ import SimplicialObjects.FiniteFiberTransfer
 import Mathlib.Algebra.Category.ModuleCat.Abelian
 import Mathlib.Algebra.Category.ModuleCat.Colimits
 import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
+import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
+import Mathlib.CategoryTheory.Monoidal.Closed.Braided
+import Mathlib.Data.ZMod.Basic
 
 /-!
 # Integral chains on the standard simplicial interval
@@ -58,16 +61,16 @@ private theorem vertex_cases (x : interval _⦋0⦌) : x = vertex 0 ∨ x = vert
     fin_cases i
     exact h
 
-private noncomputable def normalizedDesc (X : SSet.{0}) {n : ℕ} {T : ModuleCat ℤ}
-    (f : X.nonDegenerate n → (integralModule ⟶ T)) :
-    (X.normalizedChainComplex integralModule).X n ⟶ T :=
-  Cofan.IsColimit.desc (X.isColimitCofanNormalizedChainComplex integralModule n) f
+private noncomputable def normalizedDesc (X : SSet.{0}) {R : ModuleCat ℤ} {n : ℕ}
+    {T : ModuleCat ℤ} (f : X.nonDegenerate n → (R ⟶ T)) :
+    (X.normalizedChainComplex R).X n ⟶ T :=
+  Cofan.IsColimit.desc (X.isColimitCofanNormalizedChainComplex R n) f
 
 @[reassoc (attr := simp)]
-private theorem ι_normalizedDesc (X : SSet.{0}) {n : ℕ} {T : ModuleCat ℤ}
-    (f : X.nonDegenerate n → (integralModule ⟶ T)) (x : X.nonDegenerate n) :
-    X.ιNormalizedChainComplex x.val ≫ normalizedDesc X f = f x :=
-  Cofan.IsColimit.fac (X.isColimitCofanNormalizedChainComplex integralModule n) f x
+private theorem ι_normalizedDesc (X : SSet.{0}) {R : ModuleCat ℤ} {n : ℕ}
+    {T : ModuleCat ℤ} (f : X.nonDegenerate n → (R ⟶ T)) (x : X.nonDegenerate n) :
+    X.ιNormalizedChainComplex (R := R) x.val ≫ normalizedDesc X f = f x :=
+  Cofan.IsColimit.fac (X.isColimitCofanNormalizedChainComplex R n) f x
 
 private noncomputable def degreeZeroCoordinates : intervalComplex.X 0 ⟶
     integralModule ⊞ integralModule :=
@@ -100,15 +103,17 @@ private noncomputable def degreeZeroIso : intervalComplex.X 0 ≅
     apply biprod.hom_ext' <;>
       simp [degreeZeroGenerators, vertex_coordinates]
 
-private noncomputable def degreeOneCoordinates : intervalComplex.X 1 ⟶ integralModule :=
+private noncomputable def degreeOneCoordinates {R : ModuleCat ℤ} :
+    (interval.normalizedChainComplex R).X 1 ⟶ R :=
   normalizedDesc interval fun _ ↦ 𝟙 _
 
-private theorem edge_coordinates :
-    interval.ιNormalizedChainComplex edge ≫ degreeOneCoordinates = 𝟙 integralModule :=
+private theorem edge_coordinates {R : ModuleCat ℤ} :
+    interval.ιNormalizedChainComplex (R := R) edge ≫ degreeOneCoordinates = 𝟙 R :=
   ι_normalizedDesc interval (fun _ ↦ 𝟙 _) ⟨edge, edge_nondegenerate⟩
 
-/-- Normalized degree one is a copy of ℤ, with the nondegenerate edge as basis. -/
-private noncomputable def degreeOneIso : intervalComplex.X 1 ≅ integralModule where
+/-- Normalized degree one is the coefficient module via the unique nondegenerate edge. -/
+private noncomputable def degreeOneIso {R : ModuleCat ℤ} :
+    (interval.normalizedChainComplex R).X 1 ≅ R where
   hom := degreeOneCoordinates
   inv := interval.ιNormalizedChainComplex edge
   hom_inv_id := by
@@ -381,5 +386,88 @@ private theorem normalizedTransfer_sheet {F G : SSet.{0}} (p : F ⟶ G)
     SSet.toNormalizedChainComplex_normalizedChainComplexMap, ← Category.assoc,
     SSet.chainComplexTransfer_comp_map p hp hf integralModule d hd]
   simp
+
+/-! ## Normalized coefficient comparison on the same interval -/
+
+open MonoidalCategory
+open scoped TensorProduct
+
+private abbrev cyclicModule : ModuleCat.{0} ℤ := ModuleCat.of ℤ (ZMod 4)
+private noncomputable abbrev cyclicTensor : ModuleCat.{0} ℤ ⥤ ModuleCat.{0} ℤ :=
+  tensorRight cyclicModule
+private noncomputable abbrev tensorCoefficient := cyclicTensor.obj integralModule
+private noncomputable def tensorOne : tensorCoefficient := (1 : ℤ) ⊗ₜ[ℤ] (1 : ZMod 4)
+
+private theorem tensorOne_unitor : (λ_ cyclicModule).hom tensorOne = (1 : ZMod 4) :=
+  (ModuleCat.MonoidalCategory.leftUnitor_hom_apply (1 : ℤ) (1 : cyclicModule)).trans
+    (one_smul ℤ (1 : ZMod 4))
+
+private noncomputable def sourceEdge : cyclicTensor.obj (intervalComplex.X 1) :=
+  cyclicTensor.map (interval.ιNormalizedChainComplex (R := integralModule) edge) tensorOne
+
+private noncomputable def targetEdge :
+    (interval.normalizedChainComplex tensorCoefficient).X 1 :=
+  interval.ιNormalizedChainComplex (R := tensorCoefficient) edge tensorOne
+
+/-- Tensoring the edge coordinate gives the pure tensor `1 ⊗ₜ 1`. -/
+private theorem sourceEdge_coordinate :
+    cyclicTensor.map degreeOneCoordinates sourceEdge = tensorOne := by
+  have h := cyclicTensor.congr_map (edge_coordinates (R := integralModule))
+  rw [cyclicTensor.map_comp, cyclicTensor.map_id] at h
+  exact congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne) h
+
+/-- The normalized coproduct coordinate of the tensor-valued edge is `1 ⊗ₜ 1`. -/
+private theorem targetEdge_coordinate : degreeOneCoordinates targetEdge = tensorOne :=
+  congrArg (fun k : tensorCoefficient ⟶ tensorCoefficient ↦ k tensorOne)
+    (edge_coordinates (R := tensorCoefficient))
+
+private theorem sourceEdge_unitor_coordinate :
+    (λ_ cyclicModule).hom (cyclicTensor.map degreeOneCoordinates sourceEdge) = (1 : ZMod 4) :=
+  (congrArg (fun x ↦ (λ_ cyclicModule).hom x) sourceEdge_coordinate).trans tensorOne_unitor
+
+private theorem targetEdge_unitor_coordinate :
+    (λ_ cyclicModule).hom (degreeOneCoordinates targetEdge) = (1 : ZMod 4) :=
+  (congrArg (fun x ↦ (λ_ cyclicModule).hom x) targetEdge_coordinate).trans tensorOne_unitor
+
+private theorem sourceEdge_ne_zero : sourceEdge ≠ 0 := by
+  intro h
+  have hc := sourceEdge_unitor_coordinate
+  rw [h, map_zero, map_zero] at hc
+  exact (show (0 : ZMod 4) ≠ 1 from by decide) hc
+
+private theorem targetEdge_ne_zero : targetEdge ≠ 0 := by
+  intro h
+  have hc := targetEdge_unitor_coordinate
+  rw [h, map_zero, map_zero] at hc
+  exact (show (0 : ZMod 4) ≠ 1 from by decide) hc
+
+/-- Collapsing the interval annihilates its tensor-valued normalized edge. -/
+private theorem sourceEdge_collapse : cyclicTensor.map (collapseMap.f 1) sourceEdge = 0 := by
+  rw [collapse_degreeOne, cyclicTensor.map_zero]
+  rfl
+
+private theorem targetEdge_collapse :
+    (SSet.normalizedChainComplexMap collapse tensorCoefficient).f 1 targetEdge = 0 := by
+  have h : (SSet.normalizedChainComplexMap collapse tensorCoefficient).f 1 = 0 :=
+    (point.isZero_normalizedChainComplex_X_of_hasDimensionLT tensorCoefficient 1 1).eq_of_tgt _ _
+  rw [h]
+  rfl
+
+private noncomputable def intervalCoefficientComparison :=
+  (SSet.normalizedChainComplexFunctorObjCompMapIso integralModule cyclicTensor).app interval
+
+/-- The coefficient comparison maps the tensor-valued edge to the normalized edge. -/
+private theorem comparison_sourceEdge :
+    intervalCoefficientComparison.hom.f 1 sourceEdge = targetEdge :=
+  congrArg (fun k : tensorCoefficient ⟶
+      (interval.normalizedChainComplex tensorCoefficient).X 1 ↦ k tensorOne)
+    (SSet.map_ιNormalizedChainComplex_normalizedChainComplexFunctorObjCompMapIso_hom_app_f
+      integralModule cyclicTensor interval edge)
+
+private theorem comparison_sourceEdge_coordinate :
+    (λ_ cyclicModule).hom (degreeOneCoordinates
+      (intervalCoefficientComparison.hom.f 1 sourceEdge)) = (1 : ZMod 4) := by
+  rw [comparison_sourceEdge]
+  exact targetEdge_unitor_coordinate
 
 end SimplicialObjectsTest.Normalization
