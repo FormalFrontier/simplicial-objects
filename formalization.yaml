@@ -43,7 +43,8 @@ status:
     preadditive category with coproducts. Equifibered simplicial maps require
     only finite vertex fibers; the induced homology map additionally requires
     homology in the coefficient category. Transfers satisfy postcomposition,
-    pullback base change, coefficient naturality and fiber-counting laws.
+    identity and reverse-order composition, pullback base change, coefficient
+    naturality and fiber-counting laws.
     A fixed vertex-fiber cardinal gives the sheet identity on chains and homology.
 review:
   status: unchecked
@@ -102,9 +103,15 @@ alignment:
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: CategoryTheory.Limits.Types.pullbackFiberEquiv
       module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.Limits.Types.finite_fiber_comp
+      module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: CategoryTheory.sigmaConstTransfer
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: CategoryTheory.ι_sigmaConstTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.sigmaConstTransfer_id
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.sigmaConstTransfer_comp
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: CategoryTheory.sigmaConstTransfer_desc
       module: SimplicialObjects/FiniteFiberTransfer.lean
@@ -113,6 +120,8 @@ alignment:
     - lean: CategoryTheory.sigmaConstTransfer_baseChange
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: CategoryTheory.equifiberedSigmaTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.equifiberedSigmaTransfer_comp
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: CategoryTheory.equifiberedSigmaTransfer_coefficient
       module: SimplicialObjects/FiniteFiberTransfer.lean
@@ -124,6 +133,8 @@ alignment:
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.chainComplexTransfer
       module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.chainComplexTransfer_comp
+      module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.ι_chainComplexTransfer_f
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.ι_chainComplexTransfer_push
@@ -133,6 +144,8 @@ alignment:
     - lean: SSet.chainComplexTransfer_comp_map
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.homologyTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.homologyTransfer_comp
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.homologyTransfer_comp_map
       module: SimplicialObjects/FiniteFiberTransfer.lean

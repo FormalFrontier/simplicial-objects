@@ -9,6 +9,7 @@ public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Equifibered
 public import Mathlib.CategoryTheory.Limits.Types.Pullbacks
 public import Mathlib.Algebra.BigOperators.Finprod
 public import Mathlib.SetTheory.Cardinal.Finite
+public import Mathlib.Basic.Finite.Sigma
 
 /-!
 # Finite-fiber transfers
@@ -68,6 +69,17 @@ theorem pullbackFiberEquiv_apply {A B U V : Type w} {t : A ⟶ B} {l : A ⟶ U}
     (a : {a : A // l a = x}) :
     (pullbackFiberEquiv h x a).val = t a := rfl
 
+/-- A composite of two maps with finite fibers has finite fibers. -/
+theorem finite_fiber_comp {A B D : Type*} (f : A → B) (g : B → D)
+    (hf : ∀ b : B, Finite {a : A // f a = b})
+    (hg : ∀ d : D, Finite {b : B // g b = d}) (d : D) :
+    Finite {a : A // (g ∘ f) a = d} := by
+  let := hg d
+  let := fun b : {b : B // g b = d} ↦ hf b.val
+  exact Finite.of_equiv (Σ b : {b : B // g b = d}, {a : A // f a = b.val})
+    (Equiv.sigmaSubtypeFiberEquivSubtype f (p := fun a ↦ (g ∘ f) a = d)
+      (q := fun b ↦ g b = d) (fun _ ↦ Iff.rfl))
+
 end CategoryTheory.Limits.Types
 
 namespace CategoryTheory
@@ -95,6 +107,47 @@ theorem ι_sigmaConstTransfer {A B : Type w} (f : A ⟶ B)
   let := hf b
   let := Fintype.ofFinite {a : A // f a = b}
   simp [sigmaConstTransfer, finsum_eq_sum_of_fintype]
+
+/-- The transfer of the identity is the identity on the coproduct. -/
+@[simp]
+theorem sigmaConstTransfer_id (A : Type w) (R : C) :
+    sigmaConstTransfer (𝟙 A) (fun a ↦ by
+      change Finite {a' : A // a' = a}
+      infer_instance) R = 𝟙 _ := by
+  classical
+  apply Sigma.hom_ext
+  intro a
+  calc
+    _ = ∑ᶠ a' : {a' : A // a' = a}, Sigma.ι (fun _ : A ↦ R) a'.val :=
+      ι_sigmaConstTransfer _ _ _ _
+    _ = Sigma.ι (fun _ : A ↦ R) a :=
+      finsum_eq_single (fun a' : {a' : A // a' = a} ↦ Sigma.ι (fun _ : A ↦ R) a'.val)
+        ⟨a, rfl⟩ (fun a' h ↦ (h (Subtype.ext a'.property)).elim)
+    _ = _ := (Category.comp_id _).symm
+
+/-- The transfer of a composite is the reverse-order composite of transfers.
+Finiteness of composite fibers follows from the constituent fibers. -/
+theorem sigmaConstTransfer_comp {A B D : Type w} (f : A ⟶ B) (g : B ⟶ D)
+    (hf : ∀ b : B, Finite {a : A // f a = b})
+    (hg : ∀ d : D, Finite {b : B // g b = d}) (R : C) :
+    sigmaConstTransfer (f ≫ g) (Types.finite_fiber_comp f g hf hg) R =
+      sigmaConstTransfer g hg R ≫ sigmaConstTransfer f hf R := by
+  classical
+  apply Sigma.hom_ext
+  intro d
+  let := hg d
+  let := hf
+  let : Finite {a : A // (f ≫ g) a = d} := Types.finite_fiber_comp f g hf hg d
+  let := Fintype.ofFinite {b : B // g b = d}
+  let := fun b : B ↦ Fintype.ofFinite {a : A // f a = b}
+  let := Fintype.ofFinite {a : A // (f ≫ g) a = d}
+  rw [ι_sigmaConstTransfer, ι_sigmaConstTransfer_assoc]
+  simp only [finsum_eq_sum_of_fintype, Preadditive.sum_comp]
+  simp_rw [ι_sigmaConstTransfer, finsum_eq_sum_of_fintype]
+  rw [← Fintype.sum_sigma']
+  exact ((Equiv.sigmaSubtypeFiberEquivSubtype f (p := fun a ↦ (f ≫ g) a = d)
+    (q := fun b ↦ g b = d) (fun _ ↦ Iff.rfl)).sum_comp
+      (fun a ↦ Sigma.ι (fun _ : A ↦ R) a.val)).symm
 
 /-- Postcomposition of a transfer with the coproduct eliminator sums the chosen maps
 along fibers. Uniqueness is the coproduct universal property `Sigma.hom_ext`. -/
@@ -163,6 +216,18 @@ theorem equifiberedSigmaTransfer_app
     (hf : ∀ j (g : G.obj j), Finite {f : F.obj j // p.app j f = g}) (R : C) (j : D) :
     (equifiberedSigmaTransfer p hp hf R).app j =
       sigmaConstTransfer (p.app j) (hf j) R := rfl
+
+/-- Diagram transfers compose in reverse order for equifibered maps. -/
+theorem equifiberedSigmaTransfer_comp
+    {D : Type uD} [Category.{vD} D] {F G H : D ⥤ Type w} (p : F ⟶ G) (q : G ⟶ H)
+    (hp : NatTrans.Equifibered p) (hq : NatTrans.Equifibered q)
+    (hf : ∀ j (g : G.obj j), Finite {f : F.obj j // p.app j f = g})
+    (hg : ∀ j (h : H.obj j), Finite {g : G.obj j // q.app j g = h}) (R : C) :
+    equifiberedSigmaTransfer (p ≫ q) (hp.comp hq)
+        (fun j ↦ Types.finite_fiber_comp (p.app j) (q.app j) (hf j) (hg j)) R =
+      equifiberedSigmaTransfer q hq hg R ≫ equifiberedSigmaTransfer p hp hf R := by
+  ext j
+  exact sigmaConstTransfer_comp (p.app j) (q.app j) (hf j) (hg j) R
 
 /-- Coefficient naturality for the diagram transfer. -/
 theorem equifiberedSigmaTransfer_coefficient
@@ -237,6 +302,20 @@ theorem chainComplexTransfer_f
       sigmaConstTransfer (p.app (op ⦋n⦌))
         (finite_fiber_of_finite_vertices p hp hf (op ⦋n⦌)) R := rfl
 
+/-- Chain transfers compose in reverse order, with only finite vertex fibers. -/
+theorem chainComplexTransfer_comp {H : SSet.{w}} (q : G ⟶ H)
+    (hq : NatTrans.Equifibered q)
+    (hf : ∀ g : G _⦋0⦌, Finite {f : F _⦋0⦌ // p.app _ f = g})
+    (hg : ∀ h : H _⦋0⦌, Finite {g : G _⦋0⦌ // q.app _ g = h}) (R : C) :
+    chainComplexTransfer (p ≫ q) (hp.comp hq)
+        (Types.finite_fiber_comp (p.app _) (q.app _) hf hg) R =
+      chainComplexTransfer q hq hg R ≫ chainComplexTransfer p hp hf R := by
+  simpa only [chainComplexTransfer, Functor.map_comp] using
+    congrArg (AlgebraicTopology.alternatingFaceMapComplex C).map
+      (equifiberedSigmaTransfer_comp p q hp hq
+        (finite_fiber_of_finite_vertices p hp hf)
+        (finite_fiber_of_finite_vertices q hq hg) R)
+
 /-- The generator formula in every chain degree. -/
 @[reassoc]
 theorem ι_chainComplexTransfer_f
@@ -298,6 +377,21 @@ noncomputable def homologyTransfer
     G.homology R q ⟶ F.homology R q :=
   (HomologicalComplex.homologyFunctor C (ComplexShape.down ℕ) q).map
     (chainComplexTransfer p hp hf R)
+
+/-- The homology functor carries reverse-order chain-transfer composition to homology. -/
+theorem homologyTransfer_comp {H : SSet.{w}} (q : G ⟶ H)
+    (hq : NatTrans.Equifibered q)
+    (hf : ∀ g : G _⦋0⦌, Finite {f : F _⦋0⦌ // p.app _ f = g})
+    (hg : ∀ h : H _⦋0⦌, Finite {g : G _⦋0⦌ // q.app _ g = h}) (R : C) (n : ℕ) :
+    homologyTransfer (p ≫ q) (hp.comp hq)
+        (Types.finite_fiber_comp (p.app _) (q.app _) hf hg) R n =
+      homologyTransfer q hq hg R n ≫ homologyTransfer p hp hf R n := by
+  let T := HomologicalComplex.homologyFunctor C (ComplexShape.down ℕ) n
+  change T.map (chainComplexTransfer (p ≫ q) (hp.comp hq)
+      (Types.finite_fiber_comp (p.app _) (q.app _) hf hg) R) =
+    T.map (chainComplexTransfer q hq hg R) ≫ T.map (chainComplexTransfer p hp hf R)
+  exact (congrArg T.map (chainComplexTransfer_comp p hp q hq hf hg R)).trans
+    (T.map_comp _ _)
 
 /-- The fixed-sheet identity descends to homology. -/
 theorem homologyTransfer_comp_map

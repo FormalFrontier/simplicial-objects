@@ -9,7 +9,7 @@ import Mathlib.Algebra.Category.ModuleCat.Abelian
 import Mathlib.Algebra.Category.ModuleCat.Colimits
 import Mathlib.Algebra.Module.ULift
 
-/-! Integral constant two-sheet and empty-sheet clients for finite-fiber transfer. -/
+/-! Integral constant-sheet, composite and empty-sheet clients for finite-fiber transfer. -/
 
 open CategoryTheory Limits Opposite
 open scoped Simplicial
@@ -174,6 +174,150 @@ private theorem zeroCoefficientTransfer_comp_map :
     SSet.chainComplexTransfer twoSheetMap twoSheetMap_equifibered
         twoSheetMap_finite zeroModule ≫ SSet.chainComplexMap twoSheetMap zeroModule = 0 := by
   rw [zeroCoefficientTransfer_zero, zero_comp]
+
+private abbrev threeSheets : SSet.{0} := (Functor.const _).obj (Fin 3)
+private abbrev sixSheets : SSet.{0} := (Functor.const _).obj (Fin 2 × Fin 3)
+
+private def projectionMap : sixSheets ⟶ threeSheets :=
+  (Functor.const _).map (↾Prod.snd)
+
+private def threeSheetMap : threeSheets ⟶ point :=
+  (Functor.const _).map (↾fun _ : Fin 3 ↦ PUnit.unit)
+
+private theorem projectionMap_equifibered : NatTrans.Equifibered projectionMap := by
+  intro i j α
+  change IsPullback (𝟙 (Fin 2 × Fin 3)) _ _ (𝟙 (Fin 3))
+  exact IsPullback.of_horiz_isIso ⟨rfl⟩
+
+private theorem threeSheetMap_equifibered : NatTrans.Equifibered threeSheetMap := by
+  intro i j α
+  change IsPullback (𝟙 (Fin 3)) _ _ (𝟙 PUnit)
+  exact IsPullback.of_horiz_isIso ⟨rfl⟩
+
+private theorem projectionMap_finite (g : threeSheets _⦋0⦌) :
+    Finite {f : sixSheets _⦋0⦌ // projectionMap.app _ f = g} := by
+  change Finite {f : Fin 2 × Fin 3 // _}
+  infer_instance
+
+private theorem threeSheetMap_finite (g : point _⦋0⦌) :
+    Finite {f : threeSheets _⦋0⦌ // threeSheetMap.app _ f = g} := by
+  change Finite {f : Fin 3 // _}
+  infer_instance
+
+private noncomputable def projectionTransfer :
+    threeSheets.chainComplex integralModule ⟶ sixSheets.chainComplex integralModule :=
+  SSet.chainComplexTransfer projectionMap projectionMap_equifibered
+    projectionMap_finite integralModule
+
+private noncomputable def threeSheetTransfer :
+    point.chainComplex integralModule ⟶ threeSheets.chainComplex integralModule :=
+  SSet.chainComplexTransfer threeSheetMap threeSheetMap_equifibered
+    threeSheetMap_finite integralModule
+
+private def projectionFiberEquiv (j : Fin 3) :
+    {f : sixSheets _⦋0⦌ // projectionMap.app _ f = j} ≃ Fin 2 where
+  toFun f := f.val.1
+  invFun i := ⟨(i, j), rfl⟩
+  left_inv := by rintro ⟨⟨i, j'⟩, h⟩; cases h; rfl
+  right_inv _ := rfl
+
+private def threeSheetFiberEquiv :
+    {f : threeSheets _⦋0⦌ // threeSheetMap.app _ f = PUnit.unit} ≃ Fin 3 where
+  toFun := Subtype.val
+  invFun j := ⟨j, rfl⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+private theorem projectionTransfer_generator (j : Fin 3) :
+    threeSheets.ιChainComplex j ≫ projectionTransfer.f 0 =
+      ∑ i : Fin 2, sixSheets.ιChainComplex (i, j) := by
+  rw [projectionTransfer, SSet.ι_chainComplexTransfer_f]
+  calc
+    _ = ∑ᶠ i : Fin 2, sixSheets.ιChainComplex (i, j) :=
+      finsum_eq_of_bijective (projectionFiberEquiv j) (projectionFiberEquiv j).bijective
+        (fun f ↦ by congr 1; exact Prod.ext rfl f.property)
+    _ = _ := finsum_eq_sum_of_fintype _
+
+private theorem threeSheetTransfer_generator :
+    point.ιChainComplex PUnit.unit ≫ threeSheetTransfer.f 0 =
+      ∑ j : Fin 3, threeSheets.ιChainComplex j := by
+  rw [threeSheetTransfer, SSet.ι_chainComplexTransfer_f]
+  calc
+    _ = ∑ᶠ j : Fin 3, threeSheets.ιChainComplex j :=
+      finsum_eq_of_bijective threeSheetFiberEquiv threeSheetFiberEquiv.bijective (fun _ ↦ rfl)
+    _ = _ := finsum_eq_sum_of_fintype _
+
+private noncomputable def sixCoordinate (k : Fin 2 × Fin 3) :
+    (sixSheets.chainComplex integralModule).X 0 ⟶ integralModule :=
+  Sigma.desc fun l : Fin 2 × Fin 3 ↦ if l = k then 𝟙 _ else 0
+
+/-- Each coordinate is computed from the two separate generator equations. -/
+private theorem twoStepTransfer_coordinate (k : Fin 2 × Fin 3) :
+    point.ιChainComplex PUnit.unit ≫ (threeSheetTransfer ≫ projectionTransfer).f 0 ≫
+        sixCoordinate k = 𝟙 integralModule := by
+  calc
+    _ = (∑ j : Fin 3, ∑ i : Fin 2, sixSheets.ιChainComplex (i, j)) ≫ sixCoordinate k := by
+      rw [HomologicalComplex.comp_f, ← Category.assoc, ← Category.assoc,
+        threeSheetTransfer_generator, Preadditive.sum_comp]
+      simp_rw [projectionTransfer_generator]
+    _ = _ := by
+      rcases k with ⟨i, j⟩
+      fin_cases i <;> fin_cases j <;>
+        simp [sixCoordinate, SSet.ιChainComplex, Cofan.mk_ι_app, Fin.sum_univ_succ]
+
+/-- All six coordinates of the two-step transfer of the integral generator are one. -/
+private theorem twoStepTransfer_coordinate_one (k : Fin 2 × Fin 3) :
+    (sixCoordinate k) ((threeSheetTransfer ≫ projectionTransfer).f 0
+      (point.ιChainComplex (R := integralModule) (n := 0) PUnit.unit (1 : ℤ))) = 1 := by
+  exact congrArg (fun f : integralModule ⟶ integralModule ↦ f (1 : ℤ))
+    (twoStepTransfer_coordinate k)
+
+private theorem integralCoproductTransfer_id :
+    sigmaConstTransfer (𝟙 (Fin 2 × Fin 3)) (fun _ ↦ inferInstance) integralModule = 𝟙 _ :=
+  sigmaConstTransfer_id _ _
+
+private theorem integralCoproductTransfer_comp :
+    sigmaConstTransfer (projectionMap.app (op ⦋0⦌) ≫ threeSheetMap.app (op ⦋0⦌))
+        (Types.finite_fiber_comp (projectionMap.app (op ⦋0⦌)) (threeSheetMap.app (op ⦋0⦌))
+          projectionMap_finite threeSheetMap_finite) integralModule =
+      sigmaConstTransfer (threeSheetMap.app (op ⦋0⦌)) threeSheetMap_finite integralModule ≫
+        sigmaConstTransfer (projectionMap.app (op ⦋0⦌)) projectionMap_finite integralModule :=
+  sigmaConstTransfer_comp _ _ _ _ _
+
+private theorem integralDiagramTransfer_comp :
+    equifiberedSigmaTransfer (projectionMap ≫ threeSheetMap)
+        (projectionMap_equifibered.comp threeSheetMap_equifibered)
+        (fun j ↦ Types.finite_fiber_comp (projectionMap.app j) (threeSheetMap.app j)
+          (SSet.finite_fiber_of_finite_vertices projectionMap projectionMap_equifibered
+            projectionMap_finite j)
+          (SSet.finite_fiber_of_finite_vertices threeSheetMap threeSheetMap_equifibered
+            threeSheetMap_finite j)) integralModule =
+      equifiberedSigmaTransfer threeSheetMap threeSheetMap_equifibered
+          (SSet.finite_fiber_of_finite_vertices threeSheetMap threeSheetMap_equifibered
+            threeSheetMap_finite) integralModule ≫
+        equifiberedSigmaTransfer projectionMap projectionMap_equifibered
+          (SSet.finite_fiber_of_finite_vertices projectionMap projectionMap_equifibered
+            projectionMap_finite) integralModule :=
+  equifiberedSigmaTransfer_comp _ _ _ _ _ _ _
+
+private theorem integralChainTransfer_comp :
+    SSet.chainComplexTransfer (projectionMap ≫ threeSheetMap)
+        (projectionMap_equifibered.comp threeSheetMap_equifibered)
+        (Types.finite_fiber_comp (projectionMap.app (op ⦋0⦌)) (threeSheetMap.app (op ⦋0⦌))
+          projectionMap_finite threeSheetMap_finite) integralModule =
+      threeSheetTransfer ≫ projectionTransfer :=
+  SSet.chainComplexTransfer_comp _ _ _ _ _ _ _
+
+private theorem integralHomologyTransfer_comp :
+    SSet.homologyTransfer (projectionMap ≫ threeSheetMap)
+        (projectionMap_equifibered.comp threeSheetMap_equifibered)
+        (Types.finite_fiber_comp (projectionMap.app (op ⦋0⦌)) (threeSheetMap.app (op ⦋0⦌))
+          projectionMap_finite threeSheetMap_finite) integralModule 0 =
+      SSet.homologyTransfer threeSheetMap threeSheetMap_equifibered
+          threeSheetMap_finite integralModule 0 ≫
+        SSet.homologyTransfer projectionMap projectionMap_equifibered
+          projectionMap_finite integralModule 0 :=
+  SSet.homologyTransfer_comp _ _ _ _ _ _ _ _
 
 universe u
 

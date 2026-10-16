@@ -9,7 +9,8 @@ assumptions are required. Its public import is `SimplicialObjects`, which
 exports `SimplicialObjects.LeftDecalage` and
 `SimplicialObjects.FiniteFiberTransfer`, but no private test declarations.
 The transfer construction uses coefficient objects in a preadditive category
-with coproducts, and is compatible with pullback base change and coefficient maps.
+with coproducts, and is compatible with identity, reverse-order composition,
+pullback base change and coefficient maps.
 
 ## Headline results
 
@@ -34,13 +35,17 @@ with coproducts, and is compatible with pullback base change and coefficient map
   equifibered simplicial map only vertex fibers must be finite; no fixed
   sheet number is required. The coproduct generator maps to the sum over its
   fiber, compatibly with postcomposition, pullback base change and coefficient
-  maps. Transfer followed by pushforward counts the fiber. If every vertex
+  maps. Identity maps have identity coproduct transfer, and transfers compose in
+  reverse order on coproducts, equifibered diagrams, simplicial chains and homology.
+  Composite fibers are finite by the constituent finite-fiber hypotheses alone.
+  Transfer followed by pushforward counts the fiber. If every vertex
   fiber has cardinality `d`, this composite is `d` times the identity on chains
   and on natural-number-graded homology, when the coefficient category has
   homology. No normalized or topological comparison is asserted.
   The private client `SimplicialObjectsTest.FiniteFiberTransfer` computes the
   two-sheet integral generator, its coordinates and its pushforward, and
-  checks empty sheets, zero coefficients and independent coefficient/index universes.
+  computes the six-sheet two-step transfer through three sheets, and checks empty
+  sheets, zero coefficients and independent coefficient/index universes.
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is
