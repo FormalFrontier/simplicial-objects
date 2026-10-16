@@ -3,61 +3,52 @@ version: "v0.4"
 project:
   name: Simplicial Objects
   description: >-
-    Functorial augmented left decalage of any simplicial object, its natural
-    zeroth-face projection and canonical native five-law extra degeneracy.
+    Functorial augmented left decalage of simplicial objects with a canonical
+    extra degeneracy, and finite-fiber coproduct, diagram and simplicial chain
+    transfers with induced homology maps, coefficient naturality and sheet identities.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
-    - Prism
+    - Formal Frontier source maintainers
   license: Apache-2.0
 sources:
   - title: Standard ordinal and simplicial identities
     type: folklore
     relationship: background
-    note: >-
-      Mathematical input for this original Formal Frontier Lean construction;
-      no named source, book chapter or source-specific coverage is asserted.
+    note: Ordinal identities underlying the augmented left decalage.
+  - title: A Concise Course in Algebraic Topology
+    authors:
+      - J. Peter May
+    type: book
+    location: Revised edition, §16, Problem 3
+    relationship: background
+    note: Motivation for covering transfers and their sheet identity.
 related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4
     relationship: builds-on
     note: >-
-      Uses mathlib's simplex categories, augmented-object equivalence and native
-      extra-degeneracy section, split-epimorphism, homotopy and transport API.
+      Uses mathlib's simplex categories, augmented objects, extra degeneracies,
+      coproducts, pullbacks, alternating-face-map chain complexes and homology.
 automation:
   methods:
     - method: agent
       framework: Formal Frontier agents and Lean 4
-      tool_setup: >-
-        AI-assisted original mathematical proof and ordinary-import private
-        client, independently agent-reviewed and packaged as a standalone library.
-      prompting_notes: >-
-        The original proof and client were adapted through namespace/import
-        relocation; package assembly added no mathematical implementation.
+      tool_setup: AI-assisted Lean formalization and mathematical documentation.
 status:
   scope: >-
-    Twenty-four original public declarations and a maintained private client
-    form the initial published library. Its mathematics and release artifacts
-    received independent Formal Frontier agent review; the native both-root
-    build and complete transitive standard-three axiom audit include private
-    and generated declarations. These historical results do not review or
-    release subsequent edits, establish source-specific coverage or imply a
-    topological realization theorem.
+    Augmented left decalage is defined for simplicial objects in an arbitrary
+    category. Its degree-zero augmentation is delta 1, whereas its simplicial
+    projection is delta 0. The original zeroth degeneracies satisfy all defining
+    extra-degeneracy equations. Transfers use coefficient objects in a
+    preadditive category with coproducts. Equifibered simplicial maps require
+    only finite vertex fibers; the induced homology map additionally requires
+    homology in the coefficient category. Transfers satisfy postcomposition,
+    pullback base change, coefficient naturality and fiber-counting laws.
+    A fixed vertex-fiber cardinal gives the sheet identity on chains and homology.
 review:
-  status: agent-reviewed
-  reviewers:
-    - Independent Formal Frontier agent reviewers
-  notes: >-
-    Independent agent reviews addressed the original mathematics, initial
-    destination code and exact first-release artifacts. Historical native
-    checks built both roots and audited all transitive standard axioms,
-    including private/generated declarations. This is agent review, not
-    independent human review or review of later edits; see CONTRIBUTORS.md
-    for separate author, reviewer and maintainer roles.
+  status: unchecked
 alignment:
-  namespace: SimplicialObjects.LeftDecalage
-  note: >-
-    Public API inventory, not a source-specific passage or coverage mapping;
-    every item below is an original project declaration in this one module.
+  note: Public API inventory for augmented left decalage and finite-fiber transfers.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -107,9 +98,46 @@ alignment:
       module: SimplicialObjects/LeftDecalage.lean
     - lean: SimplicialObjects.LeftDecalage.naturalProjection
       module: SimplicialObjects/LeftDecalage.lean
+    - lean: CategoryTheory.Limits.Types.pullbackFiberMap_bijective
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.Limits.Types.pullbackFiberEquiv
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.sigmaConstTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.ι_sigmaConstTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.sigmaConstTransfer_desc
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.sigmaConstTransfer_coefficient
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.sigmaConstTransfer_baseChange
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.equifiberedSigmaTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.equifiberedSigmaTransfer_coefficient
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.ι_sigmaConstTransfer_push
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.equifiberedFiberEquiv
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.finite_fiber_of_finite_vertices
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.chainComplexTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.ι_chainComplexTransfer_f
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.ι_chainComplexTransfer_push
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.chainComplexTransfer_coefficient
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.chainComplexTransfer_comp_map
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.homologyTransfer
+      module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: SSet.homologyTransfer_comp_map
+      module: SimplicialObjects/FiniteFiberTransfer.lean
 acknowledgements: >-
-  Formal Frontier agents wrote the original proof, client and guide; independent
-  agents reviewed the original and destination artifacts, and separate agents
-  packaged and edited them. Mathlib supplies the underlying categorical
-  structures, section, split-epimorphism, generic homotopy and transport;
-  authorship and role credit are in CONTRIBUTORS.md.
+  Formal Frontier agents contributed the formalization and documentation; see
+  CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
+  categorical structures, extra-degeneracy section, split-epimorphism, homotopy
+  and transport, and chain-complex and homology APIs.

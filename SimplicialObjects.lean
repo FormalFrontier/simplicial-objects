@@ -5,3 +5,5 @@ Authors: Formal Frontier Agents
 module
 
 public import SimplicialObjects.LeftDecalage
+
+public import SimplicialObjects.FiniteFiberTransfer

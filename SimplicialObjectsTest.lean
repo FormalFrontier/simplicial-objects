@@ -5,3 +5,5 @@ Authors: Formal Frontier Agents
 module
 
 import SimplicialObjectsTest.LeftDecalage
+
+import SimplicialObjectsTest.FiniteFiberTransfer

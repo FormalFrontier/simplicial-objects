@@ -83,12 +83,7 @@ the distinct endpoints of the standard simplicial edge.
 
 ## Reproduction and provenance
 
-The original mathematical construction, private client and guide received
-independent Formal Frontier agent review. The initial published artifact also
-received an independent final agent review and native checks of both maintained
-roots, including a complete transitive standard-three axiom audit of private
-and generated declarations. These are historical results for the original
-artifact, not acceptance or release of subsequent edits. The project pins
+The project pins
 Lean `v4.34.0-rc2` and mathlib
 `83abb3e776bdefcbc447a1e44d0debe4010039e5` in its Lake files. In a
 checkout of this project, install the pinned toolchain, fetch the matching
@@ -101,15 +96,15 @@ lake exe cache get
 lake build SimplicialObjects SimplicialObjectsTest
 ```
 
-For the measured cache-first workload and explicitly estimated disk planning
-guidance (not a memory benchmark), see [expected cost and resources](../README.md#reproduce-and-verification).
+For build targets and qualitative resource guidance, see
+[reproduction and verification](../README.md#reproduce-and-verification).
 
 Formal Frontier agents wrote this categorical construction, its proof, client
 and guide from standard ordinal identities and mathlib's simplex-category,
 augmentation-equivalence and extra-degeneracy APIs. The contributed files use
-the repository's Apache-2.0 license; native mathlib definitions retain their
+the repository's Apache-2.0 license; Mathlib definitions retain their
 upstream attribution. See [contributors and provenance](../CONTRIBUTORS.md)
-for distinct original author, independent reviewers and package assembly credit.
+for attribution.
 
 This is a combinatorial simplicial homotopy, **not** a realization or
 topological contractibility theorem. No generic relative pullback contraction,
