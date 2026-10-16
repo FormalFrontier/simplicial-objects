@@ -49,7 +49,11 @@ status:
 review:
   status: unchecked
 alignment:
-  note: Public API inventory for augmented left decalage and finite-fiber transfers.
+  note: >-
+    Public API inventory for augmented left decalage, finite-fiber transfers and
+    maps between normalized complexes of split simplicial objects, including
+    projection equations, functoriality, the degreewise degeneracy-quotient property
+    and agreement with the normalized functor on compatible split morphisms.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -149,6 +153,26 @@ alignment:
       module: SimplicialObjects/FiniteFiberTransfer.lean
     - lean: SSet.homologyTransfer_comp_map
       module: SimplicialObjects/FiniteFiberTransfer.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.nondegComplexMap
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.nondegComplexMap_f
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.toNondegComplex_nondegComplexMap
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.nondegComplexMap_eq_iff
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.nondegComplexMap_id
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.nondegComplexMap_comp
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.degeneraciesVanish_iff_existsUnique
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Splitting.toNondegComplex_f_factor
+      module: SimplicialObjects/Normalization.lean
+    - lean: CategoryTheory.SimplicialObject.Split.nondegComplexMap_eq_nondegComplexFunctor_map
+      module: SimplicialObjects/Normalization.lean
+    - lean: SSet.nondegComplexMap_eq_normalizedChainComplexMap
+      module: SimplicialObjects/Normalization.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying

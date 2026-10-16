@@ -6,8 +6,9 @@ This Lean library constructs the augmented left décalage and its canonical
 extra degeneracy for **every simplicial object `X : SimplicialObject C`** in
 an arbitrary `[Category* C]`. No terminal or zero object, additivity or limit
 assumptions are required. Its public import is `SimplicialObjects`, which
-exports `SimplicialObjects.LeftDecalage` and
-`SimplicialObjects.FiniteFiberTransfer`, but no private test declarations.
+exports `SimplicialObjects.LeftDecalage`,
+`SimplicialObjects.FiniteFiberTransfer` and `SimplicialObjects.Normalization`,
+but no private test declarations.
 The transfer construction uses coefficient objects in a preadditive category
 with coproducts, and is compatible with identity, reverse-order composition,
 pullback base change and coefficient maps.
@@ -46,6 +47,21 @@ pullback base change and coefficient maps.
   two-sheet integral generator, its coordinates and its pushforward, and
   computes the six-sheet two-step transfer through three sheets, and checks empty
   sheets, zero coefficients and independent coefficient/index universes.
+
+- **Normalized descent.** [`Normalization`](SimplicialObjects/Normalization.lean)
+  constructs maps between mathlib's normalized complexes for any morphism
+  `f : X ⟶ Y` of simplicial objects in a preadditive category, given splittings
+  `s` and `t`. The formula is `s.fromNondegComplex ≫ K(f) ≫ t.toNondegComplex`,
+  where `K` is the alternating-face-map complex; `f` need not preserve the chosen
+  nondegenerate summands. Its API comprises the projection equation,
+  characterization of descent, identity and composition, the degreewise quotient
+  property for elementary degeneracies, the explicit factor `s.fromNondegComplex.f n ≫ a`,
+  and agreement with mathlib's simplicial-set normalized map. It also agrees with
+  mathlib's `Split.nondegComplexFunctor` on morphisms compatible with the splittings,
+  without an additional finite-coproduct assumption. The private integral
+  `Δ[1]` model has normalized groups `ℤ ⊞ ℤ` and `ℤ` in degrees zero and one,
+  boundary `a ↦ (-a,a)`, and collapse to `Δ[0]` zero in degree one but nonzero in
+  degree zero.
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is
@@ -103,7 +119,7 @@ lake build SimplicialObjects SimplicialObjectsTest
 ```
 
 **Verification targets:** The two maintained roots include ordinary-import
-private clients for the decalage and transfer APIs.
+private clients for the decalage, transfer and normalization APIs.
 [`formalization.yaml`](formalization.yaml) is a public API index, not a
 source-passage coverage map. See [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for
 attribution and the complete [Apache-2.0 license](LICENSE); mathlib remains

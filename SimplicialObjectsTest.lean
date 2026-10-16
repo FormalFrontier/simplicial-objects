@@ -7,3 +7,5 @@ module
 import SimplicialObjectsTest.LeftDecalage
 
 import SimplicialObjectsTest.FiniteFiberTransfer
+
+import SimplicialObjectsTest.Normalization
