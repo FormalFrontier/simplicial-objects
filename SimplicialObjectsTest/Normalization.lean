@@ -4,12 +4,12 @@ Authors: Formal Frontier Agents
 -/
 module
 
-import SimplicialObjects.Normalization
+public import SimplicialObjects.Normalization
 import SimplicialObjects.FiniteFiberTransfer
 import Mathlib.Algebra.Category.ModuleCat.Abelian
 import Mathlib.Algebra.Category.ModuleCat.Colimits
 import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
-import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
+public import Mathlib.AlgebraicTopology.SimplicialSet.Monoidal
 import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
 import Mathlib.CategoryTheory.Monoidal.Closed.Braided
 import Mathlib.Data.ZMod.Basic
@@ -29,18 +29,33 @@ open scoped Simplicial
 namespace SimplicialObjectsTest.Normalization
 
 private abbrev integralModule : ModuleCat ℤ := ModuleCat.of ℤ ℤ
-private abbrev interval : SSet.{0} := Δ[1]
+
+/-- The standard simplicial interval. -/
+public abbrev interval : SSet.{0} := Δ[1]
+
 private abbrev point : SSet.{0} := Δ[0]
 private noncomputable abbrev intervalComplex := interval.normalizedChainComplex integralModule
 private noncomputable abbrev pointComplex := point.normalizedChainComplex integralModule
-private def vertex (i : Fin 2) : interval _⦋0⦌ := SSet.stdSimplex.obj₀Equiv.symm i
-private def edge : interval _⦋1⦌ := SSet.stdSimplex.objEquiv.symm (𝟙 ⦋1⦌)
 
-private theorem vertex_nondegenerate (i : Fin 2) : vertex i ∈ interval.nonDegenerate 0 := by
+/-- The vertex indexed by `i` in the standard simplicial interval. -/
+@[expose] public def vertex (i : Fin 2) : interval _⦋0⦌ := SSet.stdSimplex.obj₀Equiv.symm i
+
+/-- The top-dimensional edge of the standard simplicial interval. -/
+public def edge : interval _⦋1⦌ := SSet.stdSimplex.objEquiv.symm (𝟙 ⦋1⦌)
+
+/-- Every interval vertex is nondegenerate. -/
+public theorem vertex_nondegenerate (i : Fin 2) : vertex i ∈ interval.nonDegenerate 0 := by
   simp [SSet.nondegenerate_zero]
 
-private theorem edge_nondegenerate : edge ∈ interval.nonDegenerate 1 :=
+/-- The top-dimensional interval edge is nondegenerate. -/
+public theorem edge_nondegenerate : edge ∈ interval.nonDegenerate 1 :=
   SSet.stdSimplex.objEquiv_symm_id_mem_nonDegenerate 1
+
+/-- The zeroth face of the interval edge is its terminal vertex. -/
+public theorem edge_face_zero : interval.δ (0 : Fin 2) edge = vertex 1 := by decide
+
+/-- The first face of the interval edge is its initial vertex. -/
+public theorem edge_face_one : interval.δ (1 : Fin 2) edge = vertex 0 := by decide
 
 private theorem edge_unique (x : interval _⦋1⦌) (hx : x ∈ interval.nonDegenerate 1) :
     x = edge := by
@@ -129,9 +144,7 @@ private theorem edge_boundary :
       interval.ιNormalizedChainComplex (vertex 1) -
         interval.ιNormalizedChainComplex (vertex 0) := by
   rw [SSet.ιNormalizedChainComplex_d, Fin.sum_univ_two]
-  have h₀ : interval.δ (0 : Fin 2) edge = vertex 1 := by decide
-  have h₁ : interval.δ (1 : Fin 2) edge = vertex 0 := by decide
-  simp [h₀, h₁, sub_eq_add_neg]
+  simp [edge_face_zero, edge_face_one, sub_eq_add_neg]
 
 /-- In the displayed coordinates the boundary is `a ↦ (-a,a)`. -/
 private theorem boundary_coordinates :
@@ -495,10 +508,12 @@ private theorem mixedCoefficientComparison :
   SSet.normalizedChainComplexFunctorObjCompMapIso_nondegComplexMap
     integralModule cyclicTensor interval interval mixedCoefficientMorphism
 
-private abbrev twoSheetInterval : SSet.{0} :=
+/-- The product of the constant two-element simplicial set and the interval. -/
+public abbrev twoSheetInterval : SSet.{0} :=
   ((Functor.const _).obj (Fin 2) : SSet.{0}) ⊗ interval
 
-private def twoSheetIntervalMap : twoSheetInterval ⟶ interval :=
+/-- The two-sheet projection onto the interval. -/
+public def twoSheetIntervalMap : twoSheetInterval ⟶ interval :=
   CartesianMonoidalCategory.snd _ _
 
 private def twoSheetSimplex {n : SimplexCategoryᵒᵖ} (i : Fin 2) (x : interval.obj n) :
@@ -517,7 +532,8 @@ private theorem twoSheetIntervalMap_simplex {n : SimplexCategoryᵒᵖ} (i : Fin
 private theorem twoSheetSimplex_eta {n : SimplexCategoryᵒᵖ} (x : twoSheetInterval.obj n) :
     twoSheetSimplex (twoSheetIndex x) (twoSheetIntervalMap.app n x) = x := rfl
 
-private theorem twoSheetIntervalMap_equifibered : NatTrans.Equifibered twoSheetIntervalMap := by
+/-- The two-sheet interval projection is equifibered. -/
+public theorem twoSheetIntervalMap_equifibered : NatTrans.Equifibered twoSheetIntervalMap := by
   intro i j α
   apply (Types.isPullback_iff _ _ _ _).2
   refine ⟨rfl, ?_, ?_⟩
@@ -527,7 +543,8 @@ private theorem twoSheetIntervalMap_equifibered : NatTrans.Equifibered twoSheetI
     exact ⟨twoSheetSimplex (twoSheetIndex y) x, Prod.ext rfl h.symm,
       twoSheetIntervalMap_simplex _ _⟩
 
-private def twoSheetIntervalFiberEquiv {n : ℕ} (x : interval _⦋n⦌) :
+/-- Every simplex fiber of the interval projection is the two-element sheet set. -/
+public def twoSheetIntervalFiberEquiv {n : ℕ} (x : interval _⦋n⦌) :
     {y : twoSheetInterval _⦋n⦌ // twoSheetIntervalMap.app _ y = x} ≃ Fin 2 where
   toFun y := twoSheetIndex y.val
   invFun i := ⟨twoSheetSimplex i x, twoSheetIntervalMap_simplex i x⟩
@@ -536,7 +553,8 @@ private def twoSheetIntervalFiberEquiv {n : ℕ} (x : interval _⦋n⦌) :
       (twoSheetSimplex_eta y.val))
   right_inv i := twoSheetIndex_simplex i x
 
-private theorem twoSheetIntervalMap_finite (x : interval _⦋0⦌) :
+/-- The two-sheet interval projection has finite vertex fibers. -/
+public theorem twoSheetIntervalMap_finite (x : interval _⦋0⦌) :
     Finite {y : twoSheetInterval _⦋0⦌ // twoSheetIntervalMap.app _ y = x} :=
   Finite.of_equiv (Fin 2) (twoSheetIntervalFiberEquiv x).symm
 

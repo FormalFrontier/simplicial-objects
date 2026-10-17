@@ -8,7 +8,8 @@ project:
     transfers with induced homology maps, coefficient naturality and sheet identities,
     together with normalized-chain descent and coefficient comparisons coherent
     with arbitrary coefficient-valued maps, finite-fiber transfers and transformations
-    of additive coproduct-preserving functors.
+    of additive coproduct-preserving functors, and an integral tensor presentation of
+    normalized chains for arbitrary simplicial sets and abelian coefficient groups.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -23,15 +24,18 @@ sources:
     authors:
       - J. Peter May
     type: book
-    location: Revised edition, §16, Problem 3
+    location: Revised edition, §16.1 and §16, Problem 3
     relationship: background
-    note: Motivation for covering transfers and their sheet identity.
+    note: >-
+      Motivation for the integral tensor presentation of normalized chains,
+      covering transfers and their sheet identity.
 related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4
     relationship: builds-on
     note: >-
       Uses mathlib's simplex categories, augmented objects, extra degeneracies,
-      coproducts, pullbacks, alternating-face-map chain complexes and homology.
+      coproducts, pullbacks, alternating-face-map chain complexes, normalized cofans,
+      direct-sum and Finsupp isomorphisms, TensorProduct.finsuppScalarLeft and homology.
 automation:
   methods:
     - method: agent
@@ -72,8 +76,35 @@ status:
     preservation hypotheses. The transformation acts on the normalized source and
     coefficientwise on the target. The mixed interval map 2 id plus the constant
     vertex map, the two-sheet interval cover, and multiplication by two on the
-    tensor coefficient instantiate these laws. No full arbitrary-Abelian
-    tensor/Finsupp dictionary or comparison with topological chains is asserted.
+    tensor coefficient instantiate these laws.
+    Independently, for any A : Type a with AddCommGroup A and S : SSet.{w}, integral
+    normalized classes lie in S.nonDegenerate n →₀ ℤ; a nondegenerate simplex gives
+    its basis vector and a degenerate simplex gives zero. The integral boundary is
+    the uniquely specified linear map taking each generator to the alternating sum
+    of its face classes, with positive zeroth face and degenerate faces zero.
+    Tensor degrees are ModuleCat.of ℤ (ULift.{max a w p}
+    ((S.nonDegenerate n →₀ ℤ) tensor[ℤ] A)), using only the canonical integer module.
+    The independently defined successor boundary lifts the integral boundary rTensor A;
+    all other differential components vanish, and successive differentials compose to zero.
+    Coefficient, simplex and padding universes a, w, p are independent, without finite,
+    flat, field or nonempty assumptions. The whole normalized-degree Finsupp isomorphism
+    works for any Ring R : Type r and M : ModuleCat.{max w v} R, with independent r, w, v.
+    It uses the normalized cofan universal property, coproduct/direct-sum isomorphism
+    and inverse Finsupp/direct-sum isomorphism. Tensor coordinates send a pure tensor
+    z tensor x to the lifted family s ↦ z s • x. Composing tensor coordinates with
+    inverse whole normalized coordinates gives the degree comparison to normalized
+    chains with coefficient object ModuleCat.of ℤ (ULift.{max w p} A). It intertwines
+    the differentials and assembles into a chain isomorphism, uniquely characterized
+    on nondegenerate generators with coefficients. Its all-simplex formula includes
+    zero degenerate classes; the inverse recovers nondegenerate pure tensors.
+    The standard interval over ZMod 4 has nonzero terminal-minus-initial boundary.
+    Pushing forward the existing two-sheet all-simplex transfer and normalizing gives
+    vertex coefficient two modulo four; inverse tensor coordinates recover a nonzero
+    tensor with that coefficient. Degenerate edges, outgoing degree-zero maps and empty
+    sheets give zero. This calculation is not a new arbitrary tensor transfer chain map
+    or naturality theorem. The integral tensor construction is distinct from the
+    normalized coefficient-comparison coherence laws. No topological singular-chain
+    identification or homology comparison is asserted.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -85,6 +116,9 @@ alignment:
     and agreement with the normalized functor on compatible split morphisms.
     The normalized-chain coefficient natural isomorphism is indexed together with
     its projection, section and all-simplex generator characteristic equations.
+    The integral tensor presentation is indexed with its independent boundary,
+    whole normalized-degree and tensor coordinates, differential shape and square-zero,
+    chain isomorphism, generator and inverse laws, extensionality and uniqueness.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -226,8 +260,89 @@ alignment:
       module: SimplicialObjects/Normalization.lean
     - lean: SSet.normalizedChainComplexFunctorObjCompMapIso_naturality
       module: SimplicialObjects/Normalization.lean
+    - lean: SSet.normalizedIntegralSimplex
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedIntegralSimplex_of_mem_nonDegenerate
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedIntegralSimplex_of_mem_degenerate
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedIntegralBoundary
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedIntegralBoundary_single
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedIntegralBoundary_eq_iff
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedChainComplexXIsoFinsupp
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.ιNormalizedChainComplex_normalizedChainComplexXIsoFinsupp_hom
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedChainComplexXIsoFinsupp_hom_ι
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedChainComplexXIsoFinsupp_inv_single
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexX
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedBoundary
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedBoundary_tmul
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedBoundary_single
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedDifferential
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedDifferential_succ
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedDifferential_eq_zero
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedDifferential_zero
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIsoFinsupp
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_tmul_apply
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_single
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIsoFinsupp_inv_single
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexX_hom_ext
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso_hom_coordinates
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso_hom_single
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso_hom_simplex
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso_inv_ι
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedDifferential_comp
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplex
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplex_X
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplex_d_tmul
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplex_d_eq_zero
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplex_hom_ext
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso_hom_d
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso_hom_f_apply
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso_inv_f_ι
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso_hom_f_tmul_coordinate
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso_eq_iff
+      module: SimplicialObjects/TensorCoefficients.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
   categorical structures, extra-degeneracy section, split-epimorphism, homotopy
-  and transport, and chain-complex and homology APIs.
+  and transport, normalized cofan universal property, coproduct/direct-sum and
+  Finsupp isomorphisms, tensor coordinates, and chain-complex and homology APIs.
