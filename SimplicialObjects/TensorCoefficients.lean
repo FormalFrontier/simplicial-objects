@@ -502,6 +502,20 @@ noncomputable def tensorNormalizedChainIso (A : Type a) [AddCommGroup A]
   HomologicalComplex.Hom.isoOfComponents (tensorNormalizedChainComplexXIso.{a, w, p} A S)
     (fun i j _ ↦ tensorNormalizedChainComplexXIso_hom_d.{a, w, p} A S i j)
 
+/-- Each component of the chain comparison is the constructed degreewise comparison. -/
+@[simp]
+theorem tensorNormalizedChainIso_hom_f (A : Type a) [AddCommGroup A]
+    (S : SSet.{w}) (n : ℕ) :
+    (tensorNormalizedChainIso.{a, w, p} A S).hom.f n =
+      (tensorNormalizedChainComplexXIso.{a, w, p} A S n).hom := rfl
+
+/-- Each component of the inverse chain comparison is the inverse degreewise comparison. -/
+@[simp]
+theorem tensorNormalizedChainIso_inv_f (A : Type a) [AddCommGroup A]
+    (S : SSet.{w}) (n : ℕ) :
+    (tensorNormalizedChainIso.{a, w, p} A S).inv.f n =
+      (tensorNormalizedChainComplexXIso.{a, w, p} A S n).inv := rfl
+
 /-- The chain comparison agrees with the degree comparison on every simplex class. -/
 @[simp]
 theorem tensorNormalizedChainIso_hom_f_apply (A : Type a) [AddCommGroup A]

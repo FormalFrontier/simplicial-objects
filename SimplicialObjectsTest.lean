@@ -11,3 +11,5 @@ import SimplicialObjectsTest.FiniteFiberTransfer
 import SimplicialObjectsTest.Normalization
 
 import SimplicialObjectsTest.TensorCoefficients
+
+import SimplicialObjectsTest.TensorMaps

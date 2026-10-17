@@ -11,8 +11,9 @@ For any simplicial set and abelian coefficient group, the library also construct
 an integral tensor chain complex and an isomorphism to normalized coefficient chains.
 
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
-`SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization` and
-`SimplicialObjects.TensorCoefficients`; example modules have a separate root.
+`SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
+`SimplicialObjects.TensorCoefficients` and `SimplicialObjects.TensorMaps`;
+example modules have a separate root.
 
 ## Headline results
 
@@ -116,6 +117,13 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
   defined alternating tensor boundary, with Mathlib's normalized chains with
   lifted coefficients. The coefficient, simplex and padding universes `a`, `w`, `p`
   are independent; no finiteness, flatness, field or nonemptiness hypothesis is needed.
+- **Simplicial maps on integral tensor chains.**
+  [`TensorMaps`](SimplicialObjects/TensorMaps.lean) defines the integral degree map
+  by `[s] ↦ [f(s)]` and tensors it with the coefficient identity. Degenerate image
+  classes are zero; `f : S ⟶ T` is arbitrary in `SSet.{w}`.
+  It also constructs whole chain maps and a functor using the existing normalized
+  chain map and chain comparison. The component and naturality statements relate
+  this construction to the independently specified tensor-degree maps and boundary.
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is
@@ -169,6 +177,30 @@ naturality theorem. Degenerate edges, outgoing degree-zero maps and empty sheets
 give zero. May's *A Concise Course in Algebraic Topology*, revised edition, §16.1
 motivates the integral tensor presentation; no topological singular-chain
 identification or homology comparison is asserted.
+
+## Simplicial maps in tensor coordinates
+
+Import `SimplicialObjects.TensorMaps`. For `f : S ⟶ T`,
+`SSet.normalizedIntegralMap f n` is the linear map from `S.nonDegenerate n →₀ ℤ`
+to `T.nonDegenerate n →₀ ℤ` sending a basis vector to
+`T.normalizedIntegralSimplex (f.app (op ⦋n⦌) s.val)`. The `_single`, `_simplex`
+and `_eq_iff` laws compute and characterize it, including degenerate images.
+`tensorNormalizedChainComplexXMap.{a,w,p} A f n` is its lifted right tensor with
+`A`; `_tmul`, `_single`, `_simplex` and `_eq_iff` give its characteristic API.
+Extensionality is the existing `tensorNormalizedChainComplexX_hom_ext`.
+
+`tensorNormalizedChainComplexMap A f` conjugates Mathlib's normalized-chain map
+by the existing `tensorNormalizedChainIso` at source and target. It acts between
+the specified tensor complexes; it changes neither their carriers nor their
+positive-zeroth-face boundary. Identity and composition give
+`tensorNormalizedChainComplexFunctor A`. The statement
+`tensorNormalizedChainComplexMap_f` identifies its components with the raw
+tensor-degree maps. `tensorNormalizedChainComplexXIso_hom_naturality` states
+`Ψ_S ≫ N(f) = T(f) ≫ Ψ_T` in each whole `ModuleCat` degree;
+`tensorNormalizedChainComplexXMap_d` states compatibility with the independent
+differential, and `tensorNormalizedChainIso_hom_naturality` is the whole-chain
+square. All retain independent `a`, `w`, `p` and arbitrary abelian coefficients,
+without injectivity, finite fibers, flatness or nonemptiness assumptions.
 
 ## Use
 

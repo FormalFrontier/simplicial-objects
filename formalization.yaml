@@ -9,7 +9,8 @@ project:
     together with normalized-chain descent and coefficient comparisons coherent
     with arbitrary coefficient-valued maps, finite-fiber transfers and transformations
     of additive coproduct-preserving functors, and an integral tensor presentation of
-    normalized chains for arbitrary simplicial sets and abelian coefficient groups.
+    normalized chains for arbitrary simplicial sets and abelian coefficient groups,
+    with integral and tensor degree maps for arbitrary simplicial morphisms.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -105,6 +106,17 @@ status:
     or naturality theorem. The integral tensor construction is distinct from the
     normalized coefficient-comparison coherence laws. No topological singular-chain
     identification or homology comparison is asserted.
+    For any simplicial morphism f : S → T in SSet.{w}, the integral degree map
+    sends a nondegenerate basis vector to the normalized integral class of its image,
+    possibly zero. Its tensor-degree map is the lifted right tensor with the identity
+    on A. Generator, all-simplex and uniqueness laws characterize these operations.
+    Whole chain maps conjugate Mathlib's normalized-chain map by the existing tensor
+    chain comparisons and form a functor. The component-identification and naturality
+    statements compare this functor with the independent tensor-degree operations and
+    alternating differential, including degenerate images. Only morphisms are
+    conjugated; the tensor carriers and independent boundary are unchanged.
+    The coefficient, simplex and padding universes remain independent, with no
+    injectivity, finite-fiber, flatness or nonemptiness hypothesis.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -119,6 +131,8 @@ alignment:
     The integral tensor presentation is indexed with its independent boundary,
     whole normalized-degree and tensor coordinates, differential shape and square-zero,
     chain isomorphism, generator and inverse laws, extensionality and uniqueness.
+    Simplicial maps are indexed with integral and tensor-degree characteristic laws,
+    the whole chain map and functor, and their component and naturality statements.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -332,6 +346,10 @@ alignment:
       module: SimplicialObjects/TensorCoefficients.lean
     - lean: SSet.tensorNormalizedChainIso
       module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso_hom_f
+      module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.tensorNormalizedChainIso_inv_f
+      module: SimplicialObjects/TensorCoefficients.lean
     - lean: SSet.tensorNormalizedChainIso_hom_f_apply
       module: SimplicialObjects/TensorCoefficients.lean
     - lean: SSet.tensorNormalizedChainIso_inv_f_ι
@@ -340,6 +358,46 @@ alignment:
       module: SimplicialObjects/TensorCoefficients.lean
     - lean: SSet.tensorNormalizedChainIso_eq_iff
       module: SimplicialObjects/TensorCoefficients.lean
+    - lean: SSet.normalizedIntegralMap
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.normalizedIntegralMap_single
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.normalizedIntegralMap_simplex
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.normalizedIntegralMap_eq_iff
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXMap
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXMap_tmul
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXMap_single
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXMap_simplex
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXMap_eq_iff
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexMap
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexMap_eq
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexMap_id
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexMap_comp
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexFunctor
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexFunctor_obj
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexFunctor_map
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXIso_hom_naturality
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexXMap_d
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexMap_f
+      module: SimplicialObjects/TensorMaps.lean
+    - lean: SSet.tensorNormalizedChainIso_hom_naturality
+      module: SimplicialObjects/TensorMaps.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying

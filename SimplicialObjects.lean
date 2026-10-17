@@ -11,3 +11,5 @@ public import SimplicialObjects.FiniteFiberTransfer
 public import SimplicialObjects.Normalization
 
 public import SimplicialObjects.TensorCoefficients
+
+public import SimplicialObjects.TensorMaps
