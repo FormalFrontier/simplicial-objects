@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 public import SimplicialObjects.TensorCoefficients
+public import SimplicialObjects.TensorMaps
 public import Mathlib.LinearAlgebra.TensorProduct.Map
 
 /-!
@@ -31,6 +32,8 @@ coefficient lift.
 
 * Mathlib supplies `AddMonoidHom.toIntLinearMap`, `LinearMap.lTensor`,
   `ULift.moduleEquiv`, and the normalized complexes.
+  Its `LinearMap.lTensor_comp_rTensor` and `LinearMap.rTensor_comp_lTensor` identify
+  both orders of the two tensor factors' operations with `TensorProduct.map`.
 * `SimplicialObjects.Normalization` supplies the normalized morphism for arbitrary
   coefficient-valued simplicial maps and its coefficient action.
 * May, *A Concise Course in Algebraic Topology*, revised edition, §16.1 motivates
@@ -366,5 +369,74 @@ theorem tensorNormalizedCoefficientMap_boundary (g : A →+ B) (S : SSet.{w}) (n
       (tensorNormalizedDifferential_succ.{b, w, max a p} B S n)
   rw [hu, hv, hdA, hdB] at h
   exact h
+
+/-! ## Simultaneous simplicial and coefficient naturality -/
+
+/-- Changing coefficients commutes with the raw tensor-degree map of any simplicial
+morphism. The coefficient universes are independent, with balanced padding on both
+sides; images of nondegenerate simplices may be degenerate. -/
+theorem tensorNormalizedCoefficientMap_naturality {S T : SSet.{w}} (f : S ⟶ T)
+    (g : A →+ B) (n : ℕ) :
+    tensorNormalizedChainComplexXMap.{a, w, max b p} A f n ≫
+        tensorNormalizedCoefficientMap.{a, b, w, p} g T n =
+      tensorNormalizedCoefficientMap.{a, b, w, p} g S n ≫
+        tensorNormalizedChainComplexXMap.{b, w, max a p} B f n := by
+  apply tensorNormalizedChainComplexX_hom_ext.{a, w, max b p} A S n
+  intro s x
+  change
+    (tensorNormalizedCoefficientMap.{a, b, w, p} g T n).hom
+        ((tensorNormalizedChainComplexXMap.{a, w, max b p} A f n).hom
+          (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x))) =
+      (tensorNormalizedChainComplexXMap.{b, w, max a p} B f n).hom
+        ((tensorNormalizedCoefficientMap.{a, b, w, p} g S n).hom
+          (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x)))
+  have hleft :
+      (tensorNormalizedCoefficientMap.{a, b, w, p} g T n).hom
+          ((tensorNormalizedChainComplexXMap.{a, w, max b p} A f n).hom
+            (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x))) =
+        (ULift.up (normalizedIntegralMap f n (Finsupp.single s 1) ⊗ₜ[ℤ] g x) :
+          ULift.{max a b w p} ((T.nonDegenerate n →₀ ℤ) ⊗[ℤ] B)) :=
+    (congrArg
+      (fun z : ULift.{max a b w p} ((T.nonDegenerate n →₀ ℤ) ⊗[ℤ] A) ↦
+        (tensorNormalizedCoefficientMap.{a, b, w, p} g T n).hom z)
+      (tensorNormalizedChainComplexXMap_tmul.{a, w, max b p}
+        A f n (Finsupp.single s 1) x)).trans
+      (tensorNormalizedCoefficientMap_tmul.{a, b, w, p}
+        g T n (normalizedIntegralMap f n (Finsupp.single s 1)) x)
+  have hright :
+      (tensorNormalizedChainComplexXMap.{b, w, max a p} B f n).hom
+          ((tensorNormalizedCoefficientMap.{a, b, w, p} g S n).hom
+            (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x))) =
+        (ULift.up (normalizedIntegralMap f n (Finsupp.single s 1) ⊗ₜ[ℤ] g x) :
+          ULift.{max a b w p} ((T.nonDegenerate n →₀ ℤ) ⊗[ℤ] B)) :=
+    (congrArg
+      (fun z : ULift.{max a b w p} ((S.nonDegenerate n →₀ ℤ) ⊗[ℤ] B) ↦
+        (tensorNormalizedChainComplexXMap.{b, w, max a p} B f n).hom z)
+      (tensorNormalizedCoefficientMap_tmul.{a, b, w, p}
+        g S n (Finsupp.single s 1) x)).trans
+      (tensorNormalizedChainComplexXMap_tmul.{b, w, max a p}
+        B f n (Finsupp.single s 1) (g x))
+  exact hleft.trans hright.symm
+
+/-- Changing coefficients commutes with the whole tensor chain map of any simplicial
+morphism, on the original tensor complexes with their alternating differentials.
+The two coefficient universes, simplex universe and padding are independent. -/
+theorem tensorNormalizedChainComplexCoefficientMap_naturality {S T : SSet.{w}}
+    (f : S ⟶ T) (g : A →+ B) :
+    tensorNormalizedChainComplexMap.{a, w, max b p} A f ≫
+        tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g T =
+      tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g S ≫
+        tensorNormalizedChainComplexMap.{b, w, max a p} B f := by
+  ext n : 1
+  change
+    ((tensorNormalizedChainComplexMap.{a, w, max b p} A f ≫
+      tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g T).f n :
+      tensorNormalizedChainComplexX.{a, w, max b p} A S n ⟶
+        tensorNormalizedChainComplexX.{b, w, max a p} B T n) =
+      (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g S ≫
+        tensorNormalizedChainComplexMap.{b, w, max a p} B f).f n
+  simp only [HomologicalComplex.comp_f, tensorNormalizedChainComplexMap_f,
+    tensorNormalizedChainComplexCoefficientMap_f]
+  exact tensorNormalizedCoefficientMap_naturality.{a, b, w, p} f g n
 
 end SSet

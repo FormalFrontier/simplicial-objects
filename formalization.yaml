@@ -127,6 +127,12 @@ status:
     morphism has the raw operation as each component. Reduction modulo two kills a nonzero
     coefficient-two tensor and preserves a nonzero coefficient-one tensor on the
     standard interval, whose reduced edge has nonzero boundary independently.
+    The mixed naturality statements express that arbitrary simplicial morphisms
+    and arbitrary additive coefficient homomorphisms commute, in raw tensor degrees
+    and as whole chain morphisms, with the same balanced padding and original
+    alternating differentials. Collapse of the standard interval with coefficient
+    doubling modulo four sends a coefficient-one vertex to a nonzero coefficient-two
+    vertex independently of the mixed statements.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -443,6 +449,10 @@ alignment:
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap_f
       module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap_comparison
+      module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedCoefficientMap_naturality
+      module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientMap_naturality
       module: SimplicialObjects/TensorCoefficientMaps.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see

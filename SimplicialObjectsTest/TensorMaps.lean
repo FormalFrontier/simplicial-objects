@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 import SimplicialObjects.TensorMaps
+import SimplicialObjects.TensorCoefficientMaps
 import SimplicialObjectsTest.Normalization
 import Mathlib.Data.ZMod.Basic
 
@@ -287,5 +288,71 @@ private theorem collapse_chain_comparison_vertex (i : Fin 2) :
       (((SSet.tensorNormalizedChainComplexFunctor.{0, 0, 0} (ZMod 4)).map collapse).f 0
         (tensorVertex i)) at h
   exact h
+
+/-! ## Simultaneous collapse and coefficient change -/
+
+/-- Collapse followed by doubling coefficients sends a coefficient-one vertex to a
+nonzero coefficient-two vertex over `ZMod 4`, independently of mixed naturality. -/
+private theorem collapse_coefficient_vertex_nonzero :
+    SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) point 0
+        (SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) collapse 0 (tensorVertex 0)) =
+      (ULift.up (Finsupp.single pointBasis 1 ⊗ₜ[ℤ] (2 : ZMod 4)) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0) ∧
+    SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) point 0
+        (SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) collapse 0 (tensorVertex 0)) ≠
+      0 := by
+  have himage :
+      SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+          ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) point 0
+          (SSet.tensorNormalizedChainComplexXMap.{0, 0, 0}
+            (ZMod 4) collapse 0 (tensorVertex 0)) =
+        (ULift.up (Finsupp.single pointBasis 1 ⊗ₜ[ℤ] (2 : ZMod 4)) :
+          SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0) := by
+    rw [tensorVertex, tensor_collapse_vertex, SSet.tensorNormalizedCoefficientMap_single]
+    exact congrArg
+      (fun x : ZMod 4 ↦ (ULift.up (Finsupp.single pointBasis 1 ⊗ₜ[ℤ] x) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0))
+      (by decide : ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) (1 : ZMod 4) = 2)
+  refine ⟨himage, ?_⟩
+  rw [himage]
+  intro hzero
+  have hc := SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_single.{0, 0, 0}
+    (ZMod 4) point 0 pointBasis (2 : ZMod 4)
+  rw [hzero, map_zero] at hc
+  have htwo : (0 : ZMod 4) = 2 := by
+    simpa using congrArg
+      (fun z : point.nonDegenerate 0 →₀ ULift.{0} (ZMod 4) ↦ (z pointBasis).down) hc
+  exact (by decide : (0 : ZMod 4) ≠ 2) htwo
+
+/-- The degree mixed square evaluated on the same coefficient-one vertex of collapse. -/
+private theorem collapse_degree_coefficient_vertex :
+    SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) point 0
+        (SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) collapse 0 (tensorVertex 0)) =
+      SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) collapse 0
+        (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+          ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) interval 0 (tensorVertex 0)) :=
+  congrArg
+    (fun k : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ⟶
+      SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0 ↦ k (tensorVertex 0))
+    (SSet.tensorNormalizedCoefficientMap_naturality.{0, 0, 0, 0}
+      collapse ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) 0)
+
+/-- The whole mixed square evaluated on that vertex uses the same collapse and doubling. -/
+private theorem collapse_chain_coefficient_vertex :
+    (SSet.tensorNormalizedChainComplexCoefficientMap.{0, 0, 0, 0}
+        ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) point).f 0
+        ((SSet.tensorNormalizedChainComplexMap.{0, 0, 0}
+          (ZMod 4) collapse).f 0 (tensorVertex 0)) =
+      (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) collapse).f 0
+        ((SSet.tensorNormalizedChainComplexCoefficientMap.{0, 0, 0, 0}
+          ((2 : ℕ) • AddMonoidHom.id (ZMod 4)) interval).f 0 (tensorVertex 0)) :=
+  congrArg
+    (fun k : SSet.tensorNormalizedChainComplex.{0, 0, 0} (ZMod 4) interval ⟶
+      SSet.tensorNormalizedChainComplex.{0, 0, 0} (ZMod 4) point ↦ k.f 0 (tensorVertex 0))
+    (SSet.tensorNormalizedChainComplexCoefficientMap_naturality.{0, 0, 0, 0}
+      collapse ((2 : ℕ) • AddMonoidHom.id (ZMod 4)))
 
 end SimplicialObjectsTest.TensorMaps

@@ -139,6 +139,14 @@ example modules have a separate root.
   kills a nonzero coefficient-two tensor and preserves a nonzero coefficient-one
   tensor; the reduced edge has nonzero boundary independently of those statements.
 
+The mixed naturality statements in `TensorCoefficientMaps` express simultaneous
+simplicial and coefficient change: `T_A(f) ≫ C_g(T) = C_g(S) ≫ T_B(f)`, both in
+each raw tensor degree and for whole chain morphisms. They use source padding
+`max b p` and target padding `max a p`, with independent `a`, `b`, `w`, `p`.
+The interval collapse and multiplication by two on `ZMod 4` give the same named
+clients at the degree and chain levels; a coefficient-one vertex maps to a
+nonzero coefficient-two vertex by a computation independent of these statements.
+
 | Module | Interface |
 | --- | --- |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
