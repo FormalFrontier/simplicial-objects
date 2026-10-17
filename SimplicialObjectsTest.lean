@@ -13,3 +13,5 @@ import SimplicialObjectsTest.Normalization
 import SimplicialObjectsTest.TensorCoefficients
 
 import SimplicialObjectsTest.TensorMaps
+
+import SimplicialObjectsTest.TensorCoefficientMaps

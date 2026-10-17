@@ -468,6 +468,13 @@ theorem tensorNormalizedChainComplex_X (A : Type a) [AddCommGroup A]
     (tensorNormalizedChainComplex.{a, w, p} A S).X n =
       ModuleCat.of ℤ (ULift.{max a w p} ((S.nonDegenerate n →₀ ℤ) ⊗[ℤ] A)) := rfl
 
+/-- The differentials are the independently specified tensor differentials. -/
+@[simp]
+theorem tensorNormalizedChainComplex_d (A : Type a) [AddCommGroup A]
+    (S : SSet.{w}) (i j : ℕ) :
+    (tensorNormalizedChainComplex.{a, w, p} A S).d i j =
+      tensorNormalizedDifferential.{a, w, p} A S i j := rfl
+
 /-- The successor boundary on lifted pure tensors. -/
 @[simp]
 theorem tensorNormalizedChainComplex_d_tmul (A : Type a) [AddCommGroup A]

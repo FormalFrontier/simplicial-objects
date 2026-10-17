@@ -12,7 +12,8 @@ an integral tensor chain complex and an isomorphism to normalized coefficient ch
 
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
-`SimplicialObjects.TensorCoefficients` and `SimplicialObjects.TensorMaps`;
+`SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps` and
+`SimplicialObjects.TensorCoefficientMaps`;
 example modules have a separate root.
 
 ## Headline results
@@ -124,6 +125,26 @@ example modules have a separate root.
   It also constructs whole chain maps and a functor using the existing normalized
   chain map and chain comparison. The component and naturality statements relate
   this construction to the independently specified tensor-degree maps and boundary.
+
+- **Change of abelian coefficients.**
+  [`TensorCoefficientMaps`](SimplicialObjects/TensorCoefficientMaps.lean) defines
+  the degree operation `id ⊗ g` for every additive homomorphism `g : A →+ B`,
+  with independent coefficient universes `a`, `b`, simplex universe `w` and padding `p`.
+  The corresponding chain morphism conjugates the normalized coefficient morphism
+  by the integral tensor comparison, without replacing the tensor boundary.
+  Generator, uniqueness, identity and composition laws accompany both operations.
+  The comparison is natural in coefficients, the raw tensor operation commutes
+  with the alternating boundary, and the chain morphism has that operation as
+  each component. Reduction modulo two on the standard interval
+  kills a nonzero coefficient-two tensor and preserves a nonzero coefficient-one
+  tensor; the reduced edge has nonzero boundary independently of those statements.
+
+| Module | Interface |
+| --- | --- |
+| `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
+| `SimplicialObjectsTest.TensorMaps` | Identity, collapse and tensor-boundary examples |
+| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations and compatibility statements |
+| `SimplicialObjectsTest.TensorCoefficientMaps` | Reduction modulo two, nonzero generators and boundary examples |
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is
