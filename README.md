@@ -15,8 +15,8 @@ abelian coefficient groups.
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
 `SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps`,
-`SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies` and
-`SimplicialObjects.TensorCoefficientFunctor`;
+`SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies`,
+`SimplicialObjects.TensorCoefficientFunctor` and `SimplicialObjects.PointHomology`;
 example modules have a separate root.
 
 ## Headline results
@@ -189,6 +189,22 @@ example modules have a separate root.
   padding `max a b c w p`. The integer doubling/reduction sequence specializes
   this result to the standard point and interval.
 
+- **Homology of terminal simplicial sets.**
+  [`PointHomology`](SimplicialObjects/PointHomology.lean) gives
+  `SSet.tensorNormalizedHomologyZeroIsoCoefficient : H₀(K) ≅ C`, with mutually
+  inverse comparison morphisms, for every abelian `A : Type a` and every terminal
+  `T : SSet.{w}`, with independent coefficient, simplex and padding universes `a`, `w`, `p`.
+  Here `K = SSet.tensorNormalizedChainComplex.{a,w,p} A T` is the original
+  normalized integral tensor complex, and `C = ModuleCat.of ℤ (ULift.{max w p} A)`
+  lies in `ModuleCat.{max a w p} ℤ`. This coefficient lift is distinct from the
+  raw degree carrier `ULift.{max a w p} ((T.nonDegenerate n →₀ ℤ) ⊗[ℤ] A)`.
+  The comparison sends the class of a vertex tensor `[v] ⊗ x` to `ULift.up x`;
+  its inverse recovers that class. The API includes balanced coefficient
+  naturality and naturality for maps between terminal simplicial sets.
+  All positive homology `Hₙ₊₁(K)` vanishes. More generally, for arbitrary
+  `S : SSet.{w}` with `S.HasDimensionLT d`, its tensor homology vanishes in
+  every degree `n ≥ d`.
+
 The mixed naturality statements in `TensorCoefficientMaps` express simultaneous
 simplicial and coefficient change: `T_A(f) ≫ C_g(T) = C_g(S) ≫ T_B(f)`, both in
 each raw tensor degree and for whole chain morphisms. They use source padding
@@ -205,11 +221,22 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness and compatibility laws |
 | `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor and five characteristic equations |
 | `SimplicialObjectsTest.TensorCoefficientMaps` | Reduction modulo two, nonzero generators and boundary examples |
+| `SimplicialObjects.PointHomology` | Terminal-set degree-zero comparisons, inverse and class laws, naturality and dimension vanishing |
+| `SimplicialObjectsTest.PointHomology` | Reduction modulo two through point homology and positive-degree vanishing |
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is
 **combinatorial**; no geometric realization, general-relative contraction,
 long exact sequence, spectra, K-theory theorem or source-coverage claim follows here.
+
+The point-homology statements concern **simplicial normalized chains** and
+nonnegatively indexed ordinary homology only. They do not supply a `TopCat` or
+singular-chain comparison, reduced or relative homology, a long exact sequence,
+or all the results of May's cited sections, and make no source-wide coverage claim.
+Their mathematical background is J. Peter May's *A Concise Course in Algebraic
+Topology*, revised author edition, §§13.1 and 16.4. The constructions use
+Mathlib's categorical homology, dimension bounds, Finsupp coordinates and terminal
+transport, together with this library's existing integral tensor formalization.
 
 ## Integral tensor chains and coordinates
 

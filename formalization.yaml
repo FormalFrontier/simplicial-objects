@@ -13,7 +13,10 @@ project:
     with integral and tensor degree maps for arbitrary simplicial morphisms,
     additive functoriality and degreewise exactness in abelian coefficients,
     and chain homotopies induced by simplicial homotopies and equality of the
-    corresponding induced homology maps.
+    corresponding induced homology maps. For terminal simplicial sets, degree-zero
+    tensor homology has mutually inverse comparisons with the lifted coefficient
+    object, natural in coefficients and terminal-set maps; positive-degree tensor
+    homology vanishes, with dimension-bound vanishing for arbitrary simplicial sets.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -28,12 +31,13 @@ sources:
     authors:
       - J. Peter May
     type: book
-    location: Revised edition, §12.1–2, §16.1 and §16, Problem 3
+    location: Revised author edition, §12.1–2, §13.1, §16.1, §16.4 and §16, Problem 3
     relationship: background
     note: >-
       Motivation for the integral tensor presentation of normalized chains,
       covering transfers and their sheet identity, and the chain-homotopy
-      principle for equality of induced homology maps.
+      principle for equality of induced homology maps. Point homology and normalized
+      chains motivate the terminal-simplicial-set homology comparisons and vanishing.
 related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4
     relationship: builds-on
@@ -41,6 +45,8 @@ related_formalizations:
       Uses mathlib's simplex categories, augmented objects, extra degeneracies,
       coproducts, pullbacks, alternating-face-map chain complexes, normalized cofans,
       direct-sum and Finsupp isomorphisms, TensorProduct.finsuppScalarLeft and homology.
+      Terminal-object transport, Finsupp.uniqueLinearEquiv and normalized-chain
+      dimension bounds also underlie the point-homology comparisons and vanishing.
 automation:
   methods:
     - method: agent
@@ -167,6 +173,24 @@ status:
     The point-to-interval cylinder over ZMod 4 has distinct endpoint chain images
     and sends the point generator to the negative edge tensor. Its nonzero control
     uses the independently calculated terminal-minus-initial boundary.
+    For every abelian A : Type a and terminal T : SSet.{w}, the comparisons between
+    degree-zero homology of the original K = tensorNormalizedChainComplex.{a,w,p} A T
+    and C = ModuleCat.of ℤ (ULift.{max w p} A) are mutually inverse.
+    The coefficient, simplex and padding universes a, w, p are independent;
+    C lies in ModuleCat.{max a w p} ℤ, and its coefficient lift is distinct from the
+    raw degree carrier ULift.{max a w p} ((T.nonDegenerate n →₀ ℤ) tensor[ℤ] A).
+    The forward comparison sends the homology class of every original vertex tensor
+    to its lifted coefficient, and the reverse comparison recovers that class.
+    Coefficient naturality holds for every additive homomorphism A →+ B, with
+    independent coefficient universes a, b, source padding max b p and target
+    padding max a p, and lifted coefficient arrow up x ↦ up (g x).
+    The comparison is also natural for arbitrary maps between terminal simplicial sets.
+    All positive homology H_(n+1) of K vanishes. More generally, S.HasDimensionLT d
+    implies zero tensor homology in every degree n ≥ d, for any simplicial set S.
+    These point statements concern simplicial normalized chains and nonnegatively
+    indexed ordinary homology only, with no TopCat or singular-chain comparison,
+    reduced or relative homology, long exact sequence, or all-results claim for the
+    cited sections of May's book.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -185,7 +209,10 @@ alignment:
     the whole chain map and functor, and their component and naturality statements.
     Change of abelian coefficients is indexed with raw and chain-map additivity,
     the coefficient-curried functor, its five characteristic equations and its
-    additive-functor instance.
+    additive-functor instance. Terminal-set homology is indexed with its two
+    degree-zero comparisons, both inverse identities, vertex-class characteristic
+    equations, balanced coefficient naturality, terminal-map naturality and
+    positive-degree and dimension-bound vanishing.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -525,6 +552,32 @@ alignment:
       module: SimplicialObjects/TensorHomotopies.lean
     - lean: SSet.Homotopy.congr_tensorNormalizedHomologyMap
       module: SimplicialObjects/TensorHomotopies.lean
+    - lean: SSet.tensorNormalizedHomologyZeroIsoCoefficient
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroIsoCoefficient_hom
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroIsoCoefficient_inv
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroToCoefficient
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedCoefficientToHomologyZero
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroToCoefficient_comp_fromCoefficient
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedCoefficientToHomologyZero_comp_toCoefficient
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroToCoefficient_class
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedCoefficientToHomologyZero_up
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroToCoefficient_coefficient_naturality
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.tensorNormalizedHomologyZeroToCoefficient_naturality
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.isZero_tensorNormalizedHomology_of_hasDimensionLT
+      module: SimplicialObjects/PointHomology.lean
+    - lean: SSet.isZero_tensorNormalizedHomology_succ
+      module: SimplicialObjects/PointHomology.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
@@ -538,3 +591,6 @@ acknowledgements: >-
   Fabian Odermatt and Joël Riou's
   simplicial homotopy constructions supply the homotopies; Joël Riou's normalization
   and cylinder-to-combinatorial constructions are reused without a new prism engine.
+  The point-homology constructions use Mathlib's categorical homology, dimension
+  bounds, Finsupp.uniqueLinearEquiv and terminal-object transport, together with
+  the existing integral tensor-chain and coefficient-map formalization in this library.
