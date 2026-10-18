@@ -6,7 +6,8 @@ module
 
 import SimplicialObjects.TensorCoefficientMaps
 import SimplicialObjects.TensorCoefficientFunctor
-import SimplicialObjectsTest.Normalization
+public import SimplicialObjects.TensorCoefficientSequences
+public import SimplicialObjectsTest.Normalization
 import Mathlib.Data.ZMod.Basic
 
 /-!
@@ -356,5 +357,89 @@ private theorem doubling_reduction_exact_on_point_and_interval :
   · exact SSet.tensorNormalizedCoefficientMap_exact.{0, 0, 0, 0, 0}
       ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
       integer_doubling_reduction_exact interval 1
+
+/-! ## Coefficient inputs and short-complex objects -/
+
+@[expose] public section
+
+/-- Integer doubling is injective, independently of tensor endpoint preservation. -/
+theorem integer_doubling_injective :
+    Function.Injective ((2 : ℕ) • AddMonoidHom.id ℤ) := by
+  intro x y h
+  apply mul_left_cancel₀ (by decide : (2 : ℤ) ≠ 0)
+  simpa only [AddMonoidHom.nsmul_apply, AddMonoidHom.id_apply,
+    nsmul_eq_mul, Nat.cast_ofNat] using h
+
+/-- Reduction modulo two is surjective by Mathlib's integer representatives. -/
+theorem binary_reduction_surjective :
+    Function.Surjective (Int.castAddHom (ZMod 2)) :=
+  ZMod.intCast_surjective
+
+/-- The coefficient exactness input for the same doubling and reduction maps.
+This reuses the integer calculation above, without any chain endpoint statement. -/
+theorem integer_doubling_reduction_exact_coefficients :
+    Function.Exact ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2)) :=
+  integer_doubling_reduction_exact
+
+/-- The doubling and reduction short complex on the standard point. -/
+noncomputable def pointDoublingReductionShortComplex :
+    ShortComplex (ChainComplex (ModuleCat.{0} ℤ) ℕ) :=
+  SSet.tensorNormalizedChainComplexCoefficientShortComplex.{0, 0, 0, 0, 0}
+    ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
+    integer_doubling_reduction_exact_coefficients (Δ[0] : SSet.{0})
+
+/-- The same doubling and reduction short complex on the standard interval. -/
+noncomputable def intervalDoublingReductionShortComplex :
+    ShortComplex (ChainComplex (ModuleCat.{0} ℤ) ℕ) :=
+  SSet.tensorNormalizedChainComplexCoefficientShortComplex.{0, 0, 0, 0, 0}
+    ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
+    integer_doubling_reduction_exact_coefficients interval
+
+/-- The point short complex has a nonzero vertex with nonzero image under its second
+arrow, using its component API and the same integer and binary tensors. -/
+theorem point_shortComplex_nonzero_vertex_image :
+    ∃ s : (Δ[0] : SSet.{0}).nonDegenerate 0,
+      (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ)) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ (Δ[0] : SSet.{0}) 0) ≠ 0 ∧
+      pointDoublingReductionShortComplex.g.f 0
+        (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ))) ≠ 0 := by
+  obtain ⟨s, hs, himage⟩ := point_reduction_nonzero_vertex_image
+  refine ⟨s, hs, ?_⟩
+  have himage_eq := congrArg
+    (fun f : SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ (Δ[0] : SSet.{0}) 0 ⟶
+      SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 2) (Δ[0] : SSet.{0}) 0 ↦
+        f.hom (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ))))
+    (SSet.tensorNormalizedChainComplexCoefficientShortComplex_g_f.{0, 0, 0, 0, 0}
+      ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
+      integer_doubling_reduction_exact_coefficients (Δ[0] : SSet.{0}) 0)
+  intro hzero
+  exact himage (himage_eq.symm.trans hzero)
+
+/-- The interval short complex preserves the same nonzero coefficient-one vertex
+under its second arrow, independently of endpoint preservation. -/
+theorem interval_shortComplex_preserves_nonzero_one :
+    intervalDoublingReductionShortComplex.g.f 0
+        (ULift.up (Finsupp.single
+          (⟨vertex 0, vertex_nondegenerate 0⟩ : interval.nonDegenerate 0) 1 ⊗ₜ[ℤ] (1 : ℤ)) :
+          SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0) =
+      (ULift.up (Finsupp.single
+        (⟨vertex 0, vertex_nondegenerate 0⟩ : interval.nonDegenerate 0) 1 ⊗ₜ[ℤ] (1 : ZMod 2)) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 2) interval 0) ∧
+      (ULift.up (Finsupp.single
+        (⟨vertex 0, vertex_nondegenerate 0⟩ : interval.nonDegenerate 0) 1 ⊗ₜ[ℤ] (1 : ZMod 2)) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 2) interval 0) ≠ 0 := by
+  change intervalDoublingReductionShortComplex.g.f 0 (integerVertex 1) = binaryVertex 1 ∧
+    binaryVertex 1 ≠ 0
+  have himage_eq := congrArg
+    (fun f : SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0 ⟶
+      SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 2) interval 0 ↦
+        f.hom (integerVertex 1))
+    (SSet.tensorNormalizedChainComplexCoefficientShortComplex_g_f.{0, 0, 0, 0, 0}
+      ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
+      integer_doubling_reduction_exact_coefficients interval 0)
+  exact ⟨himage_eq.trans reduction_preserves_nonzero_one.1,
+    reduction_preserves_nonzero_one.2⟩
+
+end
 
 end SimplicialObjectsTest.TensorCoefficientMaps

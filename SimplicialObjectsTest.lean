@@ -17,3 +17,5 @@ import SimplicialObjectsTest.TensorMaps
 import SimplicialObjectsTest.TensorCoefficientMaps
 
 import SimplicialObjectsTest.PointHomology
+
+public import SimplicialObjectsTest.TensorCoefficientEndpoints

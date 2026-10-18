@@ -16,8 +16,8 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
 `SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps`,
 `SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies`,
-`SimplicialObjects.TensorCoefficientFunctor` and `SimplicialObjects.PointHomology`;
-example modules have a separate root.
+`SimplicialObjects.TensorCoefficientFunctor`, `SimplicialObjects.PointHomology` and
+`SimplicialObjects.TensorCoefficientSequences`; example modules have a separate root.
 
 ## Headline results
 
@@ -188,6 +188,23 @@ example modules have a separate root.
   the free first factor `S.nonDegenerate n →₀ ℤ`; the outer lifts use common
   padding `max a b c w p`. The integer doubling/reduction sequence specializes
   this result to the standard point and interval.
+- **Coefficient endpoints and short exact sequences.**
+  [`TensorCoefficientMaps`](SimplicialObjects/TensorCoefficientMaps.lean) preserves
+  injectivity and surjectivity in every tensor degree. In
+  [`TensorCoefficientSequences`](SimplicialObjects/TensorCoefficientSequences.lean),
+  the corresponding whole chain maps are monomorphisms and epimorphisms.
+  `SSet.tensorNormalizedChainComplexCoefficientShortComplex` constructs a short
+  complex from any exact coefficient pair, without endpoint assumptions. Its
+  seven characteristic equations identify the three objects, both arrows and
+  both raw degree components. An injective first coefficient map, exact middle
+  and surjective second map give `ShortExact` on these same complexes, with
+  independent `a`, `b`, `c`, `w`, `p` and common padding `max a b c w p`.
+  The zero coefficient map gives the zero chain map. The point and interval
+  doubling/reduction examples use the same coefficient inputs and retain
+  their nonzero integer and reduced generators. Endpoint preservation reuses the
+  existing free-Finsupp degree-exactness proof (`Module.Flat.finsupp` and
+  `Module.Flat.lTensor_exact`), Mathlib's functional exactness and module-category
+  endpoint criteria, and its degreewise short-exactness theorem for complexes.
 
 - **Homology of terminal simplicial sets.**
   [`PointHomology`](SimplicialObjects/PointHomology.lean) gives
@@ -218,9 +235,11 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
 | `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas and equality of induced homology maps |
 | `SimplicialObjectsTest.TensorMaps` | Identity, collapse and tensor-boundary examples |
-| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness and compatibility laws |
+| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness, endpoint preservation and compatibility laws |
 | `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor and five characteristic equations |
-| `SimplicialObjectsTest.TensorCoefficientMaps` | Reduction modulo two, nonzero generators and boundary examples |
+| `SimplicialObjects.TensorCoefficientSequences` | Coefficient short complexes, seven characteristic equations, chain Mono/Epi and short exactness |
+| `SimplicialObjectsTest.TensorCoefficientMaps` | Additive coefficient-functor controls, reduction modulo two, coefficient inputs and short-complex nonzero generators and boundaries |
+| `SimplicialObjectsTest.TensorCoefficientEndpoints` | The five endpoint and short-exactness specializations on the point and interval |
 | `SimplicialObjects.PointHomology` | Terminal-set degree-zero comparisons, inverse and class laws, naturality and dimension vanishing |
 | `SimplicialObjectsTest.PointHomology` | Reduction modulo two through point homology and positive-degree vanishing |
 

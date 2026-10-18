@@ -180,6 +180,36 @@ theorem tensorNormalizedCoefficientMap_exact (g : A →+ B) (h : B →+ C)
     (by apply LinearMap.ext; intro z; rfl)
     (by apply LinearMap.ext; intro z; rfl) hTensor
 
+/-- An injective coefficient homomorphism induces an injective tensor degree map.
+Only the free integral simplex factor is flat. Apply degree exactness to the zero
+map into the coefficients, then use Mathlib's `LinearMap.exact_zero_iff_injective`. -/
+theorem tensorNormalizedCoefficientMap_injective (g : A →+ B)
+    (hInj : Function.Injective g) (S : SSet.{w}) (n : ℕ) :
+    Function.Injective (tensorNormalizedCoefficientMap.{a, b, w, p} g S n) := by
+  have hExact : Function.Exact (0 : PUnit.{1} →+ A) g :=
+    (LinearMap.exact_zero_iff_injective (R := ℤ) PUnit.{1} g.toIntLinearMap).2 hInj
+  have hDegree := tensorNormalizedCoefficientMap_exact.{0, a, b, w, p}
+    (0 : PUnit.{1} →+ A) g hExact S n
+  rw [tensorNormalizedCoefficientMap_zero] at hDegree
+  exact (LinearMap.exact_zero_iff_injective (R := ℤ)
+    (tensorNormalizedChainComplexX.{0, w, max a (max b p)} PUnit.{1} S n)
+    (tensorNormalizedCoefficientMap.{a, b, w, p} g S n).hom).1 hDegree
+
+/-- A surjective coefficient homomorphism induces a surjective tensor degree map,
+without any flatness assumption on the coefficients. Apply degree exactness to the
+zero map out of the coefficients, then use Mathlib's `LinearMap.exact_zero_iff_surjective`. -/
+theorem tensorNormalizedCoefficientMap_surjective (g : A →+ B)
+    (hSurj : Function.Surjective g) (S : SSet.{w}) (n : ℕ) :
+    Function.Surjective (tensorNormalizedCoefficientMap.{a, b, w, p} g S n) := by
+  have hExact : Function.Exact g (0 : B →+ PUnit.{1}) :=
+    (LinearMap.exact_zero_iff_surjective (R := ℤ) PUnit.{1} g.toIntLinearMap).2 hSurj
+  have hDegree := tensorNormalizedCoefficientMap_exact.{a, b, 0, w, p}
+    g (0 : B →+ PUnit.{1}) hExact S n
+  rw [tensorNormalizedCoefficientMap_zero] at hDegree
+  exact (LinearMap.exact_zero_iff_surjective (R := ℤ)
+    (tensorNormalizedChainComplexX.{0, w, max b (max a p)} PUnit.{1} S n)
+    (tensorNormalizedCoefficientMap.{a, b, w, p} g S n).hom).1 hDegree
+
 private noncomputable def liftedCoefficientMap (g : A →+ B) :
     ModuleCat.of ℤ (ULift.{max w b} A) ⟶
       ModuleCat.of ℤ (ULift.{max w a} B) :=
@@ -325,6 +355,18 @@ theorem tensorNormalizedChainComplexCoefficientMap_add (g h : A →+ B) (S : SSe
   exact (HomologicalComplex.add_f_apply
     (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g S)
     (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} h S) n).symm
+
+/-- The zero coefficient homomorphism gives the zero chain morphism, with independent
+coefficient, simplex and padding universes. -/
+@[simp]
+theorem tensorNormalizedChainComplexCoefficientMap_zero (S : SSet.{w}) :
+    tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} (0 : A →+ B) S = 0 := by
+  symm
+  apply (tensorNormalizedChainComplexCoefficientMap_eq_iff.{a, b, w, p}
+    (0 : A →+ B) S 0).2
+  intro n s x
+  simp
+  rfl
 
 /-- The whole integral tensor comparison is natural in coefficients, using the
 corresponding padded coefficient lifts on normalized chains. -/

@@ -17,6 +17,8 @@ project:
     tensor homology has mutually inverse comparisons with the lifted coefficient
     object, natural in coefficients and terminal-set maps; positive-degree tensor
     homology vanishes, with dimension-bound vanishing for arbitrary simplicial sets.
+    Injective and surjective coefficient maps preserve endpoints, and short exact
+    coefficient pairs give short exact sequences of these chain complexes.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -38,6 +40,8 @@ sources:
       covering transfers and their sheet identity, and the chain-homotopy
       principle for equality of induced homology maps. Point homology and normalized
       chains motivate the terminal-simplicial-set homology comparisons and vanishing.
+      The coefficient endpoint and short-exactness results use Mathlib's algebraic
+      APIs, not a printed theorem about coefficient endpoints in this passage.
 related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4
     relationship: builds-on
@@ -47,6 +51,9 @@ related_formalizations:
       direct-sum and Finsupp isomorphisms, TensorProduct.finsuppScalarLeft and homology.
       Terminal-object transport, Finsupp.uniqueLinearEquiv and normalized-chain
       dimension bounds also underlie the point-homology comparisons and vanishing.
+      Coefficient endpoints use functional exactness, free-Finsupp flatness and tensor
+      exactness, module-category endpoint criteria and degreewise short exactness
+      for homological complexes.
 automation:
   methods:
     - method: agent
@@ -191,6 +198,19 @@ status:
     indexed ordinary homology only, with no TopCat or singular-chain comparison,
     reduced or relative homology, long exact sequence, or all-results claim for the
     cited sections of May's book.
+
+    Exact additive coefficient pairs give exact tensor-degree maps by flatness of
+    the free integral simplex factor, without flatness of the coefficients.
+    Injective and surjective coefficient maps give injective and surjective degree
+    maps and monomorphisms and epimorphisms of the original chain complexes.
+    An exact coefficient pair defines a short complex in ModuleCat.{max a b c w p} ℤ
+    chain complexes, with independent coefficient, simplex and padding universes.
+    Seven characteristic equations identify its three objects, both arrows and both
+    raw degree components. Injectivity of the first coefficient map and surjectivity
+    of the second make it short exact. The zero coefficient map gives the zero chain
+    map. Integer doubling and reduction modulo two specialize all five endpoint and
+    short-exactness statements to the same standard point and interval, whose short
+    complexes retain nonzero integer and reduced vertex generators.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -213,6 +233,11 @@ alignment:
     degree-zero comparisons, both inverse identities, vertex-class characteristic
     equations, balanced coefficient naturality, terminal-map naturality and
     positive-degree and dimension-bound vanishing.
+
+    Coefficient maps are indexed with degreewise exactness, injectivity and
+    surjectivity, the zero chain map, chain monomorphisms and epimorphisms, and the
+    coefficient short complex with its seven characteristic equations and short
+    exactness statement.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -578,6 +603,35 @@ alignment:
       module: SimplicialObjects/PointHomology.lean
     - lean: SSet.isZero_tensorNormalizedHomology_succ
       module: SimplicialObjects/PointHomology.lean
+
+    - lean: SSet.tensorNormalizedCoefficientMap_injective
+      module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedCoefficientMap_surjective
+      module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientMap_zero
+      module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientMap_mono
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientMap_epi
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_X₁
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_X₂
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_X₃
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_f
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_g
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_f_f
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_g_f
+      module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_shortExact
+      module: SimplicialObjects/TensorCoefficientSequences.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
@@ -594,3 +648,8 @@ acknowledgements: >-
   The point-homology constructions use Mathlib's categorical homology, dimension
   bounds, Finsupp.uniqueLinearEquiv and terminal-object transport, together with
   the existing integral tensor-chain and coefficient-map formalization in this library.
+
+  The coefficient endpoints reuse the existing degree-exactness proof using
+  Mathlib's Module.Flat.finsupp and Module.Flat.lTensor_exact; functional exactness,
+  module-category endpoint criteria and degreewise short exactness supply the
+  endpoint and short-exact-sequence packaging.

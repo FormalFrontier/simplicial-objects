@@ -20,3 +20,5 @@ public import SimplicialObjects.TensorHomotopies
 public import SimplicialObjects.TensorCoefficientFunctor
 
 public import SimplicialObjects.PointHomology
+
+public import SimplicialObjects.TensorCoefficientSequences
