@@ -138,6 +138,16 @@ example modules have a separate root.
   each component. Reduction modulo two on the standard interval
   kills a nonzero coefficient-two tensor and preserves a nonzero coefficient-one
   tensor; the reduced edge has nonzero boundary independently of those statements.
+- **Exactness in abelian coefficients.**
+  [`SSet.tensorNormalizedCoefficientMap_exact`](SimplicialObjects/TensorCoefficientMaps.lean)
+  sends any pair `g : A →+ B`, `h : B →+ C` with `Function.Exact g h` to an
+  exact pair of the existing tensor-degree maps, for every simplicial set and
+  every degree. The three coefficient groups are arbitrary abelian groups in
+  independent universes, with no coefficient-flatness, finiteness, injectivity
+  or surjectivity assumption. Mathlib's `Module.Flat.lTensor_exact` applies to
+  the free first factor `S.nonDegenerate n →₀ ℤ`; the outer lifts use common
+  padding `max a b c w p`. The integer doubling/reduction sequence specializes
+  this result to the standard point and interval.
 
 The mixed naturality statements in `TensorCoefficientMaps` express simultaneous
 simplicial and coefficient change: `T_A(f) ≫ C_g(T) = C_g(S) ≫ T_B(f)`, both in
@@ -151,13 +161,13 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | --- | --- |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
 | `SimplicialObjectsTest.TensorMaps` | Identity, collapse and tensor-boundary examples |
-| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations and compatibility statements |
+| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, degreewise exactness and compatibility laws |
 | `SimplicialObjectsTest.TensorCoefficientMaps` | Reduction modulo two, nonzero generators and boundary examples |
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is
 **combinatorial**; no geometric realization, general-relative contraction,
-exactness, spectra, K-theory theorem or source-coverage claim follows here.
+long exact sequence, spectra, K-theory theorem or source-coverage claim follows here.
 
 ## Integral tensor chains and coordinates
 

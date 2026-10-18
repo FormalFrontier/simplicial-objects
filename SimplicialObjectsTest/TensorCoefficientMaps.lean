@@ -9,13 +9,15 @@ import SimplicialObjectsTest.Normalization
 import Mathlib.Data.ZMod.Basic
 
 /-!
-# Reduction modulo two on the standard interval
+# Doubling and reduction on standard simplices
 
-Reduction of integer coefficients kills a nonzero tensor with coefficient two,
-but preserves a nonzero generator with coefficient one. The reduced edge has a
-nonzero boundary. These calculations use the degree operation and the existing
-normalized coefficient action, independently of the four compatibility
-statements. The final four examples evaluate those statements on the interval.
+Doubling integers followed by reduction modulo two is exact. Reduction preserves
+a nonzero degree-zero generator of the standard point. On the standard interval,
+it kills a nonzero tensor with coefficient two, but preserves a nonzero generator
+with coefficient one. The reduced edge has a nonzero boundary. The compatibility
+examples evaluate the comparison, boundary and component formulas on this interval.
+The degree-exactness statement is specialized to the same point in degree zero
+and interval in degree one.
 -/
 
 open CategoryTheory Limits Opposite
@@ -23,6 +25,52 @@ open scoped Simplicial TensorProduct
 open SimplicialObjectsTest.Normalization
 
 namespace SimplicialObjectsTest.TensorCoefficientMaps
+
+/-- The original integer doubling and reduction maps form an exact pair. -/
+private theorem integer_doubling_reduction_exact :
+    Function.Exact ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2)) := by
+  intro y
+  change (y : ZMod 2) = 0 ↔ ∃ x : ℤ, ((2 : ℕ) • AddMonoidHom.id ℤ) x = y
+  rw [ZMod.intCast_zmod_eq_zero_iff_dvd]
+  constructor
+  · rintro ⟨x, hx⟩
+    exact ⟨x, by simpa only [AddMonoidHom.nsmul_apply, AddMonoidHom.id_apply,
+      nsmul_eq_mul, Nat.cast_ofNat] using hx.symm⟩
+  · rintro ⟨x, hx⟩
+    exact ⟨x, by simpa only [AddMonoidHom.nsmul_apply, AddMonoidHom.id_apply,
+      nsmul_eq_mul, Nat.cast_ofNat] using hx.symm⟩
+
+/-- The standard point has a nonzero integer vertex generator with nonzero reduced image. -/
+private theorem point_reduction_nonzero_vertex_image :
+    ∃ s : (Δ[0] : SSet.{0}).nonDegenerate 0,
+      (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ)) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ (Δ[0] : SSet.{0}) 0) ≠ 0 ∧
+      SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        (Int.castAddHom (ZMod 2)) (Δ[0] : SSet.{0}) 0
+        (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ))) ≠ 0 := by
+  let s : (Δ[0] : SSet.{0}).nonDegenerate 0 :=
+    ⟨SSet.stdSimplex.obj₀Equiv.symm 0, by simp [SSet.nondegenerate_zero]⟩
+  have himage : SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+      (Int.castAddHom (ZMod 2)) (Δ[0] : SSet.{0}) 0
+      (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ))) ≠ 0 := by
+    rw [SSet.tensorNormalizedCoefficientMap_single]
+    have hcast : Int.castAddHom (ZMod 2) (1 : ℤ) = 1 := by decide
+    rw [hcast]
+    intro hzero
+    have hc := SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_tmul_apply.{0, 0, 0}
+      (ZMod 2) (Δ[0] : SSet.{0}) 0 (Finsupp.single s 1) (1 : ZMod 2) s
+    rw [hzero, map_zero] at hc
+    exact (zero_ne_one : (0 : ZMod 2) ≠ 1) (by
+      simpa using congrArg (fun x : ULift.{0} (ZMod 2) ↦ x.down) hc)
+  refine ⟨s, ?_, himage⟩
+  intro hzero
+  apply himage
+  exact (congrArg
+    (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+      (Int.castAddHom (ZMod 2)) (Δ[0] : SSet.{0}) 0).hom hzero).trans
+    (map_zero
+      (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        (Int.castAddHom (ZMod 2)) (Δ[0] : SSet.{0}) 0).hom)
 
 private def initialVertex : interval.nonDegenerate 0 := ⟨vertex 0, vertex_nondegenerate 0⟩
 private def terminalVertex : interval.nonDegenerate 0 := ⟨vertex 1, vertex_nondegenerate 1⟩
@@ -222,5 +270,25 @@ theorem chain_comparison_reduction_edge :
       interval.normalizedChainComplex binaryCoefficients ↦ f.f 1 integerEdge)
     (SSet.tensorNormalizedChainComplexCoefficientMap_comparison.{0, 0, 0, 0}
       (Int.castAddHom (ZMod 2)) interval)
+
+/-- Degree exactness on the standard point in degree zero and interval in degree one. -/
+private theorem doubling_reduction_exact_on_point_and_interval :
+    Function.Exact
+      (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        ((2 : ℕ) • AddMonoidHom.id ℤ) (Δ[0] : SSet.{0}) 0)
+      (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        (Int.castAddHom (ZMod 2)) (Δ[0] : SSet.{0}) 0) ∧
+    Function.Exact
+      (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        ((2 : ℕ) • AddMonoidHom.id ℤ) interval 1)
+      (SSet.tensorNormalizedCoefficientMap.{0, 0, 0, 0}
+        (Int.castAddHom (ZMod 2)) interval 1) := by
+  constructor
+  · exact SSet.tensorNormalizedCoefficientMap_exact.{0, 0, 0, 0, 0}
+      ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
+      integer_doubling_reduction_exact (Δ[0] : SSet.{0}) 0
+  · exact SSet.tensorNormalizedCoefficientMap_exact.{0, 0, 0, 0, 0}
+      ((2 : ℕ) • AddMonoidHom.id ℤ) (Int.castAddHom (ZMod 2))
+      integer_doubling_reduction_exact interval 1
 
 end SimplicialObjectsTest.TensorCoefficientMaps

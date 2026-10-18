@@ -7,6 +7,7 @@ module
 public import SimplicialObjects.TensorCoefficients
 public import SimplicialObjects.TensorMaps
 public import Mathlib.LinearAlgebra.TensorProduct.Map
+public import Mathlib.RingTheory.Flat.Basic
 
 /-!
 # Change of coefficients in integral tensor chains
@@ -18,7 +19,10 @@ and the target uses padding `max a p`, so both raw lifts have level `max a b w p
 
 The chain morphism is the existing normalized coefficient morphism conjugated by
 `SSet.tensorNormalizedChainIso`. Neither the tensor carrier nor its independently
-specified alternating boundary is changed.
+specified alternating boundary is changed. An exact pair of additive coefficient
+homomorphisms induces an exact pair in every tensor degree, for every simplicial
+set. Only the free integral first factor is required to be flat; the coefficient
+groups are arbitrary.
 
 ## Implementation notes
 
@@ -34,6 +38,8 @@ coefficient lift.
   `ULift.moduleEquiv`, and the normalized complexes.
   Its `LinearMap.lTensor_comp_rTensor` and `LinearMap.rTensor_comp_lTensor` identify
   both orders of the two tensor factors' operations with `TensorProduct.map`.
+  Exactness uses `Module.Flat.finsupp` and `Module.Flat.lTensor_exact`, followed by
+  `Function.Exact.of_ladder_linearEquiv_of_exact` for the outer lifts.
 * `SimplicialObjects.Normalization` supplies the normalized morphism for arbitrary
   coefficient-valued simplicial maps and its coefficient action.
 * May, *A Concise Course in Algebraic Topology*, revised edition, §16.1 motivates
@@ -129,6 +135,32 @@ theorem tensorNormalizedCoefficientMap_zero (S : SSet.{w}) (n : ℕ) :
   simp only [tensorNormalizedCoefficientMap_single, AddMonoidHom.zero_apply,
     TensorProduct.tmul_zero]
   rfl
+
+/-- Exact coefficient homomorphisms give an exact pair of normalized tensor degree maps.
+
+The first tensor factor `S.nonDegenerate n →₀ ℤ` is free, so Mathlib's
+`Module.Flat.lTensor_exact` supplies exactness before conjugation by the outer
+`ULift.moduleEquiv` maps. May, *A Concise Course in Algebraic Topology*, §16.1
+motivates this normalized integral presentation; the tensor exactness statement
+uses Mathlib's flat-module theorem. -/
+theorem tensorNormalizedCoefficientMap_exact (g : A →+ B) (h : B →+ C)
+    (hExact : Function.Exact g h) (S : SSet.{w}) (n : ℕ) :
+    Function.Exact
+      (tensorNormalizedCoefficientMap.{a, b, w, max c p} g S n)
+      (tensorNormalizedCoefficientMap.{b, c, w, max a p} h S n) := by
+  have hLinear : Function.Exact g.toIntLinearMap h.toIntLinearMap := by
+    simpa only [AddMonoidHom.coe_toIntLinearMap] using hExact
+  have hTensor := Module.Flat.lTensor_exact (S.nonDegenerate n →₀ ℤ) hLinear
+  -- The ladder uses only the existing outer lifts; coefficients inside the tensors
+  -- retain their original canonical integer actions.
+  exact Function.Exact.of_ladder_linearEquiv_of_exact
+    (g₁₂ := (tensorNormalizedCoefficientMap.{a, b, w, max c p} g S n).hom)
+    (g₂₃ := (tensorNormalizedCoefficientMap.{b, c, w, max a p} h S n).hom)
+    (e₁ := (ULift.moduleEquiv (R := ℤ)).symm)
+    (e₂ := (ULift.moduleEquiv (R := ℤ)).symm)
+    (e₃ := (ULift.moduleEquiv (R := ℤ)).symm)
+    (by apply LinearMap.ext; intro z; rfl)
+    (by apply LinearMap.ext; intro z; rfl) hTensor
 
 private noncomputable def liftedCoefficientMap (g : A →+ B) :
     ModuleCat.of ℤ (ULift.{max w b} A) ⟶
