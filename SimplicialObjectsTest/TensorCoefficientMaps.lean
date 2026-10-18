@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 import SimplicialObjects.TensorCoefficientMaps
+import SimplicialObjects.TensorCoefficientFunctor
 import SimplicialObjectsTest.Normalization
 import Mathlib.Data.ZMod.Basic
 
@@ -18,6 +19,9 @@ with coefficient one. The reduced edge has a nonzero boundary. The compatibility
 examples evaluate the comparison, boundary and component formulas on this interval.
 The degree-exactness statement is specialized to the same point in degree zero
 and interval in degree one.
+The coefficient-curried functor preserves the coefficient-one generator and the
+nonzero reduced boundary. Doubling coefficients gives a nonzero coefficient-two
+tensor, which reduction modulo two kills.
 -/
 
 open CategoryTheory Limits Opposite
@@ -270,6 +274,68 @@ theorem chain_comparison_reduction_edge :
       interval.normalizedChainComplex binaryCoefficients ↦ f.f 1 integerEdge)
     (SSet.tensorNormalizedChainComplexCoefficientMap_comparison.{0, 0, 0, 0}
       (Int.castAddHom (ZMod 2)) interval)
+
+/-! ## The coefficient functor and doubling -/
+
+/-- The coefficient functor preserves a nonzero coefficient-one vertex, and its
+value at the reduced interval has a nonzero edge boundary. -/
+private theorem coefficient_functor_reduction_preserves_nonzero_one :
+    ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}.map
+        (AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2)))).app interval).f 0
+        (integerVertex 1) = binaryVertex 1 ∧
+      binaryVertex 1 ≠ 0 ∧
+      (((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}.obj
+        (AddCommGrpCat.of (ZMod 2))).obj interval).d 1 0) binaryEdge ≠ 0 := by
+  constructor
+  · rw [SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f]
+    exact reduction_preserves_nonzero_one.1
+  · constructor
+    · exact reduction_preserves_nonzero_one.2
+    · intro h
+      exact binary_edge_boundary_ne_zero
+        ((ConcreteCategory.congr_hom
+          ((SSet.tensorNormalizedChainComplex_d.{0, 0, 0} (ZMod 2) interval 1 0).trans
+            (SSet.tensorNormalizedDifferential_succ.{0, 0, 0} (ZMod 2) interval 0))
+          binaryEdge).symm.trans h)
+
+/-- The sum of two coefficient identities sends one to a nonzero coefficient-two
+vertex, which reduction modulo two kills. This specializes the coefficient
+additivity formula corresponding to Mathlib's `LinearMap.lTensor_add`, using the
+interval computations above. -/
+private theorem coefficient_functor_doubling_reduction :
+    ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}.map
+        (AddCommGrpCat.ofHom (AddMonoidHom.id ℤ + AddMonoidHom.id ℤ))).app interval).f 0
+        (integerVertex 1) = integerVertex 2 ∧
+      integerVertex 2 ≠ 0 ∧
+      ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}.map
+        (AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2)))).app interval).f 0
+        (integerVertex 2) = 0 := by
+  refine ⟨?_, reduction_kills_nonzero_two.1, ?_⟩
+  · have hadd :
+        ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}.map
+          (AddCommGrpCat.ofHom (AddMonoidHom.id ℤ + AddMonoidHom.id ℤ))).app interval).f 0 =
+          𝟙 (SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0) +
+            𝟙 (SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0) := by
+      exact Eq.trans
+        (SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f.{0, 0, 0}
+          (AddCommGrpCat.ofHom (AddMonoidHom.id ℤ + AddMonoidHom.id ℤ)) interval 0)
+        (Eq.trans
+          (SSet.tensorNormalizedCoefficientMap_add.{0, 0, 0, 0} (A := ℤ) (B := ℤ)
+            (AddMonoidHom.id ℤ) (AddMonoidHom.id ℤ) interval 0)
+          (congrArg
+            (fun f : SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0 ⟶
+              SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0 ↦ f + f)
+            (SSet.tensorNormalizedCoefficientMap_id.{0, 0, 0} (A := ℤ) interval 0)))
+    calc
+      _ = integerVertex 1 + integerVertex 1 :=
+        (ConcreteCategory.congr_hom hadd (integerVertex 1)).trans (by rfl)
+      _ = integerVertex 2 :=
+        (congrArg
+          (fun z : (interval.nonDegenerate 0 →₀ ℤ) ⊗[ℤ] ℤ ↦
+            (ULift.up z : SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ interval 0))
+          (TensorProduct.tmul_add (Finsupp.single initialVertex 1) (1 : ℤ) (1 : ℤ))).symm
+  · rw [SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f]
+    exact reduction_kills_nonzero_two.2
 
 /-- Degree exactness on the standard point in degree zero and interval in degree one. -/
 private theorem doubling_reduction_exact_on_point_and_interval :

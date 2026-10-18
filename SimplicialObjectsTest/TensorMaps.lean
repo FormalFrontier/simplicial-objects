@@ -6,6 +6,7 @@ module
 
 import SimplicialObjects.TensorMaps
 import SimplicialObjects.TensorCoefficientMaps
+import SimplicialObjects.TensorHomotopies
 import SimplicialObjectsTest.Normalization
 import Mathlib.Data.ZMod.Basic
 
@@ -354,5 +355,203 @@ private theorem collapse_chain_coefficient_vertex :
       SSet.tensorNormalizedChainComplex.{0, 0, 0} (ZMod 4) point ↦ k.f 0 (tensorVertex 0))
     (SSet.tensorNormalizedChainComplexCoefficientMap_naturality.{0, 0, 0, 0}
       collapse ((2 : ℕ) • AddMonoidHom.id (ZMod 4)))
+/-! ## The point-to-interval cylinder homotopy
+
+The point above is `Δ[0]`. The second projection of its cylinder joins the
+initial and terminal vertex maps. The chosen chain homotopy sends the existing
+point generator to the negative of the existing edge tensor, whereas the
+independent boundary above is terminal minus initial.
+-/
+
+open MonoidalCategory
+
+private def vertexMap (i : Fin 2) : point ⟶ interval := SSet.const (vertex i)
+
+private theorem vertexMap_pointVertex (i : Fin 2) :
+    (vertexMap i).app _ pointVertex = vertex i := by
+  apply SSet.stdSimplex.ext
+  intro j
+  rfl
+
+/-- The second projection is a cylinder homotopy between the distinct vertex maps. -/
+private noncomputable def vertexHomotopy : SSet.Homotopy (vertexMap 0) (vertexMap 1) where
+  h := CartesianMonoidalCategory.snd point interval
+  h₀ := SSet.ι₀_snd point
+  h₁ := SSet.ι₁_snd point
+  rel := by
+    ext n x
+    let y : {s : point.obj n // s ∈ (⊥ : point.Subcomplex).obj n} :=
+      (CartesianMonoidalCategory.fst
+        ((⊥ : point.Subcomplex) : SSet) interval).app n x
+    have hy : y.val ∈ (⊥ : point.Subcomplex).obj n := y.property
+    have h : False := by
+      simpa only [Subfunctor.bot_obj, Set.mem_empty_iff_false] using hy
+    exact h.elim
+
+private theorem vertex_chain_image (i : Fin 2) :
+    (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap i)).f 0
+      pointTensorVertex = tensorVertex i := by
+  have h := congrArg
+    (fun k : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0 ⟶
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ↦
+      k.hom pointTensorVertex)
+    (SSet.tensorNormalizedChainComplexMap_f.{0, 0, 0} (ZMod 4) (vertexMap i) 0)
+  have hx : SSet.tensorNormalizedChainComplexXMap.{0, 0, 0}
+      (ZMod 4) (vertexMap i) 0 pointTensorVertex = tensorVertex i := by
+    rw [pointTensorVertex, SSet.tensorNormalizedChainComplexXMap_single]
+    change ULift.up (interval.normalizedIntegralSimplex
+      ((vertexMap i).app _ pointVertex) ⊗ₜ[ℤ] (1 : ZMod 4)) = _
+    rw [vertexMap_pointVertex,
+      interval.normalizedIntegralSimplex_of_mem_nonDegenerate _ (vertex_nondegenerate i)]
+    rfl
+  exact h.trans hx
+
+/-- The endpoint chain maps differ, as detected by the existing terminal coordinate. -/
+private theorem vertex_chain_images_ne :
+    (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 1)).f 0
+        pointTensorVertex ≠
+      (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 0)).f 0
+        pointTensorVertex := by
+  rw [vertex_chain_image, vertex_chain_image]
+  intro h
+  have hc := congrArg
+    (fun z : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ↦
+      ((SSet.tensorNormalizedChainComplexXIsoFinsupp.{0, 0, 0}
+        (ZMod 4) interval 0).hom z (intervalVertex 1)).down) h
+  have ht (i : Fin 2) :
+      (SSet.tensorNormalizedChainComplexXIsoFinsupp.{0, 0, 0}
+        (ZMod 4) interval 0).hom (tensorVertex i) =
+          Finsupp.single (intervalVertex i) (ULift.up (1 : ZMod 4)) :=
+    SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_single.{0, 0, 0}
+      (ZMod 4) interval 0 (intervalVertex i) (1 : ZMod 4)
+  have hzero : (1 : ZMod 4) = 0 := by
+    rw [ht, ht] at hc
+    simpa [terminal_ne_initial] using hc
+  exact (by decide : (1 : ZMod 4) ≠ 0) hzero
+
+/-- The degree-zero combinatorial prism of the projection is the interval edge. -/
+private theorem vertexHomotopy_h_zero :
+    vertexHomotopy.toSimplicialObjectHomotopy.h (0 : Fin 1) pointVertex = edge := by
+  change
+    (SSet.yonedaEquiv.symm pointVertex ▷ Δ[1] ≫
+      CartesianMonoidalCategory.snd point interval).app _
+        (SSet.prodStdSimplex₁.nonDegenerateEquiv (0 : Fin 1)).val = edge
+  rw [CartesianMonoidalCategory.whiskerRight_snd]
+  have hs : (CartesianMonoidalCategory.snd (Δ[0] : SSet.{0}) Δ[1]).app (op ⦋1⦌)
+      (SSet.prodStdSimplex₁.nonDegenerateEquiv (0 : Fin 1)).val =
+        SSet.stdSimplex.objMk₁ (0 : Fin 1).succ.castSucc :=
+    SSet.prodStdSimplex₁.nonDegenerateEquiv_snd (0 : Fin 1)
+  refine hs.trans ?_
+  have h₀ := congrArg (fun s : interval _⦋0⦌ ↦ s 0) edge_face_one
+  have h₁ := congrArg (fun s : interval _⦋0⦌ ↦ s 0) edge_face_zero
+  change edge 0 = (0 : Fin 2) at h₀
+  change edge 1 = (1 : Fin 2) at h₁
+  apply SSet.stdSimplex.ext
+  intro i
+  fin_cases i
+  · exact h₀.symm
+  · exact h₁.symm
+
+/-- The negative sign is supplied by Mathlib's negative alternating sum, not by
+an assumption about the tensor homotopy or a homology equality. -/
+private theorem vertexHomotopy_chain_component :
+    point.ιChainComplex (R := coefficients) pointVertex ≫
+        (vertexHomotopy.toSimplicialObjectHomotopy.sSetChainComplexMap coefficients).hom 0 1 =
+      -interval.ιChainComplex (R := coefficients) edge := by
+  change point.ιChainComplex (R := coefficients) pointVertex ≫
+    CategoryTheory.SimplicialObject.Homotopy.ToChainHomotopy.hom
+      (vertexHomotopy.toSimplicialObjectHomotopy.whiskerRight
+        (Limits.sigmaConst.obj coefficients)) 0 1 = _
+  rw [CategoryTheory.SimplicialObject.Homotopy.ToChainHomotopy.hom_eq,
+    Fintype.sum_subsingleton _ (0 : Fin 1)]
+  simp only [Fin.val_zero, pow_zero, one_smul,
+    CategoryTheory.SimplicialObject.Homotopy.whiskerRight_h, Preadditive.comp_neg]
+  simp only [SSet.ιChainComplex, Limits.sigmaConst_obj_map, Limits.Sigma.ι_comp_map',
+    Category.id_comp, vertexHomotopy_h_zero]
+
+/-- The chosen tensor homotopy, evaluated through its component API, takes the
+point generator to minus the edge tensor. -/
+private theorem vertexHomotopy_tensor_component :
+    (vertexHomotopy.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4)).hom 0 1
+      pointTensorVertex = -tensorEdge := by
+  have hj : point.ιNormalizedChainComplex (R := coefficients) pointVertex ≫
+      (point.fromNormalizedChainComplex coefficients).f 0 =
+        point.ιChainComplex (R := coefficients) pointVertex := by
+    rw [SSet.ιNormalizedChainComplex_fromNormalizedChainComplex_f,
+      AlgebraicTopology.DoldKan.PInfty_f_0]
+    exact Category.comp_id (point.ιChainComplex (R := coefficients) pointVertex)
+  have hc : point.ιNormalizedChainComplex (R := coefficients) pointVertex ≫
+      (point.fromNormalizedChainComplex coefficients).f 0 ≫
+        (vertexHomotopy.toSimplicialObjectHomotopy.sSetChainComplexMap coefficients).hom 0 1 ≫
+          (interval.toNormalizedChainComplex coefficients).f 1 ≫
+            (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).inv.f 1 =
+      -(interval.ιNormalizedChainComplex (R := coefficients) edge ≫
+        (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).inv.f 1) := by
+    simp only [← Category.assoc, hj, vertexHomotopy_chain_component, Preadditive.neg_comp,
+      SSet.ιChainComplex_toNormalizedChainComplex_f]
+  have he : (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) point).hom.f 0
+      pointTensorVertex =
+        point.ιNormalizedChainComplex (R := coefficients) pointVertex
+          (ULift.up (1 : ZMod 4)) := by
+    have hf := congrArg
+      (fun k : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0 ⟶
+          (point.normalizedChainComplex coefficients).X 0 ↦ k.hom pointTensorVertex)
+      (SSet.tensorNormalizedChainIso_hom_f.{0, 0, 0} (ZMod 4) point 0)
+    exact hf.trans (SSet.tensorNormalizedChainComplexXIso_hom_single.{0, 0, 0}
+      (ZMod 4) point 0 pointBasis (1 : ZMod 4))
+  rw [SSet.Homotopy.tensorNormalizedChainComplexMap_eq,
+    CategoryTheory.SimplicialObject.Homotopy.tensorNormalizedChainComplexMap_hom]
+  change (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).inv.f 1
+    ((interval.toNormalizedChainComplex coefficients).f 1
+      ((vertexHomotopy.toSimplicialObjectHomotopy.sSetChainComplexMap coefficients).hom 0 1
+        ((point.fromNormalizedChainComplex coefficients).f 0
+          ((SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) point).hom.f 0
+            pointTensorVertex)))) = _
+  rw [he]
+  have h := congrArg
+    (fun k : coefficients ⟶ SSet.tensorNormalizedChainComplexX.{0, 0, 0}
+        (ZMod 4) interval 1 ↦ k.hom (ULift.up (1 : ZMod 4))) hc
+  change (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).inv.f 1
+    ((interval.toNormalizedChainComplex coefficients).f 1
+      ((vertexHomotopy.toSimplicialObjectHomotopy.sSetChainComplexMap coefficients).hom 0 1
+        ((point.fromNormalizedChainComplex coefficients).f 0
+          (point.ιNormalizedChainComplex (R := coefficients) pointVertex
+            (ULift.up (1 : ZMod 4)))))) =
+      -((SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).inv.f 1
+        (interval.ιNormalizedChainComplex (R := coefficients) edge
+          (ULift.up (1 : ZMod 4)))) at h
+  rw [h]
+  have hi := SSet.tensorNormalizedChainIso_inv_f_ι.{0, 0, 0}
+    (ZMod 4) interval 1 intervalEdge (1 : ZMod 4)
+  rw [tensorEdge,
+    interval.normalizedIntegralSimplex_of_mem_nonDegenerate edge edge_nondegenerate]
+  exact congrArg Neg.neg hi
+
+/-- The evaluated component is nonzero, independently detected by the signed boundary. -/
+private theorem vertexHomotopy_tensor_component_ne_zero :
+    (vertexHomotopy.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4)).hom 0 1
+      pointTensorVertex ≠ 0 := by
+  intro hz
+  have hneg : -tensorEdge = 0 := vertexHomotopy_tensor_component.symm.trans hz
+  exact (neg_ne_zero.mpr tensor_edge_ne_zero) hneg
+
+/-- The combinatorial homotopy equates the induced homology maps on the same
+nonidentity cylinder, whose nonzero component is computed independently. -/
+private theorem vertexHomotopy_combinatorial_homology (n : ℕ) :
+    HomologicalComplex.homologyMap
+        (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 0)) n =
+      HomologicalComplex.homologyMap
+        (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 1)) n :=
+  vertexHomotopy.toSimplicialObjectHomotopy.congr_tensorNormalizedHomologyMap.{0, 0, 0}
+    (ZMod 4) n
+
+/-- The cylinder homotopy equates the induced homology maps even though the
+original endpoint chain maps have distinct images. -/
+private theorem vertexHomotopy_cylinder_homology (n : ℕ) :
+    HomologicalComplex.homologyMap
+        (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 0)) n =
+      HomologicalComplex.homologyMap
+        (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 1)) n :=
+  vertexHomotopy.congr_tensorNormalizedHomologyMap.{0, 0, 0} (ZMod 4) n
 
 end SimplicialObjectsTest.TensorMaps

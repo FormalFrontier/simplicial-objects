@@ -9,11 +9,14 @@ apply to **every simplicial object `X : SimplicialObject C`** in an arbitrary
 Transfers use coefficient objects in a preadditive category with coproducts.
 For any simplicial set and abelian coefficient group, the library also constructs
 an integral tensor chain complex and an isomorphism to normalized coefficient chains.
+These complexes are functorial in simplicial sets and additively functorial in
+abelian coefficient groups.
 
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
-`SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps` and
-`SimplicialObjects.TensorCoefficientMaps`;
+`SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps`,
+`SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies` and
+`SimplicialObjects.TensorCoefficientFunctor`;
 example modules have a separate root.
 
 ## Headline results
@@ -125,6 +128,18 @@ example modules have a separate root.
   It also constructs whole chain maps and a functor using the existing normalized
   chain map and chain comparison. The component and naturality statements relate
   this construction to the independently specified tensor-degree maps and boundary.
+- **Chain homotopies of integral tensor maps.**
+  [`TensorHomotopies`](SimplicialObjects/TensorHomotopies.lean) constructs a
+  Mathlib `Homotopy` between the original tensor maps from a combinatorial
+  simplicial homotopy, and adapts cylinder homotopies through the existing
+  combinatorial conversion. The component formula displays the tensor
+  comparisons and normalization section and projection around Mathlib's
+  all-simplex chain homotopy. Only `[AddCommGroup A]` is needed, with independent
+  coefficient, simplex and padding universes. Combinatorial or cylinder homotopies
+  therefore give equal induced maps on natural-number-graded homology. The interval example computes
+  the chosen degree-zero component as the negative edge tensor over `ZMod 4`,
+  with distinct endpoint chain images and the independent terminal-minus-initial
+  boundary. No relative or topological singular-homology identification is asserted.
 
 - **Change of abelian coefficients.**
   [`TensorCoefficientMaps`](SimplicialObjects/TensorCoefficientMaps.lean) defines
@@ -138,6 +153,31 @@ example modules have a separate root.
   each component. Reduction modulo two on the standard interval
   kills a nonzero coefficient-two tensor and preserves a nonzero coefficient-one
   tensor; the reduced edge has nonzero boundary independently of those statements.
+- **Additive functoriality in abelian coefficients.**
+  [`TensorCoefficientFunctor`](SimplicialObjects/TensorCoefficientFunctor.lean) constructs
+  `SSet.tensorNormalizedChainComplexCoefficientFunctor`, a functor from
+  `AddCommGrpCat.{a}` to `SSet.{w} ⥤ ChainComplex (ModuleCat.{max a w p} ℤ) ℕ`.
+  The coefficient, simplex and padding universes `a`, `w`, `p` are independent;
+  simplicial sets and abelian groups are arbitrary. Both its fixed-coefficient
+  objects and coefficient-map components use the common padding `q = max a p`.
+  The five characteristic equations, with prefix
+  `tensorNormalizedChainComplexCoefficientFunctor`, are `_obj`, `_obj_obj`,
+  `_obj_map`, `_map_app` and `_map_app_f`. They identify the existing
+  fixed-coefficient `tensorNormalizedChainComplexFunctor`, its tensor complexes
+  and simplicial maps, and the coefficient natural transformation's components
+  `tensorNormalizedChainComplexCoefficientMap` and raw degree operations
+  `tensorNormalizedCoefficientMap` (`id ⊗ g`), respectively. Thus the existing
+  pure-tensor and simplex formulas apply, with unchanged carriers and independently
+  specified differentials. The functor data uses the existing identity,
+  composition and mixed naturality laws. Its `Functor.Additive` instance is derived
+  degreewise from `tensorNormalizedCoefficientMap_add`: the raw operation satisfies
+  `C_(g+h) = C_g + C_h` for arbitrary additive homomorphisms `g,h : A →+ B`, with
+  independent `a`, `b`, `w`, `p`, source padding `max b p` and target padding `max a p`.
+  Both degree objects lie in `ModuleCat.{max a b w p} ℤ` on the original tensor carriers.
+  Mathlib's `Functor.map_add` gives the corresponding equality of coefficient
+  natural transformations; its generic additive-functor API also supplies zero,
+  negation, subtraction, integer-multiple and finite-sum laws.
+
 - **Exactness in abelian coefficients.**
   [`SSet.tensorNormalizedCoefficientMap_exact`](SimplicialObjects/TensorCoefficientMaps.lean)
   sends any pair `g : A →+ B`, `h : B →+ C` with `Function.Exact g h` to an
@@ -160,8 +200,10 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | Module | Interface |
 | --- | --- |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
+| `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas and equality of induced homology maps |
 | `SimplicialObjectsTest.TensorMaps` | Identity, collapse and tensor-boundary examples |
-| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, degreewise exactness and compatibility laws |
+| `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness and compatibility laws |
+| `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor and five characteristic equations |
 | `SimplicialObjectsTest.TensorCoefficientMaps` | Reduction modulo two, nonzero generators and boundary examples |
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact

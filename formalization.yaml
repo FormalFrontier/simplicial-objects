@@ -10,7 +10,10 @@ project:
     with arbitrary coefficient-valued maps, finite-fiber transfers and transformations
     of additive coproduct-preserving functors, and an integral tensor presentation of
     normalized chains for arbitrary simplicial sets and abelian coefficient groups,
-    with integral and tensor degree maps for arbitrary simplicial morphisms.
+    with integral and tensor degree maps for arbitrary simplicial morphisms,
+    additive functoriality and degreewise exactness in abelian coefficients,
+    and chain homotopies induced by simplicial homotopies and equality of the
+    corresponding induced homology maps.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -25,11 +28,12 @@ sources:
     authors:
       - J. Peter May
     type: book
-    location: Revised edition, §16.1 and §16, Problem 3
+    location: Revised edition, §12.1–2, §16.1 and §16, Problem 3
     relationship: background
     note: >-
       Motivation for the integral tensor presentation of normalized chains,
-      covering transfers and their sheet identity.
+      covering transfers and their sheet identity, and the chain-homotopy
+      principle for equality of induced homology maps.
 related_formalizations:
   - id: https://github.com/leanprover-community/mathlib4
     relationship: builds-on
@@ -127,12 +131,42 @@ status:
     morphism has the raw operation as each component. Reduction modulo two kills a nonzero
     coefficient-two tensor and preserves a nonzero coefficient-one tensor on the
     standard interval, whose reduced edge has nonzero boundary independently.
+    The raw coefficient operation and coefficient chain morphism preserve addition
+    of arbitrary additive homomorphisms A →+ B, with independent a, b, w, p,
+    source padding max b p and target padding max a p. The coefficient-curried
+    functor from AddCommGrpCat.{a} to SSet.{w} ⥤ ChainComplex (ModuleCat.{max a w p} ℤ) ℕ
+    uses the existing fixed-coefficient functors and coefficient morphisms, both
+    with common padding max a p. Its five characteristic equations identify the
+    fixed-coefficient object, tensor complex, simplicial map, coefficient component
+    and raw degree map. Its Functor.Additive instance gives addition and Mathlib's
+    generic additive-functor laws, including preservation of zero morphisms.
+    The same interval computations give a nonzero coefficient-one image and reduced
+    edge boundary, and show that doubling sends one to a nonzero coefficient-two
+    tensor which reduction modulo two kills.
+    An exact pair of additive coefficient homomorphisms induces an exact pair of
+    the existing tensor-degree maps for every simplicial set and degree. The three
+    coefficient groups are arbitrary abelian groups in independent universes.
+    Mathlib's Module.Flat.lTensor_exact uses the free first factor
+    S.nonDegenerate n →₀ ℤ; only the existing outer lifts use common padding
+    max a b c w p. No coefficient-flatness, finiteness, injectivity or surjectivity
+    assumption is required. Integer doubling followed by reduction modulo two
+    specializes this exactness result to the standard point and interval.
     The mixed naturality statements express that arbitrary simplicial morphisms
     and arbitrary additive coefficient homomorphisms commute, in raw tensor degrees
     and as whole chain morphisms, with the same balanced padding and original
     alternating differentials. Collapse of the standard interval with coefficient
     doubling modulo four sends a coefficient-one vertex to a nonzero coefficient-two
     vertex independently of the mixed statements.
+    Combinatorial and cylinder simplicial homotopies give Mathlib chain homotopies
+    between the original tensor maps, with the component formula through the existing
+    tensor comparisons and normalization section and projection. Coefficients use
+    exactly ModuleCat.of ℤ (ULift.{max w p} A), with canonical structures and only
+    AddCommGroup A. The constructed chain homotopies give equal induced maps
+    on natural-number-graded homology. Their data and characteristic API are
+    independent of this homology consequence.
+    The point-to-interval cylinder over ZMod 4 has distinct endpoint chain images
+    and sends the point generator to the negative edge tensor. Its nonzero control
+    uses the independently calculated terminal-minus-initial boundary.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -149,6 +183,9 @@ alignment:
     chain isomorphism, generator and inverse laws, extensionality and uniqueness.
     Simplicial maps are indexed with integral and tensor-degree characteristic laws,
     the whole chain map and functor, and their component and naturality statements.
+    Change of abelian coefficients is indexed with raw and chain-map additivity,
+    the coefficient-curried functor, its five characteristic equations and its
+    additive-functor instance.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -432,6 +469,10 @@ alignment:
       module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedCoefficientMap_zero
       module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedCoefficientMap_add
+      module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedCoefficientMap_exact
+      module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap
       module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap_f_single
@@ -448,15 +489,52 @@ alignment:
       module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap_f
       module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientMap_add
+      module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap_comparison
       module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedCoefficientMap_naturality
       module: SimplicialObjects/TensorCoefficientMaps.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientMap_naturality
       module: SimplicialObjects/TensorCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_obj
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_obj_obj
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_obj_map
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_additive
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: CategoryTheory.SimplicialObject.Homotopy.tensorNormalizedChainComplexMap
+      module: SimplicialObjects/TensorHomotopies.lean
+    - lean: CategoryTheory.SimplicialObject.Homotopy.tensorNormalizedChainComplexMap_hom
+      module: SimplicialObjects/TensorHomotopies.lean
+    - lean: CategoryTheory.SimplicialObject.Homotopy.tensorNormalizedChainComplexMap_comm_zero
+      module: SimplicialObjects/TensorHomotopies.lean
+    - lean: CategoryTheory.SimplicialObject.Homotopy.congr_tensorNormalizedHomologyMap
+      module: SimplicialObjects/TensorHomotopies.lean
+    - lean: SSet.Homotopy.tensorNormalizedChainComplexMap
+      module: SimplicialObjects/TensorHomotopies.lean
+    - lean: SSet.Homotopy.tensorNormalizedChainComplexMap_eq
+      module: SimplicialObjects/TensorHomotopies.lean
+    - lean: SSet.Homotopy.congr_tensorNormalizedHomologyMap
+      module: SimplicialObjects/TensorHomotopies.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
   categorical structures, extra-degeneracy section, split-epimorphism, homotopy
   and transport, normalized cofan universal property, coproduct/direct-sum and
   Finsupp isomorphisms, tensor coordinates, and chain-complex and homology APIs.
+  Mathlib also supplies free-module flatness, tensor-product exactness,
+  LinearMap.lTensor_add, AddCommGrpCat, additive functors, and the pointwise
+  preadditive structures on chain complexes and functor categories.
+  Kim Morrison's chain-homotopy composition and homology-invariance API and
+  Fabian Odermatt and Joël Riou's
+  simplicial homotopy constructions supply the homotopies; Joël Riou's normalization
+  and cylinder-to-combinatorial constructions are reused without a new prism engine.

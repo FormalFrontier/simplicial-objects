@@ -136,6 +136,24 @@ theorem tensorNormalizedCoefficientMap_zero (S : SSet.{w}) (n : ℕ) :
     TensorProduct.tmul_zero]
   rfl
 
+/-- The degree coefficient operation is additive in the coefficient homomorphism,
+with independent coefficient, simplex and padding universes.
+
+This is the balanced `ULift` form of `LinearMap.lTensor_add`, following Mathlib's
+formalization of tensoring linear maps. -/
+theorem tensorNormalizedCoefficientMap_add (g h : A →+ B) (S : SSet.{w}) (n : ℕ) :
+    tensorNormalizedCoefficientMap.{a, b, w, p} (g + h) S n =
+      tensorNormalizedCoefficientMap.{a, b, w, p} g S n +
+        tensorNormalizedCoefficientMap.{a, b, w, p} h S n := by
+  have hadd : (g + h).toIntLinearMap = g.toIntLinearMap + h.toIntLinearMap := by
+    ext x
+    rfl
+  simp only [tensorNormalizedCoefficientMap, hadd, LinearMap.lTensor_add]
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro z
+  rfl
+
 /-- Exact coefficient homomorphisms give an exact pair of normalized tensor degree maps.
 
 The first tensor factor `S.nonDegenerate n →₀ ℤ` is free, so Mathlib's
@@ -289,6 +307,24 @@ theorem tensorNormalizedChainComplexCoefficientMap_f (g : A →+ B) (S : SSet.{w
   exact (tensorNormalizedChainComplexCoefficientMap_f_single.{a, b, w, p}
     g S n s x).trans
       (tensorNormalizedCoefficientMap_single.{a, b, w, p} g S n s x).symm
+
+/-- Chain coefficient morphisms are additive in the coefficient homomorphism,
+with independent coefficient, simplex and padding universes. -/
+theorem tensorNormalizedChainComplexCoefficientMap_add (g h : A →+ B) (S : SSet.{w}) :
+    tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} (g + h) S =
+      tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g S +
+        tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} h S := by
+  ext n : 1
+  refine Eq.trans
+    (tensorNormalizedChainComplexCoefficientMap_f.{a, b, w, p} (g + h) S n) ?_
+  refine Eq.trans (tensorNormalizedCoefficientMap_add.{a, b, w, p} g h S n) ?_
+  refine Eq.trans
+    (congrArg₂ (· + ·)
+      (tensorNormalizedChainComplexCoefficientMap_f.{a, b, w, p} g S n).symm
+      (tensorNormalizedChainComplexCoefficientMap_f.{a, b, w, p} h S n).symm) ?_
+  exact (HomologicalComplex.add_f_apply
+    (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g S)
+    (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} h S) n).symm
 
 /-- The whole integral tensor comparison is natural in coefficients, using the
 corresponding padded coefficient lifts on normalized chains. -/

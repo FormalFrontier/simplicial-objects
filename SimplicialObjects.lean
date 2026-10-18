@@ -15,3 +15,6 @@ public import SimplicialObjects.TensorCoefficients
 public import SimplicialObjects.TensorMaps
 
 public import SimplicialObjects.TensorCoefficientMaps
+public import SimplicialObjects.TensorHomotopies
+
+public import SimplicialObjects.TensorCoefficientFunctor
