@@ -6,6 +6,7 @@ module
 
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.Nondegenerate
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.MapHomologicalComplex
+public import Mathlib.CategoryTheory.Limits.MonoCoprod
 public import SimplicialObjects.FiniteFiberTransfer
 
 /-!
@@ -20,6 +21,9 @@ nondegenerate summands.
 A supplied splitting contains the coproduct data; the construction needs only
 preadditivity. The projection equation characterizes descent, and its degreewise
 quotient property is expressed by vanishing on elementary degeneracies.
+The section is also natural, so normalization preserves degreewise monomorphisms.
+For simplicial sets this applies with any coefficient object, using monicity of
+coproduct maps induced by injective maps of simplices.
 
 For additive coefficient functors preserving coproducts indexed in the simplex
 universe, the normalized coefficient comparison is coherent with arbitrary
@@ -72,6 +76,26 @@ theorem toNondegComplex_nondegComplexMap (f : X ⟶ Y) :
   unfold nondegComplexMap
   rw [← Category.assoc, s.toNondegComplex_fromNondegComplex, ← Category.assoc,
     ← h, Category.assoc, t.PInfty_toNondegComplex]
+
+/-- The section is natural for every underlying simplicial morphism. -/
+@[reassoc]
+theorem nondegComplexMap_fromNondegComplex (f : X ⟶ Y) :
+    s.nondegComplexMap t f ≫ t.fromNondegComplex =
+      s.fromNondegComplex ≫ (alternatingFaceMapComplex C).map f := by
+  apply (cancel_epi s.toNondegComplex).mp
+  rw [← Category.assoc, s.toNondegComplex_nondegComplexMap t f,
+    Category.assoc, t.toNondegComplex_fromNondegComplex,
+    ← Category.assoc, s.toNondegComplex_fromNondegComplex]
+  exact (DoldKan.natTransPInfty C).naturality f
+
+/-- Normalization preserves monicity in each degree. -/
+theorem mono_nondegComplexMap_f (f : X ⟶ Y) (n : ℕ)
+    [Mono (f.app (op ⦋n⦌))] : Mono ((s.nondegComplexMap t f).f n) := by
+  have h : (s.nondegComplexMap t f).f n ≫ t.fromNondegComplex.f n =
+      s.fromNondegComplex.f n ≫ f.app (op ⦋n⦌) :=
+    HomologicalComplex.congr_hom (s.nondegComplexMap_fromNondegComplex t f) n
+  have : Mono (s.fromNondegComplex.f n ≫ f.app (op ⦋n⦌)) := mono_comp _ _
+  exact mono_of_mono_fac h
 
 /-- The projection equation characterizes the constructed map uniquely. -/
 theorem nondegComplexMap_eq_iff (f : X ⟶ Y) (g : s.nondegComplex ⟶ t.nondegComplex) :
@@ -209,6 +233,16 @@ theorem nondegComplexMap_eq_normalizedChainComplexMap :
     (Y.splitting.map (sigmaConst.obj R))
     (Functor.whiskerRight f (sigmaConst.obj R)) _).2
   exact toNormalizedChainComplex_normalizedChainComplexMap f R
+
+/-- A simplicial monomorphism induces monomorphisms on normalized chains in every
+degree, for any coefficient object in a preadditive category with coproducts. -/
+theorem mono_normalizedChainComplexMap_f [Mono f] (n : ℕ) :
+    Mono ((normalizedChainComplexMap f R).f n) := by
+  have : Mono ((Functor.whiskerRight f (sigmaConst.obj R)).app (op ⦋n⦌)) :=
+    inferInstanceAs (Mono ((sigmaConst.obj R).map (f.app (op ⦋n⦌))))
+  rw [← nondegComplexMap_eq_normalizedChainComplexMap f R]
+  exact (X.splitting.map (sigmaConst.obj R)).mono_nondegComplexMap_f
+      (Y.splitting.map (sigmaConst.obj R)) (Functor.whiskerRight f (sigmaConst.obj R)) n
 
 /-- Changing the coefficient of a normalized simplex is coefficientwise, including
 for a degenerate simplex whose normalized class is zero. -/

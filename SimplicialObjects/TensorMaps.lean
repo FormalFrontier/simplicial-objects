@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 public import SimplicialObjects.TensorCoefficients
+public import Mathlib.Algebra.Category.ModuleCat.EpiMono
 
 /-!
 # Simplicial maps on integral tensor chains
@@ -295,5 +296,33 @@ theorem tensorNormalizedChainIso_hom_naturality (A : Type a) [AddCommGroup A]
       (normalizedChainComplexMap f (ModuleCat.of ℤ (ULift.{max w p} A)))
       (tensorNormalizedChainIso.{a, w, p} A T).inv).trans
         (tensorNormalizedChainComplexMap_eq.{a, w, p} A f).symm)
+
+/-- A simplicial monomorphism induces an injective map on each normalized integral
+tensor degree with arbitrary abelian coefficients. -/
+theorem tensorNormalizedChainComplexXMap_injective
+    (A : Type a) [AddCommGroup A] {S T : SSet.{w}}
+    (f : S ⟶ T) [Mono f] (n : ℕ) :
+    Function.Injective (tensorNormalizedChainComplexXMap.{a, w, p} A f n).hom := by
+  have : Mono ((normalizedChainComplexMap f
+      (ModuleCat.of ℤ (ULift.{max w p} A))).f n) :=
+    mono_normalizedChainComplexMap_f f (ModuleCat.of ℤ (ULift.{max w p} A)) n
+  have : Mono ((tensorNormalizedChainComplexXIso.{a, w, p} A S n).hom ≫
+      (normalizedChainComplexMap f (ModuleCat.of ℤ (ULift.{max w p} A))).f n) :=
+    mono_comp _ _
+  exact (ModuleCat.mono_iff_injective
+    (tensorNormalizedChainComplexXMap.{a, w, p} A f n)).mp
+      (mono_of_mono_fac (tensorNormalizedChainComplexXIso_hom_naturality.{a, w, p}
+        A f n).symm)
+
+/-- A simplicial monomorphism induces a monomorphism of the normalized integral
+tensor chain complexes with arbitrary abelian coefficients. -/
+theorem tensorNormalizedChainComplexMap_mono
+    (A : Type a) [AddCommGroup A] {S T : SSet.{w}}
+    (f : S ⟶ T) [Mono f] :
+    Mono (tensorNormalizedChainComplexMap.{a, w, p} A f) := by
+  refine HomologicalComplex.mono_of_mono_f _ (fun n ↦ ?_)
+  rw [tensorNormalizedChainComplexMap_f.{a, w, p} A f n]
+  exact (ModuleCat.mono_iff_injective _).mpr
+    (tensorNormalizedChainComplexXMap_injective.{a, w, p} A f n)
 
 end SSet

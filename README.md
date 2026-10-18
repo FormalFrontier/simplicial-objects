@@ -128,6 +128,10 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
   It also constructs whole chain maps and a functor using the existing normalized
   chain map and chain comparison. The component and naturality statements relate
   this construction to the independently specified tensor-degree maps and boundary.
+  If `f` is a monomorphism, every tensor degree map is injective and the whole
+  chain morphism is monic, for arbitrary `[AddCommGroup A]` and independent
+  coefficient, simplex and padding universes. These results use coproduct monicity
+  and the natural normalization retract, without a flatness hypothesis on `A`.
 - **Chain homotopies of integral tensor maps.**
   [`TensorHomotopies`](SimplicialObjects/TensorHomotopies.lean) constructs a
   Mathlib `Homotopy` between the original tensor maps from a combinatorial

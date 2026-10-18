@@ -19,3 +19,5 @@ import SimplicialObjectsTest.TensorCoefficientMaps
 import SimplicialObjectsTest.PointHomology
 
 public import SimplicialObjectsTest.TensorCoefficientEndpoints
+
+import SimplicialObjectsTest.TensorMonomorphisms
