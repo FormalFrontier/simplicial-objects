@@ -6,6 +6,8 @@ module
 
 import SimplicialObjectsTest.LeftDecalage
 
+import SimplicialObjectsTest.PathComponents
+
 import SimplicialObjectsTest.FiniteFiberTransfer
 
 import SimplicialObjectsTest.Normalization

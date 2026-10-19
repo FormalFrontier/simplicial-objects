@@ -14,6 +14,7 @@ abelian coefficient groups. Their degree-zero homology is the coproduct of the
 lifted coefficient object over simplicial components, naturally in both variables.
 
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
+`SimplicialObjects.PathComponents`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
 `SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps`,
 `SimplicialObjects.TensorCokernels`,
@@ -27,6 +28,12 @@ example modules have a separate root.
 
 ## Headline results
 
+- **Path components and singular components.** For every topological space and continuous map,
+  [`ZerothHomotopy.map`](SimplicialObjects/PathComponents.lean) acts directly on path classes.
+  `TopCat.zerothHomotopyFunctor` is naturally isomorphic, via Mathlib's singular-component
+  equivalence, to `TopCat.toSSet ⋙ SSet.π₀Functor`. A
+  [discrete two-point transposition](SimplicialObjectsTest/PathComponents.lean) exchanges
+  distinct components and illustrates the naturality square.
 - **Augmented left décalage.** [`augmented X`](SimplicialObjects/LeftDecalage.lean) has ordinary degree
   `P(X)ₙ = Xₙ₊₁` and augmentation target `X₀`. Its augmentation takes the
   new initial vertex: at degree zero `ε₀ = X.δ 1`, **not** `X.δ 0`.

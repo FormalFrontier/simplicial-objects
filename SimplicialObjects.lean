@@ -6,6 +6,8 @@ module
 
 public import SimplicialObjects.LeftDecalage
 
+public import SimplicialObjects.PathComponents
+
 public import SimplicialObjects.FiniteFiberTransfer
 
 public import SimplicialObjects.Normalization
