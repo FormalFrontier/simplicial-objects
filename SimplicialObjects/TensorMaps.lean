@@ -275,6 +275,40 @@ theorem tensorNormalizedChainComplexMap_f (A : Type a) [AddCommGroup A]
   exact ((tensorNormalizedChainComplexXIso.{a, w, p} A T n).comp_inv_eq).2
     (tensorNormalizedChainComplexXIso_hom_naturality.{a, w, p} A f n)
 
+/-- The chain map sends a basis tensor to the normalized class of its image with
+unchanged coefficient; a degenerate image contributes zero. -/
+@[simp]
+theorem tensorNormalizedChainComplexMap_f_single (A : Type a) [AddCommGroup A]
+    (f : S ⟶ T) (n : ℕ) (s : S.nonDegenerate n) (x : A) :
+    (tensorNormalizedChainComplexMap.{a, w, p} A f).f n
+        (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x) :
+          (tensorNormalizedChainComplex.{a, w, p} A S).X n) =
+      (ULift.up (T.normalizedIntegralSimplex (f.app (op ⦋n⦌) s.val) ⊗ₜ[ℤ] x) :
+        (tensorNormalizedChainComplex.{a, w, p} A T).X n) := by
+  exact (congrArg
+    (fun q : (tensorNormalizedChainComplex.{a, w, p} A S).X n ⟶
+        (tensorNormalizedChainComplex.{a, w, p} A T).X n =>
+      q (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x)))
+    (tensorNormalizedChainComplexMap_f.{a, w, p} A f n)).trans
+      (tensorNormalizedChainComplexXMap_single.{a, w, p} A f n s x)
+
+/-- The chain-map image formula holds for every simplex class, including
+source and image classes that vanish by degeneracy. -/
+@[simp]
+theorem tensorNormalizedChainComplexMap_f_simplex (A : Type a) [AddCommGroup A]
+    (f : S ⟶ T) {n : ℕ} (s : S _⦋n⦌) (x : A) :
+    (tensorNormalizedChainComplexMap.{a, w, p} A f).f n
+        (ULift.up (S.normalizedIntegralSimplex s ⊗ₜ[ℤ] x) :
+          (tensorNormalizedChainComplex.{a, w, p} A S).X n) =
+      (ULift.up (T.normalizedIntegralSimplex (f.app (op ⦋n⦌) s) ⊗ₜ[ℤ] x) :
+        (tensorNormalizedChainComplex.{a, w, p} A T).X n) := by
+  exact (congrArg
+    (fun q : (tensorNormalizedChainComplex.{a, w, p} A S).X n ⟶
+        (tensorNormalizedChainComplex.{a, w, p} A T).X n =>
+      q (ULift.up (S.normalizedIntegralSimplex s ⊗ₜ[ℤ] x)))
+    (tensorNormalizedChainComplexMap_f.{a, w, p} A f n)).trans
+      (tensorNormalizedChainComplexXMap_simplex.{a, w, p} A f s x)
+
 /-- The whole chain comparison is natural for arbitrary simplicial morphisms. -/
 theorem tensorNormalizedChainIso_hom_naturality (A : Type a) [AddCommGroup A]
     (f : S ⟶ T) :

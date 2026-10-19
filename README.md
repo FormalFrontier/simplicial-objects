@@ -10,7 +10,8 @@ Transfers use coefficient objects in a preadditive category with coproducts.
 For any simplicial set and abelian coefficient group, the library also constructs
 an integral tensor chain complex and an isomorphism to normalized coefficient chains.
 These complexes are functorial in simplicial sets and additively functorial in
-abelian coefficient groups.
+abelian coefficient groups. Their degree-zero homology is the coproduct of the
+lifted coefficient object over simplicial components, naturally in both variables.
 
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
@@ -18,6 +19,9 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.TensorCokernels`,
 `SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies`,
 `SimplicialObjects.TensorCoefficientFunctor`, `SimplicialObjects.PointHomology`,
+`SimplicialObjects.TensorHomologyZero`, `SimplicialObjects.TensorHomologyZeroNaturality`,
+`SimplicialObjects.TensorHomologyZeroCoefficientMaps`,
+`SimplicialObjects.TensorHomologyZeroConnected`, `SimplicialObjects.TensorHomologyZeroEmpty`,
 `SimplicialObjects.TensorCoefficientSequences` and `SimplicialObjects.HomologyZero`;
 example modules have a separate root.
 
@@ -75,7 +79,8 @@ example modules have a separate root.
   property for elementary degeneracies, the explicit factor `s.fromNondegComplex.f n ≫ a`,
   and agreement with mathlib's simplicial-set normalized map. It also agrees with
   mathlib's `Split.nondegComplexFunctor` on morphisms compatible with the splittings,
-  without an additional finite-coproduct assumption. The integral
+  without an additional finite-coproduct assumption. For simplicial sets, the inverse
+  normalization homotopy equivalence is natural on homology in every degree. The integral
   `Δ[1]` model has normalized groups `ℤ ⊞ ℤ` and `ℤ` in degrees zero and one,
   boundary `a ↦ (-a,a)`, and collapse to `Δ[0]` zero in degree one but nonzero in
   degree zero.
@@ -278,6 +283,64 @@ example modules have a separate root.
   This concerns ordinary simplicial homology, distinct from the normalized tensor
   homology below; no singular, topological, relative or reduced comparison is asserted.
 
+- **Degree-zero homology and simplicial components.**
+  [`TensorHomologyZero`](SimplicialObjects/TensorHomologyZero.lean) constructs
+  `SSet.tensorNormalizedHomologyZeroIsoComponents` for every `A : Type a` with `[AddCommGroup A]`
+  and every `S : SSet.{w}`: `H₀(SSet.tensorNormalizedChainComplex.{a,w,p} A S) ≅ ∐ (fun _ : SSet.π₀
+  S => ModuleCat.of ℤ (ULift.{max w p} A))`. The coefficient object lies in `ModuleCat.{max a w p}
+  ℤ`; its lift is distinct from the raw outer `ULift.{max a w p}` of the tensor groups. The
+  universes `a`, `w`, `p` are independent, with no finiteness, flatness, field, basis or
+  nonemptiness hypotheses. This is an `Iso` with hom, inverse and both inverse identities, composed
+  from three existing factors: the tensor chain comparison on homology, Mathlib's normalization
+  homotopy equivalence in the direction from normalized to all-simplex chains, and Mathlib's
+  `S.homology₀Iso`.
+
+- **Vertex classes and the signed edge boundary.** `ChainComplex.homologyπ₀`, from
+  [`HomologyZero`](SimplicialObjects/HomologyZero.lean), projects degree-zero chains to homology.
+  With prefix
+  `SSet.tensorNormalizedHomologyZeroIsoComponents`, `_hom_class` sends the class of every original
+  `[v] ⊗ x` to `Sigma.ι _ (SSet.π₀.mk v) (ULift.up x)`, and `_inv_ι` recovers that class.
+  `SSet.tensorNormalizedChainComplex_d_one_single` and
+  `SSet.tensorNormalizedChainComplex_d_one_simplex` compute the raw boundary as face zero minus face
+  one, including degenerate edges; `SSet.tensorNormalizedHomologyZeroClass_endpoints` equates their
+  endpoint classes.
+
+- **Naturality of the component isomorphism.**
+  [`TensorHomologyZeroNaturality`](SimplicialObjects/TensorHomologyZeroNaturality.lean) proves
+  `SSet.tensorNormalizedHomologyZeroIsoComponents_hom_naturality` and its inverse square for every
+  simplicial morphism, including maps with degenerate simplex images. The coproduct map is
+  `Sigma.map' (SSet.mapπ₀ f)` with identity coefficients. Independently,
+  [`TensorHomologyZeroCoefficientMaps`](SimplicialObjects/TensorHomologyZeroCoefficientMaps.lean)
+  proves `SSet.tensorNormalizedHomologyZeroIsoComponents_hom_coefficient_naturality` for every
+  additive `g : A →+ B` and `SSet.tensorNormalizedHomologyZeroIsoComponents_hom_mixed_naturality`
+  for simultaneous simplicial and coefficient change. For independent `a`, `b`, `w`, `p`, source
+  padding is `max b p`, target padding is `max a p`, and the coefficient objects are `ModuleCat.of ℤ
+  (ULift.{max w b p} A)` and `ModuleCat.of ℤ (ULift.{max w a p} B)` in `ModuleCat.{max a b w p} ℤ`.
+  The mixed coproduct map reindexes by `SSet.mapπ₀` and sends `ULift.up x` to `ULift.up (g x)` on
+  each summand. These coefficient and mixed squares use raw degree-zero generators, not the separate
+  simplicial-naturality theorem; simplicial and coefficient maps also commute on homology and on the
+  coproducts.
+
+- **Component fold and connected coefficients.**
+  [`TensorHomologyZeroConnected`](SimplicialObjects/TensorHomologyZeroConnected.lean) identifies the
+  component comparison followed by `Sigma.desc (fun _ => 𝟙 _)` with collapse to `Δ[0]` followed by
+  terminal coefficient evaluation, for every source, including the empty one.
+  `SSet.tensorNormalizedHomologyZeroIsoComponents_hom_fold_to_terminal` holds for any map
+  to any terminal simplicial set;
+  `SSet.tensorNormalizedHomologyZeroIsoComponents_hom_fold_normalization` expresses the same
+  fold through the tensor comparison, normalized-chain
+  inclusion and homology augmentation. For `[S.IsConnected]`,
+  `SSet.tensorNormalizedHomologyZeroIsoCoefficientOfIsConnected` is an isomorphism to `ModuleCat.of
+  ℤ (ULift.{max w p} A)`, with vertex and inverse class formulas; on terminal sets it agrees with
+  `SSet.tensorNormalizedHomologyZeroIsoCoefficient`. Only invertibility of the fold needs
+  connectedness.
+
+- **The empty standard boundary.**
+  [`TensorHomologyZeroEmpty`](SimplicialObjects/TensorHomologyZeroEmpty.lean) proves
+  `SSet.tensorNormalizedHomologyZero_boundary_zero_isZero`: the degree-zero tensor homology of
+  `(∂Δ[0] : SSet.{w})` is zero for arbitrary abelian coefficients and independent `a`, `w`, `p`,
+  using its empty component coproduct.
+
 - **Homology of terminal simplicial sets.**
   [`PointHomology`](SimplicialObjects/PointHomology.lean) gives
   `SSet.tensorNormalizedHomologyZeroIsoCoefficient : H₀(K) ≅ C`, with mutually
@@ -315,7 +378,12 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | `SimplicialObjectsTest.TensorCoefficientEndpoints` | The five endpoint and short-exactness specializations on the point and interval |
 | `SimplicialObjects.PointHomology` | Terminal-set degree-zero comparisons, inverse and class laws, naturality and dimension vanishing |
 | `SimplicialObjectsTest.PointHomology` | Reduction modulo two through point homology and positive-degree vanishing |
-| `SimplicialObjects.HomologyZero` | All-degree coefficient-generator law and coefficient naturality of Mathlib's zeroth-homology isomorphism and inverse |
+| `SimplicialObjects.TensorHomologyZero` | Component isomorphism, raw vertex classes, signed edge boundary and endpoint equality |
+| `SimplicialObjects.TensorHomologyZeroNaturality` | All-map simplicial naturality of the component isomorphism and its inverse |
+| `SimplicialObjects.TensorHomologyZeroCoefficientMaps` | Universe-balanced additive coefficient and mixed naturality squares |
+| `SimplicialObjects.TensorHomologyZeroConnected` | All-source fold, connected coefficient isomorphism and terminal compatibility |
+| `SimplicialObjects.TensorHomologyZeroEmpty` | Zero degree-zero homology of the empty standard boundary |
+| `SimplicialObjects.HomologyZero` | Degree-zero chain projection, simplicial naturality, all-degree coefficient-generator law and coefficient naturality of the zeroth-homology isomorphism and inverse |
 | `SimplicialObjectsTest.HomologyZeroPoint` | Forward and inverse naturality evaluated on the point class and component generator, with integer augmentation and reduction modulo two |
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
@@ -323,7 +391,9 @@ equations, construction and example clients. The homotopy is
 **combinatorial**; no geometric realization, general-relative contraction,
 long exact sequence, spectra, K-theory theorem or source-coverage claim follows here.
 
-The point-homology statements concern **simplicial normalized chains** and
+Here `SSet.π₀ S` means simplicial components, the quotient of vertices by edge
+zigzags, not components of a topological realization. The component and
+point-homology statements concern **simplicial normalized chains** and
 nonnegatively indexed ordinary homology only. They do not supply a `TopCat` or
 singular-chain comparison, reduced or relative homology, a long exact sequence,
 or all the results of May's cited sections, and make no source-wide coverage claim.
@@ -476,3 +546,13 @@ dependency setup. Allow disk space for the cache, checkout, downloads and
 intermediate build files, and choose memory and build parallelism to fit the
 machine. Peak disk and memory use for the transfer module have not been
 measured.
+
+## Credits and license
+
+Authors: Formal Frontier Agents. This is AI-assisted mathematical formalization, using Mathlib's
+simplicial, Dold–Kan normalization and homology constructions, notably Joël Riou's normalization and
+degree-zero component formalization, and this library's integral tensor comparison and terminal
+coefficient API. May's *A Concise Course in Algebraic Topology*, revised edition, provides the
+mathematical background cited above; no source-wide formalization is claimed. Existing contributor
+and source credit is retained in [CONTRIBUTORS.md](CONTRIBUTORS.md). Licensed under
+[Apache-2.0](LICENSE); Mathlib retains its own license and authorship.

@@ -18,7 +18,13 @@ project:
     and chain homotopies induced by simplicial homotopies and equality of the
     corresponding induced homology maps. Simplicial homotopy inverses induce
     quasi-isomorphisms of normalized chains and of the original integral tensor
-    complexes with arbitrary abelian coefficients. For terminal simplicial sets, degree-zero
+    complexes with arbitrary abelian coefficients. Degree-zero normalized tensor homology is
+    isomorphic to the coproduct of the lifted coefficient object over simplicial
+    components, with raw vertex and signed boundary formulas, all-map simplicial
+    naturality, and universe-balanced additive coefficient and mixed naturality.
+    The component fold agrees with collapse to a terminal simplicial set for every
+    source; connected sets have a coefficient isomorphism, and the empty standard
+    boundary has zero degree-zero homology. For terminal simplicial sets, degree-zero
     tensor homology has mutually inverse comparisons with the lifted coefficient
     object, natural in coefficients and terminal-set maps; positive-degree tensor
     homology vanishes, with dimension-bound vanishing for arbitrary simplicial sets.
@@ -59,6 +65,9 @@ related_formalizations:
       direct-sum and Finsupp isomorphisms, TensorProduct.finsuppScalarLeft and homology.
       Terminal-object transport, Finsupp.uniqueLinearEquiv and normalized-chain
       dimension bounds also underlie the point-homology comparisons and vanishing.
+      Mathlib's Dold–Kan normalization homotopy equivalence and degree-zero simplicial
+      component isomorphism, notably the work of Joël Riou, combine with the integral
+      tensor comparison to give the general component isomorphism and its class laws.
       Coefficient endpoints use functional exactness, free-Finsupp flatness and tensor
       exactness, module-category endpoint criteria and degreewise short exactness
       for homological complexes.
@@ -212,6 +221,44 @@ status:
     The point-to-interval cylinder over ZMod 4 has distinct endpoint chain images
     and sends the point generator to the negative edge tensor. Its nonzero control
     uses the independently calculated terminal-minus-initial boundary.
+    For every A : Type a with AddCommGroup A and every S : SSet.{w},
+    tensorNormalizedHomologyZeroIsoComponents identifies degree-zero homology of
+    tensorNormalizedChainComplex.{a,w,p} A S with the coproduct indexed by SSet.π₀ S
+    of ModuleCat.of ℤ (ULift.{max w p} A), in ModuleCat.{max a w p} ℤ.
+    These are simplicial components, the quotient of vertices by edge zigzags,
+    not components of a topological realization. Universes a, w, p are independent;
+    no finiteness, flatness, field, basis or nonemptiness hypotheses are imposed.
+    This Iso, including hom, inverse and both inverse identities, composes three
+    existing factors: the tensor chain comparison on homology, Mathlib's normalization
+    homotopy equivalence from normalized to all-simplex chains, and its homology₀Iso.
+    The coefficient lift is distinct from the raw outer ULift.{max a w p}.
+    ChainComplex.homologyπ₀, in HomologyZero, projects raw vertex tensors to homology;
+    the component hom sends each class to its component injection with lifted coefficient, and
+    the inverse recovers the class. The raw degree-one differential is face zero
+    minus face one, for nondegenerate generators and arbitrary edges, and the
+    endpoint classes agree. The component isomorphism and its inverse are natural
+    for every simplicial morphism, including degenerate simplex images, with the
+    coproduct reindexed by SSet.mapπ₀ and identity coefficients. The general
+    simplicial naturality theorem is in HomologyZero; inverse normalization
+    naturality on homology in every degree is in Normalization.
+    Independently, tensorNormalizedHomologyZeroIsoComponents_hom_coefficient_naturality
+    and tensorNormalizedHomologyZeroIsoComponents_hom_mixed_naturality give the
+    additive coefficient and simultaneous simplicial/coefficient squares on raw
+    degree-zero generators. For arbitrary A →+ B and independent a, b, w, p,
+    source padding is max b p and target padding is max a p; coefficient objects
+    ModuleCat.of ℤ (ULift.{max w b p} A) and ModuleCat.of ℤ (ULift.{max w a p} B)
+    lie in ModuleCat.{max a b w p} ℤ. The mixed coproduct map reindexes by mapπ₀
+    and sends up x to up (g x) on each summand for the coefficient map g.
+    Simplicial and coefficient maps also commute on homology and on coproducts.
+    For every source, the component comparison followed by Sigma.desc of identity
+    maps is collapse to the standard point followed by terminal coefficient evaluation;
+    the same formula holds for any map to any terminal simplicial set. It also agrees
+    with the tensor comparison, normalized-chain inclusion and homology augmentation.
+    For S.IsConnected, tensorNormalizedHomologyZeroIsoCoefficientOfIsConnected is the
+    component comparison followed by the canonical fold, with vertex and inverse
+    formulas, and agrees with the original coefficient isomorphism on terminal sets.
+    The canonical empty boundary ∂Δ[0] has zero degree-zero normalized tensor homology,
+    using its empty component coproduct, for arbitrary abelian coefficients.
     For every abelian A : Type a and terminal T : SSet.{w}, the comparisons between
     degree-zero homology of the original K = tensorNormalizedChainComplex.{a,w,p} A T
     and C = ModuleCat.of ℤ (ULift.{max w p} A) are mutually inverse.
@@ -226,7 +273,7 @@ status:
     The comparison is also natural for arbitrary maps between terminal simplicial sets.
     All positive homology H_(n+1) of K vanishes. More generally, S.HasDimensionLT d
     implies zero tensor homology in every degree n ≥ d, for any simplicial set S.
-    These point statements concern simplicial normalized chains and nonnegatively
+    These component and point statements concern simplicial normalized chains and nonnegatively
     indexed ordinary homology only, with no TopCat or singular-chain comparison,
     reduced or relative homology, long exact sequence, or all-results claim for the
     cited sections of May's book.

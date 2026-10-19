@@ -338,6 +338,23 @@ theorem tensorNormalizedChainComplexCoefficientMap_f (g : A →+ B) (S : SSet.{w
     g S n s x).trans
       (tensorNormalizedCoefficientMap_single.{a, b, w, p} g S n s x).symm
 
+/-- On every simplex class, including degenerate zero classes, the chain morphism
+changes only the coefficient, with balanced source and target padding. -/
+@[simp]
+theorem tensorNormalizedChainComplexCoefficientMap_f_simplex (g : A →+ B) (S : SSet.{w})
+    {n : ℕ} (s : S _⦋n⦌) (x : A) :
+    (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} g S).f n
+        (ULift.up (S.normalizedIntegralSimplex s ⊗ₜ[ℤ] x) :
+          (tensorNormalizedChainComplex.{a, w, max b p} A S).X n) =
+      (ULift.up (S.normalizedIntegralSimplex s ⊗ₜ[ℤ] g x) :
+        (tensorNormalizedChainComplex.{b, w, max a p} B S).X n) := by
+  exact (congrArg
+    (fun q : (tensorNormalizedChainComplex.{a, w, max b p} A S).X n ⟶
+        (tensorNormalizedChainComplex.{b, w, max a p} B S).X n =>
+      q (ULift.up (S.normalizedIntegralSimplex s ⊗ₜ[ℤ] x)))
+    (tensorNormalizedChainComplexCoefficientMap_f.{a, b, w, p} g S n)).trans
+      (tensorNormalizedCoefficientMap_simplex.{a, b, w, p} g S s x)
+
 /-- Chain coefficient morphisms are additive in the coefficient homomorphism,
 with independent coefficient, simplex and padding universes. -/
 theorem tensorNormalizedChainComplexCoefficientMap_add (g h : A →+ B) (S : SSet.{w}) :

@@ -27,6 +27,9 @@ The section is also natural, so normalization preserves degreewise monomorphisms
 For simplicial sets this applies with any coefficient object, using monicity of
 coproduct maps induced by injective maps of simplices.
 
+On homology in every degree, the inverse normalization homotopy equivalence
+commutes with arbitrary simplicial morphisms.
+
 For additive coefficient functors preserving coproducts indexed in the simplex
 universe, the normalized coefficient comparison is coherent with arbitrary
 coefficient-valued simplicial morphisms, finite-fiber equifibered transfer, and
@@ -740,5 +743,45 @@ theorem normalizedChainComplexFunctorObjCompMapIso_naturality
     _ = K.map (S.toNormalizedChainComplex R) ≫ (bL ≫ N) := Category.assoc _ _ _
 
 end CoefficientFunctorNaturality
+
+end SSet
+
+namespace SSet
+
+section General
+
+variable {C : Type u} [Category.{v} C] [HasCoproducts.{w} C] [Preadditive C]
+  [CategoryWithHomology C]
+  {S T : SSet.{w}}
+
+/-- The homology isomorphism from normalized chains to all-simplex chains
+commutes with every simplicial morphism. The inverse normalization map need
+not itself be a natural chain map for this homology-level statement. -/
+@[reassoc]
+theorem homotopyEquivNormalizedChainComplex_inv_homology_naturality
+    (f : S ⟶ T) (R : C) (n : ℕ) :
+    HomologicalComplex.homologyMap (normalizedChainComplexMap f R) n ≫
+        ((T.homotopyEquivNormalizedChainComplex R).symm.toHomologyIso n).hom =
+      ((S.homotopyEquivNormalizedChainComplex R).symm.toHomologyIso n).hom ≫
+        HomologicalComplex.homologyMap (chainComplexMap f R) n := by
+  let eS := (S.homotopyEquivNormalizedChainComplex R).toHomologyIso n
+  let eT := (T.homotopyEquivNormalizedChainComplex R).toHomologyIso n
+  have h : eS.hom ≫
+      HomologicalComplex.homologyMap (normalizedChainComplexMap f R) n =
+        HomologicalComplex.homologyMap (chainComplexMap f R) n ≫ eT.hom := by
+    change HomologicalComplex.homologyMap (S.toNormalizedChainComplex R) n ≫
+        HomologicalComplex.homologyMap (normalizedChainComplexMap f R) n =
+      HomologicalComplex.homologyMap (chainComplexMap f R) n ≫
+        HomologicalComplex.homologyMap (T.toNormalizedChainComplex R) n
+    rw [← HomologicalComplex.homologyMap_comp,
+      toNormalizedChainComplex_normalizedChainComplexMap,
+      HomologicalComplex.homologyMap_comp]
+  change HomologicalComplex.homologyMap (normalizedChainComplexMap f R) n ≫
+      eT.inv = eS.inv ≫ HomologicalComplex.homologyMap (chainComplexMap f R) n
+  apply (cancel_mono eT.hom).mp
+  simpa only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id,
+    Category.comp_id] using congrArg (fun q ↦ eS.inv ≫ q) h
+
+end General
 
 end SSet
