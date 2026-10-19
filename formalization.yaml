@@ -13,7 +13,9 @@ project:
     with integral and tensor degree maps for arbitrary simplicial morphisms,
     additive functoriality and degreewise exactness in abelian coefficients,
     and chain homotopies induced by simplicial homotopies and equality of the
-    corresponding induced homology maps. For terminal simplicial sets, degree-zero
+    corresponding induced homology maps. Simplicial homotopy inverses induce
+    quasi-isomorphisms of normalized chains and of the original integral tensor
+    complexes with arbitrary abelian coefficients. For terminal simplicial sets, degree-zero
     tensor homology has mutually inverse comparisons with the lifted coefficient
     object, natural in coefficients and terminal-set maps; positive-degree tensor
     homology vanishes, with dimension-bound vanishing for arbitrary simplicial sets.
@@ -177,6 +179,13 @@ status:
     AddCommGroup A. The constructed chain homotopies give equal induced maps
     on natural-number-graded homology. Their data and characteristic API are
     independent of this homology consequence.
+    A simplicial map with a two-sided simplicial homotopy inverse induces a
+    quasi-isomorphism of normalized chains in every preadditive coefficient category
+    with coproducts and homology, without an abelian-category hypothesis.
+    The original tensor chain map is a quasi-isomorphism for arbitrary abelian
+    coefficients and independent coefficient, simplex and padding universes.
+    The standard interval augmentation supplies a closed example of each result
+    over ZMod 4, while identifying distinct vertices in degree zero.
     The point-to-interval cylinder over ZMod 4 has distinct endpoint chain images
     and sends the point generator to the negative edge tensor. Its nonzero control
     uses the independently calculated terminal-minus-initial boundary.

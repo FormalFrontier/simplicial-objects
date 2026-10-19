@@ -9,6 +9,9 @@ import SimplicialObjects.TensorCoefficientMaps
 import SimplicialObjects.TensorHomotopies
 import SimplicialObjectsTest.Normalization
 import Mathlib.Data.ZMod.Basic
+import Mathlib.AlgebraicTopology.ExtraDegeneracy
+import Mathlib.Algebra.Category.ModuleCat.EpiMono
+import Mathlib.CategoryTheory.Limits.Types.Products
 
 /-!
 # Tensor maps on the standard simplicial interval
@@ -384,9 +387,7 @@ private noncomputable def vertexHomotopy : SSet.Homotopy (vertexMap 0) (vertexMa
       (CartesianMonoidalCategory.fst
         ((⊥ : point.Subcomplex) : SSet) interval).app n x
     have hy : y.val ∈ (⊥ : point.Subcomplex).obj n := y.property
-    have h : False := by
-      simpa only [Subfunctor.bot_obj, Set.mem_empty_iff_false] using hy
-    exact h.elim
+    simp only [Subfunctor.bot_obj, Set.mem_empty_iff_false] at hy
 
 private theorem vertex_chain_image (i : Fin 2) :
     (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap i)).f 0
@@ -553,5 +554,117 @@ private theorem vertexHomotopy_cylinder_homology (n : ℕ) :
       HomologicalComplex.homologyMap
         (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) (vertexMap 1)) n :=
   vertexHomotopy.congr_tensorNormalizedHomologyMap.{0, 0, 0} (ZMod 4) n
+
+/-! ## The standard interval augmentation and its source homotopies
+
+This augmentation has constant target on its chosen terminal Type, not `Δ[0]`.
+The extra degeneracy supplies the section and the source homotopy; the strict
+section identity supplies the target homotopy. The degree-zero tensor
+map identifies the same two distinct vertex tensors, with nonzero common image.
+-/
+
+private noncomputable abbrev intervalAugmentation : SSet.Augmented.{0} :=
+  SSet.Augmented.stdSimplex.obj ⦋1⦌
+
+private noncomputable abbrev intervalExtraDegeneracy :
+    SimplicialObject.Augmented.ExtraDegeneracy intervalAugmentation :=
+  SSet.Augmented.StandardSimplex.extraDegeneracy ⦋1⦌
+
+private noncomputable abbrev augmentationTarget : SSet.{0} :=
+  (SimplicialObject.const (Type 0)).obj intervalAugmentation.right
+
+private noncomputable abbrev augmentation : interval ⟶ augmentationTarget :=
+  intervalAugmentation.hom
+
+private noncomputable abbrev augmentationSection : augmentationTarget ⟶ interval :=
+  intervalExtraDegeneracy.section_
+
+private noncomputable def augmentationHomotopy :
+    SimplicialObject.Homotopy (augmentation ≫ augmentationSection) (𝟙 interval) :=
+  intervalExtraDegeneracy.homotopy
+
+private noncomputable def augmentationSectionHomotopy :
+    SimplicialObject.Homotopy (augmentationSection ≫ augmentation) (𝟙 augmentationTarget) :=
+  Eq.mp
+    (congrArg (fun k : augmentationTarget ⟶ augmentationTarget ↦
+      SimplicialObject.Homotopy k (𝟙 augmentationTarget))
+      intervalExtraDegeneracy.section_comp_hom.symm)
+    (SimplicialObject.Homotopy.refl (𝟙 augmentationTarget))
+
+private noncomputable def augmentationTargetVertex : augmentationTarget _⦋0⦌ :=
+  augmentation.app (op ⦋0⦌) (vertex 0)
+
+private noncomputable def augmentationTargetBasis : augmentationTarget.nonDegenerate 0 :=
+  ⟨augmentationTargetVertex, by simp [SSet.nondegenerate_zero]⟩
+
+private theorem augmentation_vertex (i : Fin 2) :
+    augmentation.app (op ⦋0⦌) (vertex i) = augmentationTargetVertex := by
+  let : Unique (augmentationTarget _⦋0⦌) :=
+    Limits.Types.isTerminalEquivUnique _ Limits.terminalIsTerminal
+  apply Subsingleton.elim
+
+private noncomputable def augmentationTargetTensor :
+    SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) augmentationTarget 0 :=
+  ULift.up (Finsupp.single augmentationTargetBasis 1 ⊗ₜ[ℤ] (1 : ZMod 4))
+
+/-- The coefficient-one common image is nonzero in the exact constant target. -/
+private theorem augmentation_target_tensor_ne_zero : augmentationTargetTensor ≠ 0 := by
+  intro h
+  have hc := SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_single.{0, 0, 0}
+    (ZMod 4) augmentationTarget 0 augmentationTargetBasis (1 : ZMod 4)
+  change (SSet.tensorNormalizedChainComplexXIsoFinsupp.{0, 0, 0}
+    (ZMod 4) augmentationTarget 0).hom augmentationTargetTensor = _ at hc
+  rw [h, map_zero] at hc
+  have hzero : (0 : ZMod 4) = 1 := by
+    simpa using congrArg
+      (fun z : augmentationTarget.nonDegenerate 0 →₀ ULift.{0} (ZMod 4) ↦
+        (z augmentationTargetBasis).down) hc
+  exact (by decide : (0 : ZMod 4) ≠ 1) hzero
+
+/-- The degree map sends either interval vertex tensor to this generator. -/
+private theorem augmentation_tensor_vertex (i : Fin 2) :
+    SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) augmentation 0
+        (tensorVertex i) = augmentationTargetTensor := by
+  rw [tensorVertex, SSet.tensorNormalizedChainComplexXMap_single]
+  change ULift.up (augmentationTarget.normalizedIntegralSimplex
+    (augmentation.app (op ⦋0⦌) (vertex i)) ⊗ₜ[ℤ] (1 : ZMod 4)) = _
+  rw [augmentation_vertex,
+    augmentationTarget.normalizedIntegralSimplex_of_mem_nonDegenerate
+      augmentationTargetVertex augmentationTargetBasis.property]
+  rfl
+
+/-- The chain map has the same common image in degree zero. -/
+private theorem augmentation_chain_vertex (i : Fin 2) :
+    (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) augmentation).f 0
+      (tensorVertex i) = augmentationTargetTensor := by
+  have h := congrArg
+    (fun k : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ⟶
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) augmentationTarget 0 ↦
+      k.hom (tensorVertex i))
+    (SSet.tensorNormalizedChainComplexMap_f.{0, 0, 0} (ZMod 4) augmentation 0)
+  exact h.trans (augmentation_tensor_vertex i)
+
+/-- Simplicial homotopy-inverse data need not yield degreewise monomorphisms of tensor chains. -/
+private theorem augmentation_not_mono_zero :
+    ¬ Mono ((SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) augmentation).f 0) := by
+  intro hm
+  have hinj := (ModuleCat.mono_iff_injective _).mp hm
+  apply vertex_chain_images_ne
+  rw [vertex_chain_image, vertex_chain_image]
+  exact hinj ((augmentation_chain_vertex 1).trans (augmentation_chain_vertex 0).symm)
+
+/-- The standard interval augmentation is a quasi-isomorphism on normalized
+chains with lifted coefficients modulo four. -/
+private theorem augmentation_normalized_quasiIso :
+    QuasiIso (SSet.normalizedChainComplexMap augmentation coefficients) :=
+  SSet.quasiIso_normalizedChainComplexMap_of_homotopy_inverse
+    augmentation augmentationSection augmentationHomotopy augmentationSectionHomotopy coefficients
+
+/-- The same augmentation is a quasi-isomorphism of the original tensor
+complexes with coefficients modulo four. -/
+private theorem augmentation_tensor_quasiIso :
+    QuasiIso (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) augmentation) :=
+  SSet.quasiIso_tensorNormalizedChainComplexMap_of_homotopy_inverse.{0, 0, 0}
+    (ZMod 4) augmentation augmentationSection augmentationHomotopy augmentationSectionHomotopy
 
 end SimplicialObjectsTest.TensorMaps

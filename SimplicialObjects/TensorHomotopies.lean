@@ -158,3 +158,24 @@ theorem congr_tensorNormalizedHomologyMap
   exact (H.tensorNormalizedChainComplexMap.{a, w, p} A).homologyMap_eq n
 
 end SSet.Homotopy
+
+namespace SSet
+
+/-- A simplicial map with a two-sided combinatorial homotopy inverse induces a
+quasi-isomorphism of normalized integral tensor complexes, as a consequence of
+the homotopy-invariance principle in May, *A Concise Course in Algebraic Topology*,
+§13.4. The coefficient, simplex and padding universes are independent. -/
+theorem quasiIso_tensorNormalizedChainComplexMap_of_homotopy_inverse
+    (A : Type a) [AddCommGroup A]
+    {S T : SSet.{w}} (f : S ⟶ T) (g : T ⟶ S)
+    (Hfg : CategoryTheory.SimplicialObject.Homotopy (f ≫ g) (𝟙 S))
+    (Hgf : CategoryTheory.SimplicialObject.Homotopy (g ≫ f) (𝟙 T)) :
+    QuasiIso (tensorNormalizedChainComplexMap.{a, w, p} A f) := by
+  have : QuasiIso
+      (normalizedChainComplexMap f (ModuleCat.of ℤ (ULift.{max w p} A))) :=
+    quasiIso_normalizedChainComplexMap_of_homotopy_inverse f g Hfg Hgf
+      (ModuleCat.of ℤ (ULift.{max w p} A))
+  rw [tensorNormalizedChainComplexMap_eq]
+  infer_instance
+
+end SSet

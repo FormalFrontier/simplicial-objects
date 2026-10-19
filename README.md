@@ -144,6 +144,14 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
   the chosen degree-zero component as the negative edge tensor over `ZMod 4`,
   with distinct endpoint chain images and the independent terminal-minus-initial
   boundary. No relative or topological singular-homology identification is asserted.
+- **Quasi-isomorphisms from simplicial homotopy inverses.**
+  A simplicial map with a two-sided simplicial homotopy inverse induces a
+  quasi-isomorphism of normalized chains. The coefficient category can be any
+  preadditive category with coproducts and homology, without an abelian-category
+  hypothesis. The original integral tensor chain map is therefore a
+  quasi-isomorphism for every abelian coefficient group, with independent
+  coefficient, simplex and padding universes. The standard interval augmentation
+  illustrates both results over `ZMod 4`, although it identifies distinct vertices.
 
 - **Change of abelian coefficients.**
   [`TensorCoefficientMaps`](SimplicialObjects/TensorCoefficientMaps.lean) defines
@@ -237,8 +245,8 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | Module | Interface |
 | --- | --- |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
-| `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas and equality of induced homology maps |
-| `SimplicialObjectsTest.TensorMaps` | Identity, collapse and tensor-boundary examples |
+| `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas, homology invariance and quasi-isomorphisms from homotopy inverses |
+| `SimplicialObjectsTest.TensorMaps` | Identity, collapse, tensor-boundary and augmentation quasi-isomorphism examples |
 | `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness, endpoint preservation and compatibility laws |
 | `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor and five characteristic equations |
 | `SimplicialObjects.TensorCoefficientSequences` | Coefficient short complexes, seven characteristic equations, chain Mono/Epi and short exactness |

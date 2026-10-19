@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.Nondegenerate
+public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.HomotopyInvariance
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.MapHomologicalComplex
 public import Mathlib.CategoryTheory.Limits.MonoCoprod
 public import SimplicialObjects.FiniteFiberTransfer
@@ -39,7 +40,9 @@ Mathlib's Dold–Kan projector and splitting constructions, notably
 objects and strict retract identities. The map generalizes the simplicial-set
 normalized-map construction to coefficient-valued simplicial morphisms. May,
 *A Concise Course in Algebraic Topology*, revised edition, §16.1 motivates the
-degeneracy-quotient characterization.
+degeneracy-quotient characterization. The homotopy-invariance principle of §13.4,
+together with Mathlib's simplicial homotopy constructions by Fabian Odermatt and
+Joël Riou, also gives quasi-isomorphisms on normalized chains.
 -/
 
 @[expose] public section
@@ -218,6 +221,35 @@ end
 end CategoryTheory.SimplicialObject.Split
 
 namespace SSet
+
+/-- A simplicial map with a two-sided combinatorial homotopy inverse induces a
+quasi-isomorphism on normalized chains with coefficients in any object of a
+preadditive category with the required coproducts and homology. This is the
+normalized-chain form of the homotopy-invariance principle in May,
+*A Concise Course in Algebraic Topology*, §13.4. -/
+theorem quasiIso_normalizedChainComplexMap_of_homotopy_inverse
+    {C : Type u} [Category.{v} C] [Preadditive C] [HasCoproducts.{w} C]
+    [CategoryWithHomology C]
+    {S T : SSet.{w}} (f : S ⟶ T) (g : T ⟶ S)
+    (Hfg : CategoryTheory.SimplicialObject.Homotopy (f ≫ g) (𝟙 S))
+    (Hgf : CategoryTheory.SimplicialObject.Homotopy (g ≫ f) (𝟙 T))
+    (R : C) : QuasiIso (normalizedChainComplexMap f R) := by
+  -- The stock simplicial homotopies first give an equivalence on all-simplex chains.
+  let e : HomotopyEquiv (S.chainComplex R) (T.chainComplex R) :=
+    { hom := chainComplexMap f R
+      inv := chainComplexMap g R
+      homotopyHomInvId := by
+        rw [← ((chainComplexFunctor C).obj R).map_comp f g,
+          ← ((chainComplexFunctor C).obj R).map_id S]
+        exact Hfg.sSetChainComplexMap R
+      homotopyInvHomId := by
+        rw [← ((chainComplexFunctor C).obj R).map_comp g f,
+          ← ((chainComplexFunctor C).obj R).map_id T]
+        exact Hgf.sSetChainComplexMap R }
+  have : QuasiIso (chainComplexMap f R) := e.quasiIso_hom
+  -- The normalization section and projection are already quasi-isomorphisms.
+  unfold normalizedChainComplexMap
+  infer_instance
 
 variable {C : Type u} [Category.{v} C] [Preadditive C] [HasCoproducts.{w} C]
   {X Y : SSet.{w}} (f : X ⟶ Y) (R : C)
