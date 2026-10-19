@@ -5,6 +5,11 @@ Authors: Formal Frontier Agents
 module
 
 public import SimplicialObjects.TensorCoefficientSequences
+public import SimplicialObjects.NormalizedCoefficientFunctor
+public import Mathlib.CategoryTheory.Comma.Arrow
+public import Mathlib.CategoryTheory.Whiskering
+public import Mathlib.CategoryTheory.Limits.Shapes.Kernels
+public import Mathlib.Algebra.Homology.HomologicalComplexLimits
 public import Mathlib.Algebra.Homology.ShortComplex.Ab
 public import Mathlib.Algebra.Homology.ShortComplex.ExactFunctor
 public import Mathlib.CategoryTheory.Limits.Preserves.FunctorCategory
@@ -29,6 +34,11 @@ functor preserves finite limits and finite colimits: evaluation at each
 simplicial set identifies mapped short exact sequences with the existing
 coefficient short complexes.
 
+The coefficient comparison has target the canonical lifted coefficient functor
+followed by normalized chains. Evaluating it at a simplicial set and applying
+Mathlib's arrow and cokernel functors compares cokernels of all coefficient
+arrows and their commutative squares.
+
 ## Implementation notes
 
 The coefficient, simplex, and padding universes are independent. For coefficient
@@ -49,6 +59,8 @@ coefficient functor, not exactness of a homology functor.
   preadditive structures on chain complexes and functor categories. Its exact
   functor criterion is due to Joël Riou and Jujian Zhang; pointwise preservation
   of finite limits and colimits uses its functor-category API.
+  Its evaluation, `Functor.mapArrowFunctor`, `Functor.isoWhiskerRight`, and
+  `Limits.coker` supply the coefficient-cokernel diagram construction.
 * `SimplicialObjects.TensorMaps` supplies the fixed-coefficient tensor-chain
   functor; `SimplicialObjects.TensorCoefficientMaps` supplies the coefficient
   morphisms and their identity, composition, component, additivity, and naturality
@@ -188,5 +200,88 @@ instance tensorNormalizedChainComplexCoefficientFunctor_preservesFiniteColimits 
       (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}) :=
   preservesFiniteColimits_of_evaluation _
     (fun S ↦ (tensorNormalizedChainComplexCoefficientFunctor_evaluation_exact.{a, w, p} S).2)
+
+end SSet
+
+namespace SSet
+
+/-- The tensor-normalized comparison, natural in the coefficient group and in
+the simplicial set. Its target uses the canonical lifted integer-module functor
+followed by normalized chains, with the common coefficient padding. -/
+noncomputable def tensorNormalizedChainComplexCoefficientNatIso :
+    tensorNormalizedChainComplexCoefficientFunctor.{a, w, p} ≅
+      AddCommGrpCat.uliftIntModuleFunctor.{a, max a w p} ⋙
+        normalizedChainComplexFunctor (C := ModuleCat.{max a w p} ℤ) :=
+  NatIso.ofComponents
+    (fun A ↦ tensorNormalizedChainNatIso.{a, w, max a p} A)
+    (by
+      intro A B g
+      apply NatTrans.ext
+      funext S
+      exact tensorNormalizedChainComplexCoefficientMap_comparison.{a, a, w, max a p}
+        g.hom S)
+
+/-- The coefficient component is the fixed-coefficient comparison with the
+padding used by the coefficient functor. -/
+@[simp]
+theorem tensorNormalizedChainComplexCoefficientNatIso_app (A : AddCommGrpCat.{a}) :
+    (tensorNormalizedChainComplexCoefficientNatIso.{a, w, p}).app A =
+      tensorNormalizedChainNatIso.{a, w, max a p} A := by
+  apply Iso.ext
+  rfl
+
+/-- The forward component is the original tensor-chain comparison. -/
+@[simp]
+theorem tensorNormalizedChainComplexCoefficientNatIso_hom_app_app
+    (A : AddCommGrpCat.{a}) (S : SSet.{w}) :
+    ((tensorNormalizedChainComplexCoefficientNatIso.{a, w, p}).hom.app A).app S =
+      (tensorNormalizedChainIso.{a, w, max a p} A S).hom := rfl
+
+/-- The inverse component is the inverse original tensor-chain comparison. -/
+@[simp]
+theorem tensorNormalizedChainComplexCoefficientNatIso_inv_app_app
+    (A : AddCommGrpCat.{a}) (S : SSet.{w}) :
+    ((tensorNormalizedChainComplexCoefficientNatIso.{a, w, p}).inv.app A).app S =
+      (tensorNormalizedChainIso.{a, w, max a p} A S).inv := rfl
+
+/-- Cokernels of coefficient arrows are compared naturally in all commutative
+coefficient squares, at a fixed simplicial set. These are cokernels of chain
+complexes, not homology groups. -/
+noncomputable def tensorNormalizedChainComplexCoefficientCokerNatIso (S : SSet.{w}) :
+    (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p} ⋙
+        (evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S).mapArrow ⋙
+          Limits.coker _ ≅
+      ((AddCommGrpCat.uliftIntModuleFunctor.{a, max a w p} ⋙
+          normalizedChainComplexFunctor (C := ModuleCat.{max a w p} ℤ)) ⋙
+        (evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S).mapArrow ⋙
+          Limits.coker _ :=
+  Functor.isoWhiskerRight
+    ((Functor.mapArrowFunctor AddCommGrpCat.{a}
+      (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).mapIso
+        (Functor.isoWhiskerRight (tensorNormalizedChainComplexCoefficientNatIso.{a, w, p})
+          ((evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S)))
+    (Limits.coker _)
+
+/-- The forward coefficient-cokernel comparison intertwines the cokernel
+projections by the comparison at the target coefficient group. -/
+@[reassoc (attr := simp)]
+theorem cokernel_π_tensorNormalizedChainComplexCoefficientCokerNatIso_hom_app
+    (S : SSet.{w}) {A B : AddCommGrpCat.{a}} (g : A ⟶ B) :
+    Limits.cokernel.π
+        (((tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}).map g).app S) ≫
+      (tensorNormalizedChainComplexCoefficientCokerNatIso.{a, w, p} S).hom.app
+        (Arrow.mk g) =
+      (tensorNormalizedChainIso.{a, w, max a p} B S).hom ≫
+        Limits.cokernel.π
+          ((((AddCommGrpCat.uliftIntModuleFunctor.{a, max a w p} ⋙
+            normalizedChainComplexFunctor (C := ModuleCat.{max a w p} ℤ)).map g).app S)) := by
+  exact
+    ((Limits.coker.π (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).naturality
+      (((Functor.mapArrowFunctor AddCommGrpCat.{a}
+        (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).map
+          (Functor.whiskerRight
+            (tensorNormalizedChainComplexCoefficientNatIso.{a, w, p}).hom
+            ((evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S))).app
+              (Arrow.mk g))).symm
 
 end SSet

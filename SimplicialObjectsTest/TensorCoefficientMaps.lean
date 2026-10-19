@@ -525,3 +525,184 @@ private theorem doublingReductionTensorRow_interval_nonzero :
   simpa only [two_smul] using hd.1
 
 end SimplicialObjectsTest.TensorCoefficientMaps
+
+namespace SimplicialObjectsTest.TensorCoefficientMaps
+
+/-- The bundled comparison sends the reduced generator of the standard point
+to a nonzero normalized chain. -/
+private theorem coefficient_comparison_point_nonzero :
+    ∃ s : (Δ[0] : SSet.{0}).nonDegenerate 0,
+      let z : SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ (Δ[0] : SSet.{0}) 0 :=
+        ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ))
+      z ≠ 0 ∧
+        (((SSet.tensorNormalizedChainComplexCoefficientNatIso.{0, 0, 0}).hom.app
+            (AddCommGrpCat.of (ZMod 2))).app (Δ[0] : SSet.{0})).f 0
+          ((((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+            (AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2)))).app
+              (Δ[0] : SSet.{0})).f 0 z) ≠ 0 := by
+  obtain ⟨s, hs, himage⟩ := point_reduction_nonzero_vertex_image
+  refine ⟨s, hs, ?_⟩
+  rw [SSet.tensorNormalizedChainComplexCoefficientNatIso_hom_app_app,
+    SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f]
+  let e := (HomologicalComplex.eval (ModuleCat.{0} ℤ) (ComplexShape.down ℕ) 0).mapIso
+    (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 2) (Δ[0] : SSet.{0}))
+  intro hzero
+  apply himage
+  exact e.toLinearEquiv.injective (hzero.trans (map_zero e.toLinearEquiv).symm)
+
+/-- Canonical normalized coefficient reduction kills the comparison of a
+nonzero coefficient-two vertex and preserves the nonzero coefficient-one image. -/
+private theorem normalized_coefficient_reduction_vertices :
+    let θ := SSet.tensorNormalizedChainComplexCoefficientNatIso.{0, 0, 0}
+    let r := AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2))
+    let n := ((AddCommGrpCat.uliftIntModuleFunctor.{0, 0} ⋙
+      SSet.normalizedChainComplexFunctor (C := ModuleCat.{0} ℤ)).map r).app interval
+    integerVertex 2 ≠ 0 ∧
+      n.f 0 (((θ.hom.app (AddCommGrpCat.of ℤ)).app interval).f 0 (integerVertex 2)) = 0 ∧
+      n.f 0 (((θ.hom.app (AddCommGrpCat.of ℤ)).app interval).f 0 (integerVertex 1)) =
+        ((θ.hom.app (AddCommGrpCat.of (ZMod 2))).app interval).f 0 (binaryVertex 1) ∧
+      ((θ.hom.app (AddCommGrpCat.of (ZMod 2))).app interval).f 0
+        (binaryVertex 1) ≠ 0 := by
+  dsimp only
+  let F := SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}
+  let G := AddCommGrpCat.uliftIntModuleFunctor.{0, 0} ⋙
+    SSet.normalizedChainComplexFunctor (C := ModuleCat.{0} ℤ)
+  let θ : F ≅ G := SSet.tensorNormalizedChainComplexCoefficientNatIso.{0, 0, 0}
+  let r : AddCommGrpCat.of ℤ ⟶ AddCommGrpCat.of (ZMod 2) :=
+    AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2))
+  let a : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 0 ⟶
+      ((F.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 0 :=
+    ((F.map r).app interval).f 0
+  let b : ((F.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 0 ⟶
+      ((G.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 0 :=
+    ((θ.hom.app (AddCommGrpCat.of (ZMod 2))).app interval).f 0
+  let c : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 0 ⟶
+      ((G.obj (AddCommGrpCat.of ℤ)).obj interval).X 0 :=
+    ((θ.hom.app (AddCommGrpCat.of ℤ)).app interval).f 0
+  let d : ((G.obj (AddCommGrpCat.of ℤ)).obj interval).X 0 ⟶
+      ((G.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 0 :=
+    ((G.map r).app interval).f 0
+  have hnat : a ≫ b = c ≫ d := by
+    simpa only [NatTrans.comp_app, HomologicalComplex.comp_f] using
+      (HomologicalComplex.congr_hom
+        (CategoryTheory.congr_app (θ.hom.naturality r) interval) 0)
+  have happ (x : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 0) :
+      b.hom (a.hom x) = d.hom (c.hom x) :=
+    (ModuleCat.comp_apply (R := ℤ) a b x).symm.trans
+      ((congrArg
+        (fun k : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 0 ⟶
+          ((G.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 0 ↦ k.hom x)
+        hnat).trans (ModuleCat.comp_apply (R := ℤ) c d x))
+  have ha_two : a.hom (integerVertex 2) = 0 := by
+    change (((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+      (AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2)))).app interval).f 0
+        (integerVertex 2) = 0
+    rw [SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f]
+    exact reduction_kills_nonzero_two.2
+  have ha_one : a.hom (integerVertex 1) = binaryVertex 1 := by
+    change (((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+      (AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2)))).app interval).f 0
+        (integerVertex 1) = binaryVertex 1
+    rw [SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f]
+    exact reduction_preserves_nonzero_one.1
+  refine ⟨reduction_kills_nonzero_two.1, ?_, ?_, ?_⟩
+  · exact (happ (integerVertex 2)).symm.trans
+      ((congrArg b.hom ha_two).trans (map_zero b.hom))
+  · exact (happ (integerVertex 1)).symm.trans (congrArg b.hom ha_one)
+  · rw [SSet.tensorNormalizedChainComplexCoefficientNatIso_hom_app_app]
+    let e := (HomologicalComplex.eval (ModuleCat.{0} ℤ) (ComplexShape.down ℕ) 0).mapIso
+      (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 2) interval)
+    intro hzero
+    apply reduction_preserves_nonzero_one.2
+    exact e.toLinearEquiv.injective (hzero.trans (map_zero e.toLinearEquiv).symm)
+
+/-- The coefficient-cokernel comparison has a nonzero value on the vertex class
+modulo integer doubling in the original coefficient sequence. -/
+private theorem coefficient_coker_doubling_vertex_nonzero :
+    let projection := cokernel.π
+      (((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+        doublingReductionCoefficientSequence.f).app interval)
+    let ψ := SSet.tensorNormalizedChainComplexCoefficientCokerNatIso.{0, 0, 0} interval
+    projection.f 0 (integerVertex 1) ≠ 0 ∧
+      (ψ.hom.app (Arrow.mk doublingReductionCoefficientSequence.f)).f 0
+        (projection.f 0 (integerVertex 1)) ≠ 0 := by
+  dsimp only
+  let f := ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+    doublingReductionCoefficientSequence.f).app interval
+  let g := ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+    doublingReductionCoefficientSequence.g).app interval
+  have hfg : f ≫ g = 0 :=
+    CategoryTheory.congr_app doublingReductionTensorRow.zero interval
+  let d := cokernel.desc f g hfg
+  have hd : (cokernel.π f).f 0 ≫ d.f 0 = g.f 0 :=
+    HomologicalComplex.congr_hom (cokernel.π_desc f g hfg) 0
+  have hd_app : d.f 0 ((cokernel.π f).f 0 (integerVertex 1)) =
+      g.f 0 (integerVertex 1) :=
+    (ModuleCat.comp_apply (R := ℤ)
+      (M := (doublingReductionTensorRow.X₂.obj interval).X 0)
+      (N := (cokernel f).X 0)
+      (O := (doublingReductionTensorRow.X₃.obj interval).X 0)
+      ((cokernel.π f).f 0) (d.f 0) (integerVertex 1)).symm.trans
+        (congrArg
+          (fun k : (doublingReductionTensorRow.X₂.obj interval).X 0 ⟶
+            (doublingReductionTensorRow.X₃.obj interval).X 0 ↦
+              k.hom (integerVertex 1)) hd)
+  have hclass : (cokernel.π f).f 0 (integerVertex 1) ≠ 0 := by
+    intro hzero
+    apply reduction_preserves_nonzero_one.2
+    have hg_zero : g.f 0 (integerVertex 1) = 0 :=
+      hd_app.symm.trans
+        ((congrArg (d.f 0).hom hzero).trans (map_zero (d.f 0).hom))
+    exact coefficient_functor_reduction_preserves_nonzero_one.1.symm.trans hg_zero
+  refine ⟨hclass, ?_⟩
+  let e := (HomologicalComplex.eval (ModuleCat.{0} ℤ) (ComplexShape.down ℕ) 0).mapIso
+    ((SSet.tensorNormalizedChainComplexCoefficientCokerNatIso.{0, 0, 0} interval).app
+      (Arrow.mk doublingReductionCoefficientSequence.f))
+  intro hzero
+  apply hclass
+  exact e.toLinearEquiv.injective (hzero.trans (map_zero e.toLinearEquiv).symm)
+
+/-- The zero coefficient arrow kills the normalized image of the same interval edge. -/
+private theorem normalized_coefficient_zero_edge :
+    (((AddCommGrpCat.uliftIntModuleFunctor.{0, 0} ⋙
+        SSet.normalizedChainComplexFunctor (C := ModuleCat.{0} ℤ)).map
+      (0 : AddCommGrpCat.of ℤ ⟶ AddCommGrpCat.of (ZMod 2))).app interval).f 1
+        ((((SSet.tensorNormalizedChainComplexCoefficientNatIso.{0, 0, 0}).hom.app
+          (AddCommGrpCat.of ℤ)).app interval).f 1 integerEdge) = 0 := by
+  let F := SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}
+  let G := AddCommGrpCat.uliftIntModuleFunctor.{0, 0} ⋙
+    SSet.normalizedChainComplexFunctor (C := ModuleCat.{0} ℤ)
+  let θ : F ≅ G := SSet.tensorNormalizedChainComplexCoefficientNatIso.{0, 0, 0}
+  let g₀ : AddCommGrpCat.of ℤ ⟶ AddCommGrpCat.of (ZMod 2) := 0
+  let a : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 1 ⟶
+      ((F.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 1 :=
+    ((F.map g₀).app interval).f 1
+  let b : ((F.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 1 ⟶
+      ((G.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 1 :=
+    ((θ.hom.app (AddCommGrpCat.of (ZMod 2))).app interval).f 1
+  let c : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 1 ⟶
+      ((G.obj (AddCommGrpCat.of ℤ)).obj interval).X 1 :=
+    ((θ.hom.app (AddCommGrpCat.of ℤ)).app interval).f 1
+  let d : ((G.obj (AddCommGrpCat.of ℤ)).obj interval).X 1 ⟶
+      ((G.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 1 :=
+    ((G.map g₀).app interval).f 1
+  have hnat : a ≫ b = c ≫ d := by
+    simpa only [NatTrans.comp_app, HomologicalComplex.comp_f] using
+      (HomologicalComplex.congr_hom
+        (CategoryTheory.congr_app (θ.hom.naturality g₀) interval) 1)
+  have happ : b.hom (a.hom integerEdge) = d.hom (c.hom integerEdge) :=
+    (ModuleCat.comp_apply (R := ℤ) a b integerEdge).symm.trans
+      ((congrArg
+        (fun k : ((F.obj (AddCommGrpCat.of ℤ)).obj interval).X 1 ⟶
+          ((G.obj (AddCommGrpCat.of (ZMod 2))).obj interval).X 1 ↦ k.hom integerEdge)
+        hnat).trans (ModuleCat.comp_apply (R := ℤ) c d integerEdge))
+  have ha_zero : a.hom integerEdge = 0 := by
+    change (((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}).map
+      (0 : AddCommGrpCat.of ℤ ⟶ AddCommGrpCat.of (ZMod 2))).app interval).f 1
+        integerEdge = 0
+    rw [SSet.tensorNormalizedChainComplexCoefficientFunctor_map_app_f,
+      AddCommGrpCat.hom_zero]
+    exact zero_coefficient_edge
+  exact happ.symm.trans ((congrArg b.hom ha_zero).trans (map_zero b.hom))
+
+end SimplicialObjectsTest.TensorCoefficientMaps
