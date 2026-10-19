@@ -201,6 +201,21 @@ example modules have a separate root.
   natural transformations; its generic additive-functor API also supplies zero,
   negation, subtraction, integer-multiple and finite-sum laws.
 
+- **Finite exactness of the coefficient functor.**
+  [`TensorCoefficientFunctor`](SimplicialObjects/TensorCoefficientFunctor.lean) gives
+  `CategoryTheory.Limits.PreservesFiniteLimits` and `PreservesFiniteColimits`
+  instances for `SSet.tensorNormalizedChainComplexCoefficientFunctor.{a,w,p}`,
+  with independent coefficient, simplex and padding universes and no additional
+  assumptions. Evaluation identifies all three objects and both arrows of a
+  mapped exact coefficient row with the existing tensor coefficient short complex.
+  The existing short-exactness theorem and Mathlib's additive exact-functor
+  criterion then give both preservation classes pointwise. The integer doubling
+  and binary reduction sequence uses these instances through
+  `ShortComplex.ShortExact.map_of_exact`; its point and interval rows retain the
+  same whole complexes, both arrows, nonzero generators and signed boundary.
+  This is categorical exactness of the chain-valued coefficient functor, not
+  exactness after taking homology.
+
 - **Exactness in abelian coefficients.**
   [`SSet.tensorNormalizedCoefficientMap_exact`](SimplicialObjects/TensorCoefficientMaps.lean)
   sends any pair `g : A →+ B`, `h : B →+ C` with `Function.Exact g h` to an
@@ -279,9 +294,9 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas, homology invariance and quasi-isomorphisms from homotopy inverses or extra-degenerate augmentations |
 | `SimplicialObjectsTest.TensorMaps` | Identity, collapse, tensor-boundary and augmentation quasi-isomorphism examples |
 | `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness, endpoint preservation and compatibility laws |
-| `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor and five characteristic equations |
+| `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor, characteristic equations, short-complex evaluation and finite limit/colimit preservation |
 | `SimplicialObjects.TensorCoefficientSequences` | Coefficient short complexes, seven characteristic equations, chain Mono/Epi and short exactness |
-| `SimplicialObjectsTest.TensorCoefficientMaps` | Additive coefficient-functor controls, reduction modulo two, coefficient inputs and short-complex nonzero generators and boundaries |
+| `SimplicialObjectsTest.TensorCoefficientMaps` | Additive and exact coefficient-functor controls, reduction modulo two, coefficient inputs and short-complex nonzero generators and boundaries |
 | `SimplicialObjectsTest.TensorCoefficientEndpoints` | The five endpoint and short-exactness specializations on the point and interval |
 | `SimplicialObjects.PointHomology` | Terminal-set degree-zero comparisons, inverse and class laws, naturality and dimension vanishing |
 | `SimplicialObjectsTest.PointHomology` | Reduction modulo two through point homology and positive-degree vanishing |

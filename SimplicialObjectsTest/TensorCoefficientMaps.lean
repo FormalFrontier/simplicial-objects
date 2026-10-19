@@ -22,7 +22,10 @@ The degree-exactness statement is specialized to the same point in degree zero
 and interval in degree one.
 The coefficient-curried functor preserves the coefficient-one generator and the
 nonzero reduced boundary. Doubling coefficients gives a nonzero coefficient-two
-tensor, which reduction modulo two kills.
+tensor, which reduction modulo two kills. The nonsplit integer doubling and
+binary reduction sequence also exercises preservation of finite limits and
+colimits through Mathlib's `ShortComplex.ShortExact.map_of_exact`. Its evaluated
+rows are the same point and interval short complexes, including both arrows.
 -/
 
 open CategoryTheory Limits Opposite
@@ -441,5 +444,84 @@ theorem interval_shortComplex_preserves_nonzero_one :
     reduction_preserves_nonzero_one.2⟩
 
 end
+
+/-! ## Preservation of the integer coefficient sequence -/
+
+private noncomputable def doublingReductionCoefficientSequence :
+    ShortComplex AddCommGrpCat.{0} where
+  X₁ := AddCommGrpCat.of ℤ
+  X₂ := AddCommGrpCat.of ℤ
+  X₃ := AddCommGrpCat.of (ZMod 2)
+  f := AddCommGrpCat.ofHom ((2 : ℕ) • AddMonoidHom.id ℤ)
+  g := AddCommGrpCat.ofHom (Int.castAddHom (ZMod 2))
+  zero := by
+    apply AddCommGrpCat.int_hom_ext
+    exact integer_doubling_reduction_exact_coefficients.apply_apply_eq_zero (1 : ℤ)
+
+private theorem doublingReductionCoefficientSequence_shortExact :
+    doublingReductionCoefficientSequence.ShortExact := by
+  refine { exact := ?_, mono_f := ?_, epi_g := ?_ }
+  · exact (ShortComplex.ab_exact_iff_function_exact _).2
+      integer_doubling_reduction_exact_coefficients
+  · exact (AddCommGrpCat.mono_iff_injective _).2 integer_doubling_injective
+  · exact (AddCommGrpCat.epi_iff_surjective _).2 binary_reduction_surjective
+
+private noncomputable def doublingReductionTensorRow :
+    ShortComplex (SSet.{0} ⥤ ChainComplex (ModuleCat.{0} ℤ) ℕ) :=
+  doublingReductionCoefficientSequence.map
+    (SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0})
+
+/-- Both finite-preservation instances are used by the stock short-exact mapping theorem. -/
+private theorem doublingReductionTensorRow_shortExact :
+    doublingReductionTensorRow.ShortExact :=
+  ShortComplex.ShortExact.map_of_exact doublingReductionCoefficientSequence_shortExact
+    (SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0})
+
+/-- The whole evaluated row identifies all three point complexes and both chain arrows. -/
+private theorem doublingReductionTensorRow_point :
+    doublingReductionTensorRow.map
+        ((evaluation SSet.{0} (ChainComplex (ModuleCat.{0} ℤ) ℕ)).obj
+          (Δ[0] : SSet.{0})) = pointDoublingReductionShortComplex :=
+  SSet.tensorNormalizedChainComplexCoefficientFunctor_map_shortComplex.{0, 0, 0}
+    doublingReductionCoefficientSequence integer_doubling_reduction_exact_coefficients
+    (Δ[0] : SSet.{0})
+
+/-- The interval row retains the same signed complexes and both coefficient arrows. -/
+private theorem doublingReductionTensorRow_interval :
+    doublingReductionTensorRow.map
+        ((evaluation SSet.{0} (ChainComplex (ModuleCat.{0} ℤ) ℕ)).obj interval) =
+      intervalDoublingReductionShortComplex :=
+  SSet.tensorNormalizedChainComplexCoefficientFunctor_map_shortComplex.{0, 0, 0}
+    doublingReductionCoefficientSequence integer_doubling_reduction_exact_coefficients interval
+
+private theorem doublingReductionTensorRow_point_nonzero :
+    ∃ s : (Δ[0] : SSet.{0}).nonDegenerate 0,
+      (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ)) :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} ℤ (Δ[0] : SSet.{0}) 0) ≠ 0 ∧
+      (doublingReductionTensorRow.g.app (Δ[0] : SSet.{0})).f 0
+        (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] (1 : ℤ))) ≠ 0 := by
+  have hg : doublingReductionTensorRow.g.app (Δ[0] : SSet.{0}) =
+      pointDoublingReductionShortComplex.g := rfl
+  rw [hg]
+  exact point_shortComplex_nonzero_vertex_image
+
+/-- Doubling, its nonzero image killed by reduction, the surviving binary generator,
+and the nonzero reduced signed edge boundary all occur in the mapped interval row. -/
+private theorem doublingReductionTensorRow_interval_nonzero :
+    (doublingReductionTensorRow.f.app interval).f 0 (integerVertex 1) =
+        integerVertex 2 ∧
+    integerVertex 2 ≠ 0 ∧
+    (doublingReductionTensorRow.g.app interval).f 0 (integerVertex 2) = 0 ∧
+    (doublingReductionTensorRow.g.app interval).f 0 (integerVertex 1) =
+        binaryVertex 1 ∧
+    binaryVertex 1 ≠ 0 ∧
+    ((doublingReductionTensorRow.X₃.obj interval).d 1 0) binaryEdge ≠ 0 := by
+  have hd := coefficient_functor_doubling_reduction
+  have hr := coefficient_functor_reduction_preserves_nonzero_one
+  refine ⟨?_, hd.2.1, hd.2.2, hr.1, hr.2.1, hr.2.2⟩
+  change ((SSet.tensorNormalizedChainComplexCoefficientFunctor.{0, 0, 0}.map
+    (AddCommGrpCat.ofHom ((2 : ℕ) • AddMonoidHom.id ℤ))).app interval).f 0
+      (integerVertex 1) = integerVertex 2
+  simpa only [two_smul] using hd.1
 
 end SimplicialObjectsTest.TensorCoefficientMaps

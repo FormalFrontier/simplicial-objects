@@ -11,7 +11,8 @@ project:
     of additive coproduct-preserving functors, and an integral tensor presentation of
     normalized chains for arbitrary simplicial sets and abelian coefficient groups,
     with integral and tensor degree maps for arbitrary simplicial morphisms,
-    additive functoriality and degreewise exactness in abelian coefficients,
+    additive functoriality, degreewise exactness and preservation of finite limits
+    and finite colimits in abelian coefficients,
     and chain homotopies induced by simplicial homotopies and equality of the
     corresponding induced homology maps. Simplicial homotopy inverses induce
     quasi-isomorphisms of normalized chains and of the original integral tensor
@@ -158,6 +159,15 @@ status:
     fixed-coefficient object, tensor complex, simplicial map, coefficient component
     and raw degree map. Its Functor.Additive instance gives addition and Mathlib's
     generic additive-functor laws, including preservation of zero morphisms.
+    The same coefficient functor preserves finite limits and finite colimits,
+    without additional coefficient or simplex hypotheses. A short-complex
+    evaluation equation identifies all three objects and both arrows with the
+    existing tensor coefficient short complex. Its short exactness and Mathlib's
+    additive exact-functor criterion give the preservation instances pointwise.
+    This is categorical exactness of the chain-valued functor, not exactness of
+    a homology functor. The integer doubling and binary reduction sequence uses
+    both instances through ShortComplex.ShortExact.map_of_exact, retaining the
+    same point and interval complexes, both arrows and nonzero signed controls.
     The same interval computations give a nonzero coefficient-one image and reduced
     edge boundary, and show that doubling sends one to a nonzero coefficient-two
     tensor which reduction modulo two kills.
@@ -253,8 +263,9 @@ alignment:
     the whole chain map and functor, and their component and naturality statements.
     Change of abelian coefficients is indexed with raw and chain-map additivity,
     the coefficient-curried functor, its five characteristic equations and its
-    additive-functor instance. Terminal-set homology is indexed with its two
-    degree-zero comparisons, both inverse identities, vertex-class characteristic
+    additive-functor instance, short-complex evaluation equation and finite-limit
+    and finite-colimit preservation instances. Terminal-set homology is indexed
+    with its two degree-zero comparisons, both inverse identities, vertex-class characteristic
     equations, balanced coefficient naturality, terminal-map naturality and
     positive-degree and dimension-bound vanishing.
 
@@ -589,6 +600,12 @@ alignment:
       module: SimplicialObjects/TensorCoefficientFunctor.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_additive
       module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_map_shortComplex
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_preservesFiniteLimits
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
+    - lean: SSet.tensorNormalizedChainComplexCoefficientFunctor_preservesFiniteColimits
+      module: SimplicialObjects/TensorCoefficientFunctor.lean
     - lean: CategoryTheory.SimplicialObject.Homotopy.tensorNormalizedChainComplexMap
       module: SimplicialObjects/TensorHomotopies.lean
     - lean: CategoryTheory.SimplicialObject.Homotopy.tensorNormalizedChainComplexMap_hom
@@ -686,7 +703,9 @@ acknowledgements: >-
   The coefficient endpoints reuse the existing degree-exactness proof using
   Mathlib's Module.Flat.finsupp and Module.Flat.lTensor_exact; functional exactness,
   module-category endpoint criteria and degreewise short exactness supply the
-  endpoint and short-exact-sequence packaging.
+  endpoint and short-exact-sequence packaging. Joël Riou and Jujian Zhang's
+  additive exact-functor criterion and Mathlib's pointwise preservation API
+  give finite-limit and finite-colimit preservation of the coefficient functor.
   The ordinary zeroth-homology coefficient laws follow Mathlib's simplicial
   homology and homology₀Iso API by Joël Riou and Andrew Yang, together with its
   categorical coproduct and isomorphism APIs.

@@ -4,8 +4,10 @@ Authors: Formal Frontier Agents
 -/
 module
 
-public import SimplicialObjects.TensorCoefficientMaps
-public import Mathlib.Algebra.Category.Grp.Basic
+public import SimplicialObjects.TensorCoefficientSequences
+public import Mathlib.Algebra.Homology.ShortComplex.Ab
+public import Mathlib.Algebra.Homology.ShortComplex.ExactFunctor
+public import Mathlib.CategoryTheory.Limits.Preserves.FunctorCategory
 
 /-!
 # Coefficient functor for normalized integral tensor chains
@@ -22,7 +24,10 @@ every-simplex, uniqueness, and mixed-naturality equations of
 `SimplicialObjects.TensorCoefficientMaps` and `SimplicialObjects.TensorMaps`, they
 allow computations without unfolding the coefficient functor. The
 `Functor.Additive` instance provides coefficient additivity through
-`Functor.map_add` and Mathlib's other additive-functor laws.
+`Functor.map_add` and Mathlib's other additive-functor laws. The coefficient
+functor preserves finite limits and finite colimits: evaluation at each
+simplicial set identifies mapped short exact sequences with the existing
+coefficient short complexes.
 
 ## Implementation notes
 
@@ -32,16 +37,23 @@ components use padding `max a p`. This gives a common target category and
 specializes the balanced coefficient composition law to a single coefficient
 universe. Only identity, composition, and mixed naturality enter the functor data.
 Additivity is derived from raw coefficient additivity using the pointwise
-preadditive structures on chain maps and natural transformations.
+preadditive structures on chain maps and natural transformations. Finite
+exactness follows from the free integral simplex factor, through the existing
+coefficient short-exactness theorem and Mathlib's criterion for additive functors
+between abelian categories. This is categorical exactness of the chain-valued
+coefficient functor, not exactness of a homology functor.
 
 ## References
 
 * Mathlib supplies `AddCommGrpCat`, `Functor.Additive`, and the pointwise
-  preadditive structures on chain complexes and functor categories.
+  preadditive structures on chain complexes and functor categories. Its exact
+  functor criterion is due to Joël Riou and Jujian Zhang; pointwise preservation
+  of finite limits and colimits uses its functor-category API.
 * `SimplicialObjects.TensorMaps` supplies the fixed-coefficient tensor-chain
   functor; `SimplicialObjects.TensorCoefficientMaps` supplies the coefficient
   morphisms and their identity, composition, component, additivity, and naturality
-  equations.
+  equations. `SimplicialObjects.TensorCoefficientSequences` supplies the short
+  complexes and their short exactness from the same coefficient maps.
 -/
 
 @[expose] public section
@@ -131,5 +143,50 @@ instance tensorNormalizedChainComplexCoefficientFunctor_additive :
     exact (NatTrans.app_add S
       ((tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}).map g)
       ((tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}).map h)).symm
+
+/-- Mapping a coefficient short complex and evaluating at a simplicial set gives
+the coefficient short complex of tensor chains. The equality identifies all
+three chain objects and both coefficient arrows, with common padding. -/
+@[simp]
+theorem tensorNormalizedChainComplexCoefficientFunctor_map_shortComplex
+    (T : ShortComplex AddCommGrpCat.{a}) (hExact : Function.Exact T.f.hom T.g.hom)
+    (S : SSet.{w}) :
+    (T.map (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p})).map
+        ((evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S) =
+      tensorNormalizedChainComplexCoefficientShortComplex.{a, a, a, w, p}
+        T.f.hom T.g.hom hExact S := rfl
+
+private theorem tensorNormalizedChainComplexCoefficientFunctor_evaluation_exact
+    (S : SSet.{w}) :
+    Limits.PreservesFiniteLimits
+        (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p} ⋙
+          (evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S) ∧
+      Limits.PreservesFiniteColimits
+        (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p} ⋙
+          (evaluation SSet.{w} (ChainComplex (ModuleCat.{max a w p} ℤ) ℕ)).obj S) := by
+  apply ((Functor.exact_tfae _).out 1 4).1
+  intro T hT
+  have hExact : Function.Exact T.f.hom T.g.hom :=
+    (ShortComplex.ab_exact_iff_function_exact T).1 hT.exact
+  rw [ShortComplex.map_comp,
+    tensorNormalizedChainComplexCoefficientFunctor_map_shortComplex T hExact S]
+  exact tensorNormalizedChainComplexCoefficientShortComplex_shortExact.{a, a, a, w, p}
+    T.f.hom T.g.hom hT.ab_injective_f hExact hT.ab_surjective_g S
+
+/-- Normalized integral tensor chains preserve finite limits in the abelian
+coefficient group, for arbitrary simplicial sets and independent universes. -/
+instance tensorNormalizedChainComplexCoefficientFunctor_preservesFiniteLimits :
+    Limits.PreservesFiniteLimits
+      (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}) :=
+  preservesFiniteLimits_of_evaluation _
+    (fun S ↦ (tensorNormalizedChainComplexCoefficientFunctor_evaluation_exact.{a, w, p} S).1)
+
+/-- Normalized integral tensor chains preserve finite colimits in the abelian
+coefficient group, for arbitrary simplicial sets and independent universes. -/
+instance tensorNormalizedChainComplexCoefficientFunctor_preservesFiniteColimits :
+    Limits.PreservesFiniteColimits
+      (tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}) :=
+  preservesFiniteColimits_of_evaluation _
+    (fun S ↦ (tensorNormalizedChainComplexCoefficientFunctor_evaluation_exact.{a, w, p} S).2)
 
 end SSet
