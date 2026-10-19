@@ -5,6 +5,8 @@ Authors: Formal Frontier Agents
 module
 
 import SimplicialObjects.TensorMaps
+import SimplicialObjects.TensorCokernels
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Kernels
 import SimplicialObjects.TensorCoefficientMaps
 import SimplicialObjects.TensorHomotopies
 import SimplicialObjectsTest.Normalization
@@ -687,5 +689,164 @@ private theorem standardSimplex_augmentation_tensor_quasiIso
   SSet.quasiIso_tensorNormalizedChainComplexMap_of_extraDegeneracy.{a, w, p} A
     (SSet.Augmented.stdSimplex.{w}.obj ⦋n⦌)
     (SSet.Augmented.StandardSimplex.extraDegeneracy ⦋n⦌)
+
+/-! ## Natural comparisons and the proper vertex face
+
+The face `δ₁ : Δ[0] ⟶ Δ[1]` selects the initial vertex. The terminal coefficient
+annihilates its degree-zero image and detects a nonzero class in the degree-zero
+chain cokernel. Evaluation preserves cokernels, so the degreewise universal
+property detects the class in the cokernel complex itself. The coefficient
+functional below is only a morphism of degree modules, not a chain map.
+-/
+
+open CategoryTheory.Limits
+
+/-- The natural comparison computes on the existing nonzero point generator. -/
+private theorem point_nat_comparison_generator :
+    pointTensorVertex ≠ 0 ∧
+      ((SSet.tensorNormalizedChainNatIso.{0, 0, 0} (ZMod 4)).hom.app point).f 0
+          pointTensorVertex =
+        point.ιNormalizedChainComplex (R := coefficients) pointVertex (ULift.up (1 : ZMod 4)) := by
+  refine ⟨point_tensor_vertex_ne_zero, ?_⟩
+  change (SSet.tensorNormalizedChainComplexXIso.{0, 0, 0} (ZMod 4) point 0).hom
+    pointTensorVertex =
+      point.ιNormalizedChainComplex (R := coefficients) pointVertex (ULift.up (1 : ZMod 4))
+  have h := SSet.tensorNormalizedChainComplexXIso_hom_single.{0, 0, 0}
+    (ZMod 4) point 0 pointBasis (1 : ZMod 4)
+  change (SSet.tensorNormalizedChainComplexXIso.{0, 0, 0} (ZMod 4) point 0).hom
+    pointTensorVertex =
+      point.ιNormalizedChainComplex (R := coefficients) pointVertex (ULift.up (1 : ZMod 4)) at h
+  exact h
+
+/-- The standard face omitting the terminal vertex. -/
+private def properFace : point ⟶ interval :=
+  SSet.stdSimplex.map (SimplexCategory.δ (1 : Fin 2))
+
+private theorem properFace_vertex : properFace.app (op ⦋0⦌) pointVertex = vertex 0 := by
+  apply SSet.stdSimplex.ext
+  intro j
+  fin_cases j
+  rfl
+
+/-- The terminal coefficient in the existing tensor coordinates. -/
+private noncomputable def terminalCoordinate :
+    SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ⟶ coefficients :=
+  (SSet.tensorNormalizedChainComplexXIsoFinsupp.{0, 0, 0} (ZMod 4) interval 0).hom ≫
+    ModuleCat.ofHom (Finsupp.lapply (intervalVertex 1))
+
+private theorem terminalCoordinate_single (s : interval.nonDegenerate 0) (x : ZMod 4) :
+    terminalCoordinate (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x)) =
+      Finsupp.single s (ULift.up x) (intervalVertex 1) :=
+  congrArg (fun z ↦ z (intervalVertex 1))
+    (SSet.tensorNormalizedChainComplexXIsoFinsupp_hom_single.{0, 0, 0}
+      (ZMod 4) interval 0 s x)
+
+/-- The omitted terminal coefficient annihilates the entire degree-zero image. -/
+private theorem properFace_terminalCoordinate_zero :
+    (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) properFace).f 0 ≫
+      terminalCoordinate = 0 := by
+  have hzero :
+      (SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) properFace 0 ≫
+        terminalCoordinate :
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0 ⟶ coefficients) = 0 := by
+    apply SSet.tensorNormalizedChainComplexX_hom_ext.{0, 0, 0} (ZMod 4) point 0
+    intro s x
+    have hs : s.val = pointVertex := by
+      apply SSet.stdSimplex.ext
+      intro j
+      exact (Fin.eq_zero _).trans (Fin.eq_zero _).symm
+    change terminalCoordinate
+      (SSet.tensorNormalizedChainComplexXMap.{0, 0, 0} (ZMod 4) properFace 0
+        (ULift.up (Finsupp.single s 1 ⊗ₜ[ℤ] x))) = 0
+    rw [SSet.tensorNormalizedChainComplexXMap_single.{0, 0, 0} (ZMod 4) properFace 0 s x,
+      hs, properFace_vertex,
+      interval.normalizedIntegralSimplex_of_mem_nonDegenerate _ (vertex_nondegenerate 0)]
+    change terminalCoordinate (ULift.up (Finsupp.single (intervalVertex 0) 1 ⊗ₜ[ℤ] x)) = 0
+    rw [terminalCoordinate_single]
+    simp [terminal_ne_initial]
+  exact (congrArg
+    (fun k : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) point 0 ⟶
+        SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ↦
+      k ≫ terminalCoordinate)
+    (SSet.tensorNormalizedChainComplexMap_f.{0, 0, 0} (ZMod 4) properFace 0)).trans hzero
+
+/-- Coefficient one at the omitted vertex survives in chain degree zero.
+This uses preservation of cokernels by evaluation, not a chain map to degree zero. -/
+private theorem properFace_cokernel_terminal_ne_zero :
+    (cokernel.π
+      (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) properFace)).f 0
+        (tensorVertex 1) ≠ 0 := by
+  let E := HomologicalComplex.eval (ModuleCat.{0} ℤ) (ComplexShape.down ℕ) 0
+  let f := SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) properFace
+  let d : (cokernel f).X 0 ⟶ coefficients :=
+    (PreservesCokernel.iso E f).hom ≫
+      cokernel.desc (E.map f) terminalCoordinate
+        properFace_terminalCoordinate_zero
+  have hdesc := cokernel.π_desc (E.map f)
+    (show E.obj (SSet.tensorNormalizedChainComplex.{0, 0, 0} (ZMod 4) interval) ⟶
+      coefficients from terminalCoordinate)
+    properFace_terminalCoordinate_zero
+  have hd : (cokernel.π f).f 0 ≫ d = terminalCoordinate := by
+    change E.map (cokernel.π f) ≫
+      (PreservesCokernel.iso E f).hom ≫
+        cokernel.desc (E.map f) terminalCoordinate
+          properFace_terminalCoordinate_zero = _
+    rw [← Category.assoc, PreservesCokernel.π_iso_hom]
+    exact hdesc
+  have hcoord : terminalCoordinate (tensorVertex 1) = ULift.up (1 : ZMod 4) := by
+    rw [tensorVertex, terminalCoordinate_single]
+    simp
+  intro hz
+  have hc := congrArg
+    (fun k : SSet.tensorNormalizedChainComplexX.{0, 0, 0} (ZMod 4) interval 0 ⟶ coefficients ↦
+      k (tensorVertex 1)) hd
+  change d ((cokernel.π f).f 0 (tensorVertex 1)) =
+    terminalCoordinate (tensorVertex 1) at hc
+  rw [hz, map_zero, hcoord] at hc
+  exact (by decide : (0 : ZMod 4) ≠ 1) (congrArg ULift.down hc)
+
+/-- The cokernel natural comparison computes the omitted-vertex class through its
+projection API on this same proper face. -/
+private theorem properFace_coker_comparison_terminal :
+    ((SSet.tensorNormalizedChainCokerNatIso.{0, 0, 0} (ZMod 4)).hom.app
+        (Arrow.mk properFace)).f 0
+      ((cokernel.π
+        (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) properFace)).f 0
+          (tensorVertex 1)) =
+      (cokernel.π
+        (SSet.normalizedChainComplexMap properFace coefficients)).f 0
+          (interval.ιNormalizedChainComplex (R := coefficients) (vertex 1)
+            (ULift.up (1 : ZMod 4))) := by
+  have h := congrArg
+    (fun k : SSet.tensorNormalizedChainComplex.{0, 0, 0} (ZMod 4) interval ⟶
+        cokernel
+          (SSet.normalizedChainComplexMap properFace coefficients) ↦
+      (k.f 0) (tensorVertex 1))
+    (SSet.cokernel_π_tensorNormalizedChainCokerNatIso_hom_app.{0, 0, 0}
+      (ZMod 4) properFace)
+  change ((SSet.tensorNormalizedChainCokerNatIso.{0, 0, 0} (ZMod 4)).hom.app
+      (Arrow.mk properFace)).f 0
+    ((cokernel.π
+      (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) properFace)).f 0
+        (tensorVertex 1)) =
+    (cokernel.π (SSet.normalizedChainComplexMap properFace coefficients)).f 0
+      ((SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).hom.f 0
+        (tensorVertex 1)) at h
+  have hgen := SSet.tensorNormalizedChainComplexXIso_hom_single.{0, 0, 0}
+    (ZMod 4) interval 0 (intervalVertex 1) (1 : ZMod 4)
+  change (SSet.tensorNormalizedChainIso.{0, 0, 0} (ZMod 4) interval).hom.f 0
+      (tensorVertex 1) =
+    interval.ιNormalizedChainComplex (R := coefficients) (vertex 1)
+      (ULift.up (1 : ZMod 4)) at hgen
+  exact h.trans (congrArg
+    (fun z : (interval.normalizedChainComplex coefficients).X 0 ↦
+      (cokernel.π (SSet.normalizedChainComplexMap properFace coefficients)).f 0 z) hgen)
+
+/-- The identity-arrow cokernel is the expected zero boundary. -/
+private theorem identity_coker_projection_zero :
+    cokernel.π
+      ((SSet.tensorNormalizedChainComplexFunctor.{0, 0, 0} (ZMod 4)).map (𝟙 point)) = 0 := by
+  rw [CategoryTheory.Functor.map_id]
+  exact cokernel.π_of_epi _
 
 end SimplicialObjectsTest.TensorMaps

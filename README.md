@@ -15,6 +15,7 @@ abelian coefficient groups.
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
 `SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps`,
+`SimplicialObjects.TensorCokernels`,
 `SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies`,
 `SimplicialObjects.TensorCoefficientFunctor`, `SimplicialObjects.PointHomology`,
 `SimplicialObjects.TensorCoefficientSequences` and `SimplicialObjects.HomologyZero`;
@@ -133,6 +134,19 @@ example modules have a separate root.
   chain morphism is monic, for arbitrary `[AddCommGroup A]` and independent
   coefficient, simplex and padding universes. These results use coproduct monicity
   and the natural normalization retract, without a flatness hypothesis on `A`.
+- **Natural tensor-chain comparison and cokernels.**
+  [`SSet.tensorNormalizedChainNatIso`](SimplicialObjects/TensorMaps.lean) bundles
+  the original chain comparisons into a natural isomorphism from the fixed-`A`
+  tensor-chain functor to normalized chains with coefficient object
+  `ModuleCat.of ℤ (ULift.{max w p} A)`, in `ModuleCat.{max a w p} ℤ` chain complexes.
+  Only `[AddCommGroup A]` is needed, with independent `a`, `w`, `p`.
+  [`SSet.tensorNormalizedChainCokerNatIso`](SimplicialObjects/TensorCokernels.lean)
+  transports this comparison along Mathlib's arrow and cokernel functors on all
+  simplicial arrows, not just monomorphisms. Its components agree with
+  `cokernel.mapIso`, with forward and inverse projection formulas. The standard
+  face `δ₁ : Δ[0] ⟶ Δ[1]` over `ZMod 4` has a nonzero omitted-vertex class in
+  chain degree zero, detected using evaluation preserving cokernels; this is
+  not a nonvanishing claim about homology.
 - **Chain homotopies of integral tensor maps.**
   [`TensorHomotopies`](SimplicialObjects/TensorHomotopies.lean) constructs a
   Mathlib `Homotopy` between the original tensor maps from a combinatorial
@@ -290,9 +304,10 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 
 | Module | Interface |
 | --- | --- |
-| `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
+| `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and the fixed-coefficient natural comparison |
+| `SimplicialObjects.TensorCokernels` | All-arrow cokernel natural comparison, component compatibility and projection laws |
 | `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas, homology invariance and quasi-isomorphisms from homotopy inverses or extra-degenerate augmentations |
-| `SimplicialObjectsTest.TensorMaps` | Identity, collapse, tensor-boundary and augmentation quasi-isomorphism examples |
+| `SimplicialObjectsTest.TensorMaps` | Identity, collapse, tensor-boundary, augmentation and proper-face chain-cokernel examples |
 | `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness, endpoint preservation and compatibility laws |
 | `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor, characteristic equations, short-complex evaluation and finite limit/colimit preservation |
 | `SimplicialObjects.TensorCoefficientSequences` | Coefficient short complexes, seven characteristic equations, chain Mono/Epi and short exactness |
@@ -388,6 +403,18 @@ tensor-degree maps. `tensorNormalizedChainComplexXIso_hom_naturality` states
 differential, and `tensorNormalizedChainIso_hom_naturality` is the whole-chain
 square. All retain independent `a`, `w`, `p` and arbitrary abelian coefficients,
 without injectivity, finite fibers, flatness or nonemptiness assumptions.
+
+`tensorNormalizedChainNatIso A` has these same pointwise chain comparisons as
+components. Its `_app`, `_hom_app` and `_inv_app` simp laws lead to the existing
+generator and coordinate API; naturality and reassociated naturality are the
+standard natural-transformation laws. Import `SimplicialObjects.TensorCokernels`
+for `tensorNormalizedChainCokerNatIso A` on
+`(tensorNormalizedChainComplexFunctor A).mapArrow ⋙ Limits.coker _` and the analogous
+normalized-chain functor. The component theorem identifies `cokernel.mapIso` of
+the original comparisons. Both projection laws compute the cokernel comparison
+without unfolding it, and stock naturality applies to every commuting square.
+These constructions reuse Mathlib's `NatIso.ofComponents`, `Functor.mapArrowFunctor`
+and `Functor.isoWhiskerRight`, rather than a separate transport or quotient construction.
 
 ## Use
 

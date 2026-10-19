@@ -14,6 +14,8 @@ public import SimplicialObjects.TensorCoefficients
 
 public import SimplicialObjects.TensorMaps
 
+public import SimplicialObjects.TensorCokernels
+
 public import SimplicialObjects.TensorCoefficientMaps
 public import SimplicialObjects.TensorHomotopies
 

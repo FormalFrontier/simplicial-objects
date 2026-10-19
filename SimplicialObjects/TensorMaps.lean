@@ -32,7 +32,7 @@ comparison with singular chains of topological spaces.
   the integral tensor presentation of normalized chains.
 * Mathlib supplies `SSet.normalizedChainComplexMap`, its all-simplex inclusion
   formula, `SSet.normalizedChainComplexFunctorObj`, `Finsupp.lift`,
-  `LinearMap.rTensor` and `ULift.moduleEquiv`.
+  `LinearMap.rTensor`, `ULift.moduleEquiv` and `CategoryTheory.NatIso.ofComponents`.
 -/
 
 @[expose] public section
@@ -296,6 +296,35 @@ theorem tensorNormalizedChainIso_hom_naturality (A : Type a) [AddCommGroup A]
       (normalizedChainComplexMap f (ModuleCat.of ℤ (ULift.{max w p} A)))
       (tensorNormalizedChainIso.{a, w, p} A T).inv).trans
         (tensorNormalizedChainComplexMap_eq.{a, w, p} A f).symm)
+
+/-- The natural comparison from normalized integral tensor chains with fixed abelian
+coefficients to normalized chains with lifted coefficients. Its components are the
+canonical tensor-chain comparisons. -/
+noncomputable def tensorNormalizedChainNatIso (A : Type a) [AddCommGroup A] :
+    tensorNormalizedChainComplexFunctor.{a, w, p} A ≅
+      normalizedChainComplexFunctorObj (ModuleCat.of ℤ (ULift.{max w p} A)) :=
+  NatIso.ofComponents (tensorNormalizedChainIso.{a, w, p} A)
+    (fun f ↦ (tensorNormalizedChainIso_hom_naturality.{a, w, p} A f).symm)
+
+/-- The components of the natural comparison are the tensor-chain comparisons. -/
+@[simp]
+theorem tensorNormalizedChainNatIso_app (A : Type a) [AddCommGroup A] (S : SSet.{w}) :
+    (tensorNormalizedChainNatIso.{a, w, p} A).app S =
+      tensorNormalizedChainIso.{a, w, p} A S := by
+  apply Iso.ext
+  rfl
+
+/-- The forward component of the natural comparison is the original chain comparison. -/
+@[simp]
+theorem tensorNormalizedChainNatIso_hom_app (A : Type a) [AddCommGroup A] (S : SSet.{w}) :
+    (tensorNormalizedChainNatIso.{a, w, p} A).hom.app S =
+      (tensorNormalizedChainIso.{a, w, p} A S).hom := rfl
+
+/-- The inverse component of the natural comparison is the inverse chain comparison. -/
+@[simp]
+theorem tensorNormalizedChainNatIso_inv_app (A : Type a) [AddCommGroup A] (S : SSet.{w}) :
+    (tensorNormalizedChainNatIso.{a, w, p} A).inv.app S =
+      (tensorNormalizedChainIso.{a, w, p} A S).inv := rfl
 
 /-- A simplicial monomorphism induces an injective map on each normalized integral
 tensor degree with arbitrary abelian coefficients. -/
