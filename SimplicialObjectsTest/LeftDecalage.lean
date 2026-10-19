@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 import SimplicialObjects.LeftDecalage
+import SimplicialObjects.TensorHomotopies
 public import Mathlib.AlgebraicTopology.SimplicialSet.StdSimplex
 
 @[expose] public section
@@ -13,6 +14,8 @@ open CategoryTheory Category Opposite SimplicialObjects.LeftDecalage
 open scoped Simplicial
 
 namespace SimplicialObjectsTest.LeftDecalage
+
+universe u v a p
 
 private theorem generic_degree_zero {C : Type*} [Category* C] (X : SimplicialObject C) :
     (augmented X).left _⦋0⦌ = X _⦋1⦌ := path_obj X 0
@@ -76,6 +79,22 @@ private theorem nonterminal_augmentation_point :
   intro pointSubsingleton
   have impossible : true = false := pointSubsingleton.elim true false
   cases impossible
+
+/-- The normalized augmentation theorem retains the genuine nonterminal Bool target. -/
+private theorem twoPoint_augmentation_normalized_quasiIso
+    {C : Type u} [Category.{v} C] [Preadditive C] [Limits.HasCoproducts.{0} C]
+    [CategoryWithHomology C] (R : C) :
+    QuasiIso (SSet.normalizedChainComplexMap (augmented twoPointSSet).hom R) :=
+  SSet.quasiIso_normalizedChainComplexMap_of_extraDegeneracy
+    (augmented twoPointSSet) (extraDegeneracy twoPointSSet) R
+
+/-- The tensor theorem applies to that augmentation, not the distinct projection. -/
+private theorem twoPoint_augmentation_tensor_quasiIso
+    (A : Type a) [AddCommGroup A] :
+    QuasiIso (SSet.tensorNormalizedChainComplexMap.{a, 0, p} A
+      (augmented twoPointSSet).hom) :=
+  SSet.quasiIso_tensorNormalizedChainComplexMap_of_extraDegeneracy.{a, 0, p} A
+    (augmented twoPointSSet) (extraDegeneracy twoPointSSet)
 
 private abbrev standardEdge : SSet := SSet.stdSimplex.obj ⦋1⦌
 

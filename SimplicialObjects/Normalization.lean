@@ -4,6 +4,7 @@ Authors: Formal Frontier Agents
 -/
 module
 
+public import Mathlib.AlgebraicTopology.ExtraDegeneracy
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.Nondegenerate
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.HomotopyInvariance
 public import Mathlib.AlgebraicTopology.SimplicialSet.Homology.MapHomologicalComplex
@@ -252,6 +253,23 @@ theorem quasiIso_normalizedChainComplexMap_of_homotopy_inverse
   -- The normalization section and projection are already quasi-isomorphisms.
   unfold normalizedChainComplexMap
   infer_instance
+
+/-- An extra degeneracy makes the augmentation a quasi-isomorphism on normalized
+chains with coefficients in any object of a preadditive category with the required
+coproducts and homology. The target is the constant simplicial set on the arbitrary
+augmentation object `U.right`. This applies the homotopy-inverse theorem using
+Mathlib's extra-degeneracy section and combinatorial homotopy. -/
+theorem quasiIso_normalizedChainComplexMap_of_extraDegeneracy
+    {C : Type u} [Category.{v} C] [Preadditive C] [HasCoproducts.{w} C]
+    [CategoryWithHomology C] (U : SSet.Augmented.{w})
+    (ed : CategoryTheory.SimplicialObject.Augmented.ExtraDegeneracy U)
+    (R : C) : QuasiIso (normalizedChainComplexMap U.hom R) := by
+  exact quasiIso_normalizedChainComplexMap_of_homotopy_inverse U.hom ed.section_ ed.homotopy
+    (Eq.mp
+      (congrArg (fun k : (SimplicialObject.const (Type w)).obj U.right ⟶
+          (SimplicialObject.const (Type w)).obj U.right ↦
+        SimplicialObject.Homotopy k (𝟙 _)) ed.section_comp_hom.symm)
+      (SimplicialObject.Homotopy.refl (𝟙 _))) R
 
 variable {C : Type u} [Category.{v} C] [Preadditive C] [HasCoproducts.{w} C]
   {X Y : SSet.{w}} (f : X ⟶ Y) (R : C)

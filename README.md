@@ -153,6 +153,16 @@ example modules have a separate root.
   quasi-isomorphism for every abelian coefficient group, with independent
   coefficient, simplex and padding universes. The standard interval augmentation
   illustrates both results over `ZMod 4`, although it identifies distinct vertices.
+- **Extra-degenerate augmentations.**
+  [`SSet.quasiIso_normalizedChainComplexMap_of_extraDegeneracy`](SimplicialObjects/Normalization.lean)
+  and [`SSet.quasiIso_tensorNormalizedChainComplexMap_of_extraDegeneracy`](SimplicialObjects/TensorHomotopies.lean)
+  apply these results directly to an augmented simplicial set `U` with Mathlib's
+  `ExtraDegeneracy U`, using its stock section and combinatorial homotopy.
+  The map is the original `U.hom` to the constant simplicial set on arbitrary
+  `U.right`, not necessarily a terminal set. The generic coefficient-category
+  scope and the tensor theorem's independent universes are unchanged. Examples
+  use the stock extra degeneracy on every standard simplex and the existing
+  Bool-target left décalage augmentation.
 
 - **Change of abelian coefficients.**
   [`TensorCoefficientMaps`](SimplicialObjects/TensorCoefficientMaps.lean) defines
@@ -266,7 +276,7 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | Module | Interface |
 | --- | --- |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and naturality laws |
-| `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas, homology invariance and quasi-isomorphisms from homotopy inverses |
+| `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas, homology invariance and quasi-isomorphisms from homotopy inverses or extra-degenerate augmentations |
 | `SimplicialObjectsTest.TensorMaps` | Identity, collapse, tensor-boundary and augmentation quasi-isomorphism examples |
 | `SimplicialObjects.TensorCoefficientMaps` | Abelian coefficient operations, additivity, degreewise exactness, endpoint preservation and compatibility laws |
 | `SimplicialObjects.TensorCoefficientFunctor` | Additive coefficient-curried tensor-chain functor and five characteristic equations |

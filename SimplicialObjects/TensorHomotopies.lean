@@ -180,4 +180,21 @@ theorem quasiIso_tensorNormalizedChainComplexMap_of_homotopy_inverse
   rw [tensorNormalizedChainComplexMap_eq]
   infer_instance
 
+/-- An extra degeneracy makes the augmentation a quasi-isomorphism of normalized
+integral tensor complexes with arbitrary abelian-group coefficients. The original
+augmentation to the constant simplicial set on `U.right` and the independent
+coefficient, simplex and padding universes are retained. This uses Mathlib's
+extra-degeneracy section and homotopy with the tensor homotopy-inverse theorem. -/
+theorem quasiIso_tensorNormalizedChainComplexMap_of_extraDegeneracy
+    (A : Type a) [AddCommGroup A] (U : SSet.Augmented.{w})
+    (ed : CategoryTheory.SimplicialObject.Augmented.ExtraDegeneracy U) :
+    QuasiIso (tensorNormalizedChainComplexMap.{a, w, p} A U.hom) := by
+  exact quasiIso_tensorNormalizedChainComplexMap_of_homotopy_inverse.{a, w, p}
+    A U.hom ed.section_ ed.homotopy
+    (Eq.mp
+      (congrArg (fun k : (SimplicialObject.const (Type w)).obj U.right ⟶
+          (SimplicialObject.const (Type w)).obj U.right ↦
+        SimplicialObject.Homotopy k (𝟙 _)) ed.section_comp_hom.symm)
+      (SimplicialObject.Homotopy.refl (𝟙 _)))
+
 end SSet

@@ -32,7 +32,7 @@ open SimplicialObjectsTest.Normalization
 
 namespace SimplicialObjectsTest.TensorMaps
 
-universe a p
+universe a w p u v
 
 private abbrev point : SSet.{0} := Δ[0]
 
@@ -666,5 +666,26 @@ private theorem augmentation_tensor_quasiIso :
     QuasiIso (SSet.tensorNormalizedChainComplexMap.{0, 0, 0} (ZMod 4) augmentation) :=
   SSet.quasiIso_tensorNormalizedChainComplexMap_of_homotopy_inverse.{0, 0, 0}
     (ZMod 4) augmentation augmentationSection augmentationHomotopy augmentationSectionHomotopy
+
+/-- The stock extra degeneracy supplies the normalized augmentation theorem
+for every standard simplex, with arbitrary categorical coefficients. -/
+private theorem standardSimplex_augmentation_normalized_quasiIso
+    {C : Type u} [Category.{v} C] [Preadditive C] [Limits.HasCoproducts.{w} C]
+    [CategoryWithHomology C] (R : C) (n : ℕ) :
+    QuasiIso (SSet.normalizedChainComplexMap
+      (SSet.Augmented.stdSimplex.{w}.obj ⦋n⦌).hom R) :=
+  SSet.quasiIso_normalizedChainComplexMap_of_extraDegeneracy
+    (SSet.Augmented.stdSimplex.{w}.obj ⦋n⦌)
+    (SSet.Augmented.StandardSimplex.extraDegeneracy ⦋n⦌) R
+
+/-- The same stock augmentation works for arbitrary abelian coefficients and
+independent coefficient, simplex and padding universes. -/
+private theorem standardSimplex_augmentation_tensor_quasiIso
+    (A : Type a) [AddCommGroup A] (n : ℕ) :
+    QuasiIso (SSet.tensorNormalizedChainComplexMap.{a, w, p} A
+      (SSet.Augmented.stdSimplex.{w}.obj ⦋n⦌).hom) :=
+  SSet.quasiIso_tensorNormalizedChainComplexMap_of_extraDegeneracy.{a, w, p} A
+    (SSet.Augmented.stdSimplex.{w}.obj ⦋n⦌)
+    (SSet.Augmented.StandardSimplex.extraDegeneracy ⦋n⦌)
 
 end SimplicialObjectsTest.TensorMaps
