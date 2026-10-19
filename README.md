@@ -16,8 +16,9 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.FiniteFiberTransfer`, `SimplicialObjects.Normalization`,
 `SimplicialObjects.TensorCoefficients`, `SimplicialObjects.TensorMaps`,
 `SimplicialObjects.TensorCoefficientMaps`, `SimplicialObjects.TensorHomotopies`,
-`SimplicialObjects.TensorCoefficientFunctor`, `SimplicialObjects.PointHomology` and
-`SimplicialObjects.TensorCoefficientSequences`; example modules have a separate root.
+`SimplicialObjects.TensorCoefficientFunctor`, `SimplicialObjects.PointHomology`,
+`SimplicialObjects.TensorCoefficientSequences` and `SimplicialObjects.HomologyZero`;
+example modules have a separate root.
 
 ## Headline results
 
@@ -218,6 +219,26 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
   `Module.Flat.lTensor_exact`), Mathlib's functional exactness and module-category
   endpoint criteria, and its degreewise short-exactness theorem for complexes.
 
+- **Coefficient naturality of zeroth simplicial homology.**
+  [`HomologyZero`](SimplicialObjects/HomologyZero.lean) proves that Mathlib's
+  `SSet.homology₀Iso` and its inverse commute with every coefficient morphism
+  `a : R ⟶ R'`, for arbitrary `S : SSet.{w}` and coefficient objects `R R' : C`.
+  Here `C : Type u` has `[Category.{v} C]`, `[HasCoproducts.{w} C]`,
+  `[Preadditive C]` and `[CategoryWithHomology C]`, with independent `u`, `v`, `w`.
+  The two squares compare `HomologicalComplex.homologyMap` in degree zero of
+  `((SSet.chainComplexFunctor C).map a).app S` with the fixed-component map
+  `Sigma.map (fun _ : SSet.π₀ S => a)`. The all-degree generator law
+  `SSet.ιChainComplex_coefficient_naturality`, with its reassociated form, needs
+  no `CategoryWithHomology` assumption. These results use Mathlib's simplicial
+  homology API of Joël Riou and Andrew Yang and its categorical coproduct API,
+  without tensor chains or normalization.
+  `SimplicialObjectsTest.HomologyZeroPoint` evaluates the forward square on the
+  standard point's integer vertex class and the inverse square on its
+  coefficient-one component generator. The augmentation detects the nonzero
+  integer class; the same map `ULift ℤ → ULift (ZMod 2)` kills two and preserves one.
+  This concerns ordinary simplicial homology, distinct from the normalized tensor
+  homology below; no singular, topological, relative or reduced comparison is asserted.
+
 - **Homology of terminal simplicial sets.**
   [`PointHomology`](SimplicialObjects/PointHomology.lean) gives
   `SSet.tensorNormalizedHomologyZeroIsoCoefficient : H₀(K) ≅ C`, with mutually
@@ -254,6 +275,8 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | `SimplicialObjectsTest.TensorCoefficientEndpoints` | The five endpoint and short-exactness specializations on the point and interval |
 | `SimplicialObjects.PointHomology` | Terminal-set degree-zero comparisons, inverse and class laws, naturality and dimension vanishing |
 | `SimplicialObjectsTest.PointHomology` | Reduction modulo two through point homology and positive-degree vanishing |
+| `SimplicialObjects.HomologyZero` | All-degree coefficient-generator law and coefficient naturality of Mathlib's zeroth-homology isomorphism and inverse |
+| `SimplicialObjectsTest.HomologyZeroPoint` | Forward and inverse naturality evaluated on the point class and component generator, with integer augmentation and reduction modulo two |
 
 See the [left décalage guide](docs/LeftDecalage.md) for indexing, exact
 equations, construction and example clients. The homotopy is

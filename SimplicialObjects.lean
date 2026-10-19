@@ -22,3 +22,5 @@ public import SimplicialObjects.TensorCoefficientFunctor
 public import SimplicialObjects.PointHomology
 
 public import SimplicialObjects.TensorCoefficientSequences
+
+public import SimplicialObjects.HomologyZero

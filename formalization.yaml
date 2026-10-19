@@ -21,6 +21,9 @@ project:
     homology vanishes, with dimension-bound vanishing for arbitrary simplicial sets.
     Injective and surjective coefficient maps preserve endpoints, and short exact
     coefficient pairs give short exact sequences of these chain complexes.
+    For arbitrary simplicial sets, Mathlib's zeroth-homology coproduct isomorphism
+    and its inverse are natural in coefficient morphisms, with an all-degree
+    coefficient-generator law.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -220,6 +223,18 @@ status:
     map. Integer doubling and reduction modulo two specialize all five endpoint and
     short-exactness statements to the same standard point and interval, whose short
     complexes retain nonzero integer and reduced vertex generators.
+    For arbitrary S : SSet.{w} and R R' : C, every morphism a : R ⟶ R' commutes
+    with Mathlib's homology₀Iso and its inverse. The category C : Type u has
+    Category.{v}, HasCoproducts.{w}, Preadditive and CategoryWithHomology, with
+    independent u, v, w. The squares use the original chainComplexFunctor.map/app,
+    homologyMap in degree zero and Sigma.map on the fixed index π₀ S.
+    The all-degree ιChainComplex coefficient-generator law and its reassociated
+    form need no CategoryWithHomology. On the standard point, the two squares
+    are evaluated on the nonzero integer vertex class and coefficient-one component
+    generator, using the same lifted integer reduction modulo two that kills two
+    and preserves one; the augmentation detects the integer class.
+    These ordinary simplicial homology laws are separate from normalized tensor
+    homology and assert no TopCat, singular, relative or reduced comparison.
     This inventory is not a source-passage coverage map.
 review:
   status: unchecked
@@ -246,7 +261,9 @@ alignment:
     Coefficient maps are indexed with degreewise exactness, injectivity and
     surjectivity, the zero chain map, chain monomorphisms and epimorphisms, and the
     coefficient short complex with its seven characteristic equations and short
-    exactness statement.
+    exactness statement. Ordinary zeroth simplicial homology is indexed with the
+    all-degree coefficient-generator law, its generated reassociated form, and
+    coefficient naturality of Mathlib's homology₀Iso in both directions.
   statements:
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
@@ -641,6 +658,14 @@ alignment:
       module: SimplicialObjects/TensorCoefficientSequences.lean
     - lean: SSet.tensorNormalizedChainComplexCoefficientShortComplex_shortExact
       module: SimplicialObjects/TensorCoefficientSequences.lean
+    - lean: SSet.ιChainComplex_coefficient_naturality
+      module: SimplicialObjects/HomologyZero.lean
+    - lean: SSet.ιChainComplex_coefficient_naturality_assoc
+      module: SimplicialObjects/HomologyZero.lean
+    - lean: SSet.homology₀Iso_hom_coefficient_naturality
+      module: SimplicialObjects/HomologyZero.lean
+    - lean: SSet.homology₀Iso_inv_coefficient_naturality
+      module: SimplicialObjects/HomologyZero.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
@@ -662,3 +687,6 @@ acknowledgements: >-
   Mathlib's Module.Flat.finsupp and Module.Flat.lTensor_exact; functional exactness,
   module-category endpoint criteria and degreewise short exactness supply the
   endpoint and short-exact-sequence packaging.
+  The ordinary zeroth-homology coefficient laws follow Mathlib's simplicial
+  homology and homology₀Iso API by Joël Riou and Andrew Yang, together with its
+  categorical coproduct and isomorphism APIs.

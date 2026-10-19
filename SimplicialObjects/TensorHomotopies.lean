@@ -162,9 +162,11 @@ end SSet.Homotopy
 namespace SSet
 
 /-- A simplicial map with a two-sided combinatorial homotopy inverse induces a
-quasi-isomorphism of normalized integral tensor complexes, as a consequence of
-the homotopy-invariance principle in May, *A Concise Course in Algebraic Topology*,
-§13.4. The coefficient, simplex and padding universes are independent. -/
+quasi-isomorphism of normalized integral tensor complexes. The tensor comparison
+transports the categorical normalized-chain analogue of the chain-homotopy
+invariance argument in May, *A Concise Course in Algebraic Topology*, revised
+edition, §§12.2 and 13.3. The coefficient, simplex and padding universes are
+independent. -/
 theorem quasiIso_tensorNormalizedChainComplexMap_of_homotopy_inverse
     (A : Type a) [AddCommGroup A]
     {S T : SSet.{w}} (f : S ⟶ T) (g : T ⟶ S)

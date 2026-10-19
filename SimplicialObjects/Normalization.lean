@@ -40,9 +40,10 @@ Mathlib's Dold–Kan projector and splitting constructions, notably
 objects and strict retract identities. The map generalizes the simplicial-set
 normalized-map construction to coefficient-valued simplicial morphisms. May,
 *A Concise Course in Algebraic Topology*, revised edition, §16.1 motivates the
-degeneracy-quotient characterization. The homotopy-invariance principle of §13.4,
-together with Mathlib's simplicial homotopy constructions by Fabian Odermatt and
-Joël Riou, also gives quasi-isomorphisms on normalized chains.
+degeneracy-quotient characterization. The quasi-isomorphism result on normalized
+chains is a categorical analogue of May's chain-homotopy invariance argument in
+§§12.2 and 13.3, using Mathlib's simplicial homotopy constructions by Fabian
+Odermatt and Joël Riou.
 -/
 
 @[expose] public section
@@ -224,9 +225,10 @@ namespace SSet
 
 /-- A simplicial map with a two-sided combinatorial homotopy inverse induces a
 quasi-isomorphism on normalized chains with coefficients in any object of a
-preadditive category with the required coproducts and homology. This is the
-normalized-chain form of the homotopy-invariance principle in May,
-*A Concise Course in Algebraic Topology*, §13.4. -/
+preadditive category with the required coproducts and homology. This categorical
+normalized-chain statement is an analogue of the chain-homotopy invariance
+argument in May, *A Concise Course in Algebraic Topology*, revised edition,
+§§12.2 and 13.3. -/
 theorem quasiIso_normalizedChainComplexMap_of_homotopy_inverse
     {C : Type u} [Category.{v} C] [Preadditive C] [HasCoproducts.{w} C]
     [CategoryWithHomology C]
