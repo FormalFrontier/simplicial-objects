@@ -55,7 +55,7 @@ chain comparison. -/
 @[reassoc (attr := simp)]
 theorem cokernel_π_tensorNormalizedChainCokerNatIso_hom_app
     (A : Type a) [AddCommGroup A] {S T : SSet.{w}} (f : S ⟶ T) :
-    cokernel.π ((tensorNormalizedChainComplexFunctor.{a, w, p} A).map f) ≫
+    cokernel.π (tensorNormalizedChainComplexMap.{a, w, p} A f) ≫
         (tensorNormalizedChainCokerNatIso.{a, w, p} A).hom.app (Arrow.mk f) =
       (tensorNormalizedChainIso.{a, w, p} A T).hom ≫
         cokernel.π (normalizedChainComplexMap f (ModuleCat.of ℤ (ULift.{max w p} A))) := by
@@ -65,7 +65,7 @@ theorem cokernel_π_tensorNormalizedChainCokerNatIso_hom_app
         (tensorNormalizedChainNatIso.{a, w, p} A).hom).app (Arrow.mk f))).symm
   -- Normalize the arrow endpoints in the characteristic equality.
   change
-    (cokernel.π ((tensorNormalizedChainComplexFunctor.{a, w, p} A).map f) ≫
+    (cokernel.π (tensorNormalizedChainComplexMap.{a, w, p} A f) ≫
         (tensorNormalizedChainCokerNatIso.{a, w, p} A).hom.app (Arrow.mk f) :
       tensorNormalizedChainComplex.{a, w, p} A T ⟶
         cokernel (normalizedChainComplexMap f (ModuleCat.of ℤ (ULift.{max w p} A)))) =

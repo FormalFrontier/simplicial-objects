@@ -11,6 +11,7 @@ public import SimplicialObjects.ComponentLifts
 public import SimplicialObjects.ComponentProducts
 
 public import SimplicialObjects.FiniteFiberTransfer
+public import SimplicialObjects.ChainCoordinates
 
 public import SimplicialObjects.Normalization
 

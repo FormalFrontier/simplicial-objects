@@ -107,7 +107,6 @@ theorem tensorNormalizedChainComplexXMap_tmul (A : Type a) [AddCommGroup A]
 
 /-- The tensor-degree map sends a basis tensor to the image simplex class tensored
 with the same coefficient; a degenerate image contributes zero. -/
-@[simp]
 theorem tensorNormalizedChainComplexXMap_single (A : Type a) [AddCommGroup A]
     (f : S ⟶ T) (n : ℕ) (s : S.nonDegenerate n) (x : A) :
     tensorNormalizedChainComplexXMap.{a, w, p} A f n
@@ -116,7 +115,6 @@ theorem tensorNormalizedChainComplexXMap_single (A : Type a) [AddCommGroup A]
   rw [tensorNormalizedChainComplexXMap_tmul, normalizedIntegralMap_single]
 
 /-- The tensor-degree image formula holds for every simplex class. -/
-@[simp]
 theorem tensorNormalizedChainComplexXMap_simplex (A : Type a) [AddCommGroup A]
     (f : S ⟶ T) {n : ℕ} (s : S _⦋n⦌) (x : A) :
     tensorNormalizedChainComplexXMap.{a, w, p} A f n

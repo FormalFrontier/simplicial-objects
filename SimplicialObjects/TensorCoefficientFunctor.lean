@@ -129,7 +129,7 @@ theorem tensorNormalizedChainComplexCoefficientFunctor_map_app
 
 /-- Each degree component is the raw tensor coefficient operation, so its
 pure-tensor and simplex formulas apply directly. -/
-@[simp]
+@[simp↓]
 theorem tensorNormalizedChainComplexCoefficientFunctor_map_app_f
     {A B : AddCommGrpCat.{a}} (g : A ⟶ B) (S : SSet.{w}) (n : ℕ) :
     (((tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}).map g).app S).f n =
@@ -268,7 +268,7 @@ projections by the comparison at the target coefficient group. -/
 theorem cokernel_π_tensorNormalizedChainComplexCoefficientCokerNatIso_hom_app
     (S : SSet.{w}) {A B : AddCommGrpCat.{a}} (g : A ⟶ B) :
     Limits.cokernel.π
-        (((tensorNormalizedChainComplexCoefficientFunctor.{a, w, p}).map g).app S) ≫
+        (tensorNormalizedChainComplexCoefficientMap.{a, a, w, max a p} g.hom S) ≫
       (tensorNormalizedChainComplexCoefficientCokerNatIso.{a, w, p} S).hom.app
         (Arrow.mk g) =
       (tensorNormalizedChainIso.{a, w, max a p} B S).hom ≫

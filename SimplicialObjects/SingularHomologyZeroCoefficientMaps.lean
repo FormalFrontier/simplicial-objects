@@ -122,7 +122,6 @@ changes coefficients at the target space. -/
 theorem tensorNormalizedHomologyZeroIsoPathComponents_hom_mixed_naturality
     (A : Type a) (B : Type b) [AddCommGroup A] [AddCommGroup B]
     (X Y : TopCat.{w}) (f : C(X, Y)) (g : A →+ B) :
-    let S := TopCat.toSSet.obj X
     let T := TopCat.toSSet.obj Y
     let RA := ModuleCat.of ℤ (ULift.{max w b p} A)
     let RB := ModuleCat.of ℤ (ULift.{max w a p} B)
@@ -203,7 +202,6 @@ the direct map on topological path components. -/
 theorem tensorNormalizedHomologyZeroIsoPathComponents_inv_mixed_naturality
     (A : Type a) (B : Type b) [AddCommGroup A] [AddCommGroup B]
     (X Y : TopCat.{w}) (f : C(X, Y)) (g : A →+ B) :
-    let S := TopCat.toSSet.obj X
     let T := TopCat.toSSet.obj Y
     let RA := ModuleCat.of ℤ (ULift.{max w b p} A)
     let RB := ModuleCat.of ℤ (ULift.{max w a p} B)

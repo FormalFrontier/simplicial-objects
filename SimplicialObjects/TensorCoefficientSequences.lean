@@ -105,7 +105,7 @@ theorem tensorNormalizedChainComplexCoefficientShortComplex_g
         tensorNormalizedChainComplexCoefficientMap.{b, c, w, max a p} h S := rfl
 
 /-- Every component of the first arrow is the original raw tensor coefficient map. -/
-@[simp]
+@[simp↓]
 theorem tensorNormalizedChainComplexCoefficientShortComplex_f_f
     (g : A →+ B) (h : B →+ C) (hExact : Function.Exact g h) (S : SSet.{w}) (n : ℕ) :
     ((tensorNormalizedChainComplexCoefficientShortComplex.{a, b, c, w, p}
@@ -115,7 +115,7 @@ theorem tensorNormalizedChainComplexCoefficientShortComplex_f_f
     tensorNormalizedChainComplexCoefficientMap_f]
 
 /-- Every component of the second arrow is the original raw tensor coefficient map. -/
-@[simp]
+@[simp↓]
 theorem tensorNormalizedChainComplexCoefficientShortComplex_g_f
     (g : A →+ B) (h : B →+ C) (hExact : Function.Exact g h) (S : SSet.{w}) (n : ℕ) :
     ((tensorNormalizedChainComplexCoefficientShortComplex.{a, b, c, w, p}

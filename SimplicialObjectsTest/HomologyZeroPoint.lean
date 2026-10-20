@@ -71,7 +71,7 @@ private theorem pointIntegerClass_ne_zero : pointIntegerClass ≠ 0 := by
   have hScalar := pointIntegerClass_augmentation
   rw [h, map_zero] at hScalar
   have hInt := congrArg (fun z : ULift.{0} ℤ => z.down) hScalar
-  simpa using hInt
+  simp at hInt
 
 /-- Integer reduction modulo two, conjugated by the lifted module equivalences. -/
 private def pointCoefficientReduction :

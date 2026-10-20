@@ -32,7 +32,9 @@ project:
     coefficient pairs give short exact sequences of these chain complexes.
     For arbitrary simplicial sets, Mathlib's zeroth-homology coproduct isomorphism
     and its inverse are natural in coefficient morphisms, with an all-degree
-    coefficient-generator law.
+    coefficient-generator law. Integral all-simplex chains have degreewise Finsupp
+    coordinates for every simplicial set and degree, using the universe-lifted
+    integer coefficient object, with morphism-level and unit summand laws.
   authors:
     - Formal Frontier Agents
   responsible_maintainers:
@@ -333,6 +335,14 @@ alignment:
     all-degree coefficient-generator law, its generated reassociated form, and
     coefficient naturality of Mathlib's homology₀Iso in both directions.
   statements:
+    - lean: AlgebraicTopology.integerCoefficients
+      module: SimplicialObjects/ChainCoordinates.lean
+    - lean: AlgebraicTopology.chainGroupIsoFinsupp
+      module: SimplicialObjects/ChainCoordinates.lean
+    - lean: AlgebraicTopology.ι_chainGroupIsoFinsupp_hom
+      module: SimplicialObjects/ChainCoordinates.lean
+    - lean: AlgebraicTopology.chainGroupIsoFinsupp_hom_ι
+      module: SimplicialObjects/ChainCoordinates.lean
     - lean: SimplicialObjects.LeftDecalage.prependMap
       module: SimplicialObjects/LeftDecalage.lean
     - lean: SimplicialObjects.LeftDecalage.prependMap_id
@@ -759,8 +769,9 @@ alignment:
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
-  categorical structures, natural-isomorphism assembly, arrow functor and cokernel
-  transport, extra-degeneracy section, split-epimorphism, homotopy
+  categorical structures, integral-chain coproduct and Finsupp colimit comparisons,
+  lifted module functor and linear equivalences, natural-isomorphism assembly,
+  arrow functor and cokernel transport, extra-degeneracy section, split-epimorphism, homotopy
   and transport, normalized cofan universal property, coproduct/direct-sum and
   Finsupp isomorphisms, tensor coordinates, and chain-complex and homology APIs.
   Mathlib also supplies free-module flatness, tensor-product exactness,

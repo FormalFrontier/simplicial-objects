@@ -9,6 +9,7 @@ import SimplicialObjectsTest.LeftDecalage
 import SimplicialObjectsTest.PathComponents
 
 import SimplicialObjectsTest.FiniteFiberTransfer
+import SimplicialObjectsTest.ChainCoordinates
 
 import SimplicialObjectsTest.Normalization
 

@@ -195,7 +195,7 @@ theorem tensorNormalizedBoundary_tmul (A : Type a) [AddCommGroup A]
       ULift.up (S.normalizedIntegralBoundary n z ⊗ₜ[ℤ] x) := rfl
 
 /-- The boundary of a tensor generator is the alternating sum of its face classes. -/
-@[simp]
+@[simp↓]
 theorem tensorNormalizedBoundary_single (A : Type a) [AddCommGroup A]
     (S : SSet.{w}) (n : ℕ) (s : S.nonDegenerate (n + 1)) (x : A) :
     tensorNormalizedBoundary.{a, w, p} A S n
@@ -476,7 +476,6 @@ theorem tensorNormalizedChainComplex_d (A : Type a) [AddCommGroup A]
       tensorNormalizedDifferential.{a, w, p} A S i j := rfl
 
 /-- The successor boundary on lifted pure tensors. -/
-@[simp]
 theorem tensorNormalizedChainComplex_d_tmul (A : Type a) [AddCommGroup A]
     (S : SSet.{w}) (n : ℕ) (z : S.nonDegenerate (n + 1) →₀ ℤ) (x : A) :
     (tensorNormalizedChainComplex.{a, w, p} A S).d (n + 1) n (ULift.up (z ⊗ₜ[ℤ] x)) =
@@ -524,7 +523,6 @@ theorem tensorNormalizedChainIso_inv_f (A : Type a) [AddCommGroup A]
       (tensorNormalizedChainComplexXIso.{a, w, p} A S n).inv := rfl
 
 /-- The chain comparison agrees with the degree comparison on every simplex class. -/
-@[simp]
 theorem tensorNormalizedChainIso_hom_f_apply (A : Type a) [AddCommGroup A]
     (S : SSet.{w}) {n : ℕ} (s : S _⦋n⦌) (x : A) :
     (tensorNormalizedChainIso.{a, w, p} A S).hom.f n
@@ -533,7 +531,6 @@ theorem tensorNormalizedChainIso_hom_f_apply (A : Type a) [AddCommGroup A]
   tensorNormalizedChainComplexXIso_hom_simplex.{a, w, p} A S s x
 
 /-- The inverse chain comparison recovers the tensor of a nondegenerate generator. -/
-@[simp]
 theorem tensorNormalizedChainIso_inv_f_ι (A : Type a) [AddCommGroup A]
     (S : SSet.{w}) (n : ℕ) (s : S.nonDegenerate n) (x : A) :
     (tensorNormalizedChainIso.{a, w, p} A S).inv.f n

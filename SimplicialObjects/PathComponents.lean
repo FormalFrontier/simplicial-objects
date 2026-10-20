@@ -92,7 +92,8 @@ noncomputable def toSSetPostcomp (f : C(X, Y)) (n : SimplexCategoryᵒᵖ)
 lemma toSSetPostcomp_apply (f : C(X, Y)) (n : SimplexCategoryᵒᵖ)
     (a : (toSSet.obj X).obj n)
     (z : ULift.{v} (StdSimplex ℝ (Fin (n.unop.len + 1)))) :
-    (toSSetPostcomp f n a).down.hom z = f (a.down.hom (ULift.up z.down)) :=
+    ConcreteCategory.hom (X := SimplexCategory.toTop.{v}.obj n.unop) (Y := Y)
+      (toSSetPostcomp f n a).down z = f (a.down.hom (ULift.up z.down)) :=
   rfl
 
 /-- The simplex encoding intertwines postcomposition with continuous-map composition. -/
@@ -312,7 +313,7 @@ lemma toSSetMapπ₀_comp_zerothHomotopyEquiv (f : C(X, Y)) :
   induction z using ZerothHomotopy.rec with
   | mk x =>
     simp only [Function.comp_apply, zerothHomotopyEquiv_mk,
-      toSSetMapπ₀_mk, toSSetPostcomp_vertex] <;> rfl
+      toSSetMapπ₀_mk, toSSetPostcomp_vertex]; rfl
 
 /-- The inverse square is the edge-descended recursor on singular vertices. -/
 lemma zerothHomotopyEquiv_symm_comp_toSSetMapπ₀ (f : C(X, Y)) :
@@ -345,7 +346,8 @@ lemma zerothHomotopyFunctor_obj (X : TopCat.{w}) :
 @[simp]
 lemma zerothHomotopyFunctor_map_apply {X Y : TopCat.{w}} (f : X ⟶ Y)
     (z : ZerothHomotopy X) :
-    ConcreteCategory.hom (zerothHomotopyFunctor.map f) z = ZerothHomotopy.map f.hom z :=
+    ConcreteCategory.hom (X := ZerothHomotopy X) (Y := ZerothHomotopy Y)
+      (zerothHomotopyFunctor.map f) z = ZerothHomotopy.map f.hom z :=
   rfl
 
 /-- Mathlib's singular-component equivalence commutes with every continuous map.
@@ -376,13 +378,17 @@ noncomputable def zerothHomotopyIso :
 /-- Evaluation of the forward comparison on a path component. -/
 @[simp]
 lemma zerothHomotopyIso_hom_app_apply (X : TopCat.{w}) (z : ZerothHomotopy X) :
-    zerothHomotopyIso.hom.app X z = zerothHomotopyEquiv z :=
+    ConcreteCategory.hom (X := ZerothHomotopy X)
+      (Y := SSet.π₀Functor.obj (toSSet.obj X))
+      (zerothHomotopyIso.hom.app X) z = zerothHomotopyEquiv z :=
   rfl
 
 /-- Evaluation of the inverse comparison on a singular component. -/
 @[simp]
 lemma zerothHomotopyIso_inv_app_apply (X : TopCat.{w}) (z : (toSSet.obj X).π₀) :
-    zerothHomotopyIso.inv.app X z = zerothHomotopyEquiv.symm z :=
+    ConcreteCategory.hom (X := SSet.π₀Functor.obj (toSSet.obj X))
+      (Y := ZerothHomotopy X)
+      (zerothHomotopyIso.inv.app X) z = zerothHomotopyEquiv.symm z :=
   rfl
 
 /-- The inverse singular-component equivalence commutes with continuous maps. -/

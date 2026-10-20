@@ -162,6 +162,8 @@ theorem uliftIntModuleFunctor_obj (A : AddCommGrpCat.{a}) :
 /-- A lifted element is sent to the lift of its coefficient image. -/
 @[simp]
 theorem uliftIntModuleFunctor_map_up {A B : AddCommGrpCat.{a}} (g : A ⟶ B) (x : A) :
-    (uliftIntModuleFunctor.{a, q}.map g) (ULift.up x) = ULift.up (g.hom x) := rfl
+    ConcreteCategory.hom (X := ModuleCat.of ℤ (ULift.{q} A))
+      (Y := ModuleCat.of ℤ (ULift.{q} B)) (uliftIntModuleFunctor.{a, q}.map g)
+      (ULift.up x) = ULift.up (g.hom x) := rfl
 
 end AddCommGrpCat

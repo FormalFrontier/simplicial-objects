@@ -1,5 +1,6 @@
 name = "simplicial-objects"
 version = "0.1.0"
+lintDriver = "batteries/runLinter"
 defaultTargets = ["SimplicialObjects", "SimplicialObjectsTest"]
 
 [leanOptions]

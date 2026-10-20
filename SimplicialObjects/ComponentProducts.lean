@@ -87,7 +87,8 @@ lemma prodVertex_eta (z : (Limits.prod X Y) _⦋0⦌) :
       (limit.isLimit (pair X Y))
   have h : prodVertex (β.inv.app (op ⦋0⦌) z).1 (β.inv.app (op ⦋0⦌) z).2 = z := by
     change (β.inv ≫ β.hom).app (op ⦋0⦌) z = z
-    rw [β.inv_hom_id] <;> rfl
+    rw [β.inv_hom_id]
+    rfl
   rw [← h, prodVertex_fst, prodVertex_snd]
 
 /-- Pairing vertices commutes with maps in both factors. -/
