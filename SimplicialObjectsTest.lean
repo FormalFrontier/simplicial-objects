@@ -28,3 +28,5 @@ import SimplicialObjectsTest.TensorMonomorphisms
 import SimplicialObjectsTest.HomologyZeroPoint
 
 import SimplicialObjectsTest.SingularHomologyZero
+
+import SimplicialObjectsTest.TensorHomologyZeroProducts
