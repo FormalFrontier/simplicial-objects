@@ -31,6 +31,10 @@ public import SimplicialObjects.TensorHomologyZeroNaturality
 public import SimplicialObjects.TensorHomologyZeroCoefficientMaps
 public import SimplicialObjects.TensorHomologyZeroConnected
 public import SimplicialObjects.TensorHomologyZeroEmpty
+
+public import SimplicialObjects.SingularHomologyZero
+public import SimplicialObjects.SingularHomologyZeroNaturality
+public import SimplicialObjects.SingularHomologyZeroCoefficientMaps
 public import SimplicialObjects.TensorCoefficientSequences
 
 public import SimplicialObjects.HomologyZero

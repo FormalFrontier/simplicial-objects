@@ -26,3 +26,5 @@ public import SimplicialObjectsTest.TensorCoefficientEndpoints
 import SimplicialObjectsTest.TensorMonomorphisms
 
 import SimplicialObjectsTest.HomologyZeroPoint
+
+import SimplicialObjectsTest.SingularHomologyZero

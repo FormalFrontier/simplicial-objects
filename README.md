@@ -12,6 +12,8 @@ an integral tensor chain complex and an isomorphism to normalized coefficient ch
 These complexes are functorial in simplicial sets and additively functorial in
 abelian coefficient groups. Their degree-zero homology is the coproduct of the
 lifted coefficient object over simplicial components, naturally in both variables.
+For singular simplices this gives the coproduct over topological path components,
+naturally in continuous maps and additive coefficient homomorphisms.
 
 The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.PathComponents`,
@@ -23,7 +25,9 @@ The public import `SimplicialObjects` exports `SimplicialObjects.LeftDecalage`,
 `SimplicialObjects.TensorHomologyZero`, `SimplicialObjects.TensorHomologyZeroNaturality`,
 `SimplicialObjects.TensorHomologyZeroCoefficientMaps`,
 `SimplicialObjects.TensorHomologyZeroConnected`, `SimplicialObjects.TensorHomologyZeroEmpty`,
-`SimplicialObjects.TensorCoefficientSequences` and `SimplicialObjects.HomologyZero`;
+`SimplicialObjects.TensorCoefficientSequences`, `SimplicialObjects.SingularHomologyZero`,
+`SimplicialObjects.SingularHomologyZeroNaturality`,
+`SimplicialObjects.SingularHomologyZeroCoefficientMaps` and `SimplicialObjects.HomologyZero`;
 example modules have a separate root.
 
 ## Headline results
@@ -328,6 +332,23 @@ example modules have a separate root.
   simplicial-naturality theorem; simplicial and coefficient maps also commute on homology and on the
   coproducts.
 
+- **Singular homology in degree zero and path components.**
+  [`SingularHomologyZero`](SimplicialObjects/SingularHomologyZero.lean) constructs
+  `TopCat.tensorNormalizedHomologyZeroIsoPathComponents` for every topological space
+  `X : TopCat.{w}` and abelian group `A : Type a`. Its source is degree-zero homology of
+  `SSet.tensorNormalizedChainComplex.{a,w,p} A (TopCat.toSSet.obj X)`; its target is the
+  coproduct of `ModuleCat.of ℤ (ULift.{max w p} A)` indexed by `ZerothHomotopy X`.
+  The isomorphism composes the tensor comparison above with the singular-component
+  equivalence. Its vertex formula sends each singular vertex tensor to the summand
+  of the corresponding point's path component. The space and coefficient universes
+  remain independent, with no local path connectedness or nonemptiness hypothesis.
+  [`SingularHomologyZeroNaturality`](SimplicialObjects/SingularHomologyZeroNaturality.lean)
+  and [`SingularHomologyZeroCoefficientMaps`](SimplicialObjects/SingularHomologyZeroCoefficientMaps.lean)
+  give both orientations of the continuous, balanced coefficient and mixed squares,
+  using the direct map on path components. A
+  [discrete two-point example](SimplicialObjectsTest/SingularHomologyZero.lean) separates
+  both nonzero vertex classes for every padding universe and evaluates these maps.
+
 - **Component fold and connected coefficients.**
   [`TensorHomologyZeroConnected`](SimplicialObjects/TensorHomologyZeroConnected.lean) identifies the
   component comparison followed by `Sigma.desc (fun _ => 𝟙 _)` with collapse to `Δ[0]` followed by
@@ -390,6 +411,10 @@ nonzero coefficient-two vertex by a computation independent of these statements.
 | `SimplicialObjects.TensorHomologyZeroCoefficientMaps` | Universe-balanced additive coefficient and mixed naturality squares |
 | `SimplicialObjects.TensorHomologyZeroConnected` | All-source fold, connected coefficient isomorphism and terminal compatibility |
 | `SimplicialObjects.TensorHomologyZeroEmpty` | Zero degree-zero homology of the empty standard boundary |
+| `SimplicialObjects.SingularHomologyZero` | Singular normalized tensor homology by path components and the singular-vertex formula |
+| `SimplicialObjects.SingularHomologyZeroNaturality` | Forward and inverse continuous-map naturality |
+| `SimplicialObjects.SingularHomologyZeroCoefficientMaps` | Balanced additive coefficient and mixed naturality |
+| `SimplicialObjectsTest.SingularHomologyZero` | Discrete two-point vertex classes and space/coefficient map evaluations |
 | `SimplicialObjects.HomologyZero` | Degree-zero chain projection, simplicial naturality, all-degree coefficient-generator law and coefficient naturality of the zeroth-homology isomorphism and inverse |
 | `SimplicialObjectsTest.HomologyZeroPoint` | Forward and inverse naturality evaluated on the point class and component generator, with integer augmentation and reduction modulo two |
 
