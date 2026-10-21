@@ -52,7 +52,7 @@ noncomputable def tensorNormalizedChainCokerNatIso (A : Type a) [AddCommGroup A]
 
 /-- The forward cokernel comparison intertwines the projections by the target
 chain comparison. -/
-@[reassoc (attr := simp)]
+@[simp, reassoc]
 theorem cokernel_π_tensorNormalizedChainCokerNatIso_hom_app
     (A : Type a) [AddCommGroup A] {S T : SSet.{w}} (f : S ⟶ T) :
     cokernel.π (tensorNormalizedChainComplexMap.{a, w, p} A f) ≫
