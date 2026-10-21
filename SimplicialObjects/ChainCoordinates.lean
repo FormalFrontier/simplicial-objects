@@ -22,8 +22,12 @@ removes this coefficient lift using `ULift.moduleEquiv`.
 
 The morphism-level summand law computes the map on every lifted integer, and
 `AlgebraicTopology.chainGroupIsoFinsupp_hom_ι` computes the unit basis chain.
-These are degreewise module isomorphisms; no chain or natural isomorphism is
-constructed here.
+`AlgebraicTopology.chainGroupIsoFinsupp_naturality` identifies each induced
+chain-map component with pushforward of finitely supported coordinates, and
+`AlgebraicTopology.chainGroupIsoFinsupp_naturality_apply` computes this on a
+chain. Coefficients of simplices with the same image are added, without an
+injectivity or finite-fiber hypothesis. These are degreewise module
+isomorphisms; no chain or natural isomorphism is constructed here.
 
 ## References
 
@@ -101,5 +105,52 @@ theorem chainGroupIsoFinsupp_hom_ι (X : SSet.{u}) {n : ℕ} (x : X _⦋n⦌) :
       ((X.ιChainComplex (R := integerCoefficients) x).hom (ULift.up (1 : ℤ))) =
         Finsupp.single x 1 at h1
   exact h1
+
+/-- Integral chain coordinates intertwine a simplicial map in each degree with
+pushforward of finitely supported functions along its map on simplices.
+Coefficients with the same image are added; no injectivity is required. -/
+@[reassoc]
+theorem chainGroupIsoFinsupp_naturality {X Y : SSet.{u}} (f : X ⟶ Y) (n : ℕ) :
+    (SSet.chainComplexMap f integerCoefficients).f n ≫
+        (chainGroupIsoFinsupp Y n).hom =
+      (chainGroupIsoFinsupp X n).hom ≫
+        ModuleCat.ofHom (Finsupp.lmapDomain ℤ ℤ
+          (fun x : X _⦋n⦌ => f.app (Opposite.op ⦋n⦌) x)) := by
+  apply SSet.chainComplex_hom_ext (X := X) (R := integerCoefficients)
+  intro x
+  simp only [← Category.assoc, SSet.ι_chainComplexMap_f]
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro a
+  have hX := ι_chainGroupIsoFinsupp_hom X x
+  have hXa := congr($hX a)
+  change (chainGroupIsoFinsupp X n).hom.hom
+      ((X.ιChainComplex (R := integerCoefficients) x).hom a) =
+        Finsupp.single x (ULift.moduleEquiv (R := ℤ) (M := ℤ) a) at hXa
+  have hY := ι_chainGroupIsoFinsupp_hom Y (f.app (Opposite.op ⦋n⦌) x)
+  have hYa := congr($hY a)
+  change (chainGroupIsoFinsupp Y n).hom.hom
+      ((Y.ιChainComplex (R := integerCoefficients) (f.app (Opposite.op ⦋n⦌) x)).hom a) =
+        Finsupp.single (f.app (Opposite.op ⦋n⦌) x)
+          (ULift.moduleEquiv (R := ℤ) (M := ℤ) a) at hYa
+  simp only [ModuleCat.hom_comp, LinearMap.comp_apply, ModuleCat.hom_ofHom,
+    Finsupp.lmapDomain_apply, hXa, hYa, Finsupp.mapDomain_single]
+
+/-- The coordinates of the image of a chain are the pushforward of its coordinates.
+At each target simplex, `Finsupp.mapDomain` sums the coefficients over the source
+chain's finite support, even when the simplex map has infinite fibers. -/
+theorem chainGroupIsoFinsupp_naturality_apply {X Y : SSet.{u}} (f : X ⟶ Y) (n : ℕ)
+    (c : (X.chainComplex integerCoefficients).X n) :
+    (chainGroupIsoFinsupp Y n).hom.hom
+        (((SSet.chainComplexMap f integerCoefficients).f n).hom c) =
+      Finsupp.mapDomain (fun x : X _⦋n⦌ => f.app (Opposite.op ⦋n⦌) x)
+        ((chainGroupIsoFinsupp X n).hom.hom c) := by
+  have h := congrArg
+    (fun k : (X.chainComplex integerCoefficients).X n ⟶
+      ModuleCat.of ℤ (Y _⦋n⦌ →₀ ℤ) ↦ k.hom)
+    (chainGroupIsoFinsupp_naturality f n)
+  rw [ModuleCat.hom_comp, ModuleCat.hom_comp, ModuleCat.hom_ofHom] at h
+  simpa only [LinearMap.comp_apply, Finsupp.lmapDomain_apply] using
+    LinearMap.congr_fun h c
 
 end AlgebraicTopology

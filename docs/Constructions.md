@@ -506,7 +506,7 @@ and `Functor.isoWhiskerRight`, rather than a separate transport or quotient cons
 
 ## All-simplex integral coordinates
 
-Import `SimplicialObjects.ChainCoordinates`; its four declarations are in
+Import `SimplicialObjects.ChainCoordinates`; its coordinate declarations are in
 `AlgebraicTopology`. For `X : SSet.{u}` and `n : ℕ`, the original coefficient object is
 `integerCoefficients = (ModuleCat.uliftFunctor.{u} ℤ).obj (ModuleCat.of ℤ ℤ)`.
 It is a `ModuleCat.{u} ℤ` object, with the original given module structure on
