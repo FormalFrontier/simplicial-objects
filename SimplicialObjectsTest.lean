@@ -10,6 +10,7 @@ import SimplicialObjectsTest.PathComponents
 
 import SimplicialObjectsTest.FiniteFiberTransfer
 import SimplicialObjectsTest.ChainCoordinates
+import SimplicialObjectsTest.ChainBoundaryCoordinates
 
 import SimplicialObjectsTest.Normalization
 

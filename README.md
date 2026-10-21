@@ -19,6 +19,11 @@ five extra-degeneracy equations are in the [left décalage guide](docs/LeftDecal
   integers and unit basis chains. This is degreewise, not a chain or natural
   isomorphism or a normalized-chain identification; the
   [standard-point chain](SimplicialObjectsTest/ChainCoordinates.lean) is nonzero.
+  In every degree the [boundary coordinates](SimplicialObjects/ChainBoundaryCoordinates.lean)
+  are the alternating sum of face pushforwards, which add coefficients of
+  coincident faces without finite-fiber or injectivity assumptions. The
+  [identity edge of `Δ[1]`](SimplicialObjectsTest/ChainBoundaryCoordinates.lean)
+  has boundary `[v₁] - [v₀]`, nonzero as a chain, not as a homology class.
 - **Augmented left décalage and its canonical extra degeneracy**
   ([`LeftDecalage`](SimplicialObjects/LeftDecalage.lean)).
   For every simplicial object in any category, `P(X)ₙ = Xₙ₊₁` augments to `X₀`,
@@ -100,6 +105,8 @@ five extra-degeneracy equations are in the [left décalage guide](docs/LeftDecal
 ## Using the library
 
 Import `SimplicialObjects` for the public API, or import a module directly.
+For the integral boundary formulas, import
+`SimplicialObjects.ChainBoundaryCoordinates`.
 
 Add the library to your `lakefile.toml`:
 
@@ -167,6 +174,8 @@ measured.
 | --- | --- |
 | `SimplicialObjects.ChainCoordinates` | Integral all-simplex degree coordinates and the two summand laws |
 | `SimplicialObjectsTest.ChainCoordinates` | A nonzero lifted integer vertex chain on the standard point |
+| `SimplicialObjects.ChainBoundaryCoordinates` | Alternating face pushforwards in integral all-simplex coordinates |
+| `SimplicialObjectsTest.ChainBoundaryCoordinates` | The genuine standard identity-edge boundary and its nonvanishing as a chain |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and the fixed-coefficient natural comparison |
 | `SimplicialObjects.TensorCokernels` | All-arrow cokernel natural comparison, component compatibility and projection laws |
 | `SimplicialObjects.TensorHomotopies` | Chain homotopies, component formulas, homology invariance and quasi-isomorphisms from homotopy inverses or extra-degenerate augmentations |
