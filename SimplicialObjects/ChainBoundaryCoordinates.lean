@@ -43,20 +43,6 @@ universe u
 
 namespace AlgebraicTopology
 
-/-- On a simplex summand with any lifted integer coefficient, the coordinate
-map is the singleton with that integer as coefficient. -/
-theorem chainGroupIsoFinsupp_hom_ι_apply (X : SSet.{u}) {n : ℕ}
-    (x : X _⦋n⦌) (a : integerCoefficients.{u}) :
-    (chainGroupIsoFinsupp X n).hom.hom
-        ((X.ιChainComplex (R := integerCoefficients.{u}) x).hom a) =
-      Finsupp.single x (ULift.moduleEquiv (R := ℤ) (M := ℤ) a) := by
-  have h := ι_chainGroupIsoFinsupp_hom X x
-  have ha := congr($h a)
-  change (chainGroupIsoFinsupp X n).hom.hom
-      ((X.ιChainComplex (R := integerCoefficients.{u}) x).hom a) =
-        Finsupp.single x (ULift.moduleEquiv (R := ℤ) (M := ℤ) a) at ha
-  exact ha
-
 /-- Integral coordinates carry the simplicial differential to the alternating
 sum of linear pushforwards along the face maps. -/
 @[reassoc]

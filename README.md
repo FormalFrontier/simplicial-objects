@@ -11,18 +11,25 @@ five extra-degeneracy equations are in the [left décalage guide](docs/LeftDecal
 
 ## Headline results
 
-- **Integral all-simplex coordinates**
-  ([`chainGroupIsoFinsupp`](SimplicialObjects/ChainCoordinates.lean)).
-  For every `X : SSet.{u}` and degree, chains with the original coefficient object
-  `(ModuleCat.uliftFunctor.{u} ℤ).obj (ModuleCat.of ℤ ℤ)` are isomorphic to integer
-  Finsupp functions on **all** simplices. The two summand laws compute lifted
-  integers and unit basis chains. This is degreewise, not a chain or natural
-  isomorphism or a normalized-chain identification; the
-  [standard-point chain](SimplicialObjectsTest/ChainCoordinates.lean) is nonzero.
+- **Integral all-simplex chain coordinates**
+  ([`chainGroupIsoFinsupp`](SimplicialObjects/ChainCoordinates.lean),
+  [`chainComplexIsoFinsupp`](SimplicialObjects/ChainComplexCoordinates.lean)).
+  For any ring `R`, `AlgebraicTopology.finsuppChainComplexFunctor R` gives the
+  ordinary-Finsupp alternating-face chain complex, with independent ring and
+  simplex universes. Over `ℤ`, `chainComplexIsoFinsupp` is a natural isomorphism
+  from the existing `SSet.chainComplexFunctor` at the original coefficient object
+  `(ModuleCat.uliftFunctor.{u} ℤ).obj (ModuleCat.of ℤ ℤ)` to this functor.
+  For every `X : SSet.{u}` and degree `n`, its evaluation isomorphism is exactly
+  `chainGroupIsoFinsupp X n`: both forward and inverse degree maps are the
+  original maps on every chain, not merely on generators. The two summand laws
+  still compute lifted integers and unit basis chains. Naturality holds for
+  every simplicial map and every chain; pushforwards add coefficients of
+  coincident images, without finite-fiber or injectivity assumptions.
   In every degree the [boundary coordinates](SimplicialObjects/ChainBoundaryCoordinates.lean)
-  are the alternating sum of face pushforwards, which add coefficients of
-  coincident faces without finite-fiber or injectivity assumptions. The
-  [identity edge of `Δ[1]`](SimplicialObjectsTest/ChainBoundaryCoordinates.lean)
+  are the signed sum of face pushforwards. This comparison concerns all simplices,
+  not normalized chains or homology. The
+  [standard-point chain](SimplicialObjectsTest/ChainCoordinates.lean) is nonzero;
+  the [identity edge of `Δ[1]`](SimplicialObjectsTest/ChainBoundaryCoordinates.lean)
   has boundary `[v₁] - [v₀]`, nonzero as a chain, not as a homology class.
 - **Augmented left décalage and its canonical extra degeneracy**
   ([`LeftDecalage`](SimplicialObjects/LeftDecalage.lean)).
@@ -105,8 +112,8 @@ five extra-degeneracy equations are in the [left décalage guide](docs/LeftDecal
 ## Using the library
 
 Import `SimplicialObjects` for the public API, or import a module directly.
-For the integral boundary formulas, import
-`SimplicialObjects.ChainBoundaryCoordinates`.
+For the integral chain-complex comparison and boundary formulas, import
+`SimplicialObjects.ChainComplexCoordinates`.
 
 Add the library to your `lakefile.toml`:
 
@@ -144,8 +151,10 @@ simplicial edge. Example modules are not part of the public root.
 <a id="reproduce-and-verification"></a>
 ## Building
 
-The pinned Lean toolchain is `leanprover/lean4:v4.34.0-rc2`; the only direct
-dependency is GitHub mathlib `83abb3e776bdefcbc447a1e44d0debe4010039e5`.
+The pinned Lean toolchain is `leanprover/lean4:v4.34.0-rc2`; the direct
+dependencies are GitHub mathlib `83abb3e776bdefcbc447a1e44d0debe4010039e5`
+and [`projective-modules`](https://github.com/FormalFrontier/projective-modules)
+`08efdc3703d199727871d0f3dbd5d3c9c4fde8bb`.
 In a checkout, use the committed `lake-manifest.json` and fetch matching
 precompiled mathlib artifacts **before** building:
 
@@ -175,6 +184,7 @@ measured.
 | `SimplicialObjects.ChainCoordinates` | Integral all-simplex degree coordinates and the two summand laws |
 | `SimplicialObjectsTest.ChainCoordinates` | A nonzero lifted integer vertex chain on the standard point |
 | `SimplicialObjects.ChainBoundaryCoordinates` | Alternating face pushforwards in integral all-simplex coordinates |
+| `SimplicialObjects.ChainComplexCoordinates` | Ordinary-Finsupp chain-complex functor for any ring and the integral natural isomorphism with the original degree coordinates |
 | `SimplicialObjectsTest.ChainBoundaryCoordinates` | The genuine standard identity-edge boundary and its nonvanishing as a chain |
 | `SimplicialObjects.TensorMaps` | Simplicial degree maps, chain maps and the fixed-coefficient natural comparison |
 | `SimplicialObjects.TensorCokernels` | All-arrow cokernel natural comparison, component compatibility and projection laws |
@@ -219,6 +229,9 @@ The [detailed guide](docs/Constructions.md) retains the precise scopes and examp
 
 - J. Peter May, *A Concise Course in Algebraic Topology*, revised author edition,
   §§13.1, 16.1 and 16.4 (mathematical background; not a source-wide formalization).
+- [ProjectiveModules](https://github.com/FormalFrontier/projective-modules),
+  especially `ModuleCat.freeOn`, for ordinary free modules with independent ring
+  and generator universes.
 - Mathlib's simplicial, normalization, categorical homology and colimit APIs;
   attribution and the role of the existing formalizations are detailed below
   and in the [mathematical guide](docs/Constructions.md).
@@ -230,6 +243,9 @@ simplicial, Dold–Kan normalization and homology constructions, notably Joël R
 degree-zero component formalization, and this library's integral tensor comparison and terminal
 coefficient API. Formal Frontier Agents, including Prism, wrote the integral all-simplex coordinates,
 using Mathlib's module-category colimits, lifted module functor and Finsupp linear equivalences.
+The chain-complex comparison uses ProjectiveModules' `ModuleCat.freeOn`, which generalizes
+Mathlib's free-module functor to independent ring and generator universes. Kim Morrison
+and Johan Commelin developed the Mathlib construction.
 May's *A Concise Course in Algebraic Topology*, revised edition, provides the mathematical background cited above; no source-wide formalization is claimed. Existing contributor
 and source credit is retained in [CONTRIBUTORS.md](CONTRIBUTORS.md). Licensed under
 [Apache-2.0](LICENSE); Mathlib retains its own license and authorship.

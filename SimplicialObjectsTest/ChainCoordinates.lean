@@ -5,6 +5,7 @@ Authors: Formal Frontier Agents
 module
 
 import SimplicialObjects
+import SimplicialObjects.ChainComplexCoordinates
 
 /-!
 # Integral chains on a point and a two-point collapse
@@ -15,9 +16,9 @@ This uses the standard simplicial point and the coefficient object
 `AlgebraicTopology.integerCoefficients`, not a different integer module model.
 
 For the constant simplicial collapse from `Fin 2` to `PUnit`, the sum of the two
-unit vertex chains has image with coordinate `single PUnit.unit 2`. This uses
-the degreewise coordinate naturality API and exhibits coefficient accumulation
-under a noninjective map.
+unit vertex chains has image with coordinate `single PUnit.unit 2`. This evaluates
+the natural chain-complex comparison in degree zero and uses its arbitrary-chain
+naturality, exhibiting coefficient accumulation under a noninjective map.
 
 Mathlib supplies the standard simplex and its vertex equivalence; the integral
 coordinate law is the Formal Frontier Agents' simplicial-chain formalization.
@@ -54,9 +55,29 @@ private theorem const_fin_two_collapse_chain_coordinates :
               (ULift.up (1 : ℤ)))) =
       Finsupp.single PUnit.unit 2 := by
   intro X Y f
-  rw [chainGroupIsoFinsupp_naturality_apply, map_add,
-    chainGroupIsoFinsupp_hom_ι, chainGroupIsoFinsupp_hom_ι,
-    Finsupp.mapDomain_add, Finsupp.mapDomain_single, Finsupp.mapDomain_single]
+  let c : (X.chainComplex integerCoefficients).X 0 :=
+    (X.ιChainComplex (R := integerCoefficients) (n := 0) (0 : Fin 2)).hom
+        (ULift.up (1 : ℤ)) +
+      (X.ιChainComplex (R := integerCoefficients) (n := 0) (1 : Fin 2)).hom
+        (ULift.up (1 : ℤ))
+  have hc : (chainGroupIsoFinsupp X 0).hom.hom c =
+      Finsupp.single (0 : Fin 2) (1 : ℤ) +
+        Finsupp.single (1 : Fin 2) (1 : ℤ) := by
+    dsimp only [c]
+    rw [map_add, chainGroupIsoFinsupp_hom_ι, chainGroupIsoFinsupp_hom_ι]
+  have hcomparison : ((chainComplexIsoFinsupp.hom.app X).f 0).hom c =
+      Finsupp.single (0 : Fin 2) (1 : ℤ) +
+        Finsupp.single (1 : Fin 2) (1 : ℤ) :=
+    (chainComplexIsoFinsupp_hom_f_apply X 0 c).trans hc
+  rw [← chainComplexIsoFinsupp_eval Y 0]
+  change ((chainComplexIsoFinsupp.hom.app Y).f 0).hom
+      (((SSet.chainComplexMap f integerCoefficients).f 0).hom c) =
+    Finsupp.single PUnit.unit 2
+  refine (chainComplexIsoFinsupp_naturality_apply f 0 c).trans ?_
+  refine (congrArg
+    (Finsupp.mapDomain (fun x : X _⦋0⦌ => f.app (Opposite.op ⦋0⦌) x))
+    hcomparison).trans ?_
+  rw [Finsupp.mapDomain_add, Finsupp.mapDomain_single, Finsupp.mapDomain_single]
   simp [f, ← Finsupp.single_add]
 
 end AlgebraicTopology

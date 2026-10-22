@@ -106,6 +106,20 @@ theorem chainGroupIsoFinsupp_hom_ι (X : SSet.{u}) {n : ℕ} (x : X _⦋n⦌) :
         Finsupp.single x 1 at h1
   exact h1
 
+/-- On a simplex summand with any lifted integer coefficient, the coordinate
+map is the singleton with that integer as coefficient. -/
+theorem chainGroupIsoFinsupp_hom_ι_apply (X : SSet.{u}) {n : ℕ}
+    (x : X _⦋n⦌) (a : integerCoefficients.{u}) :
+    (chainGroupIsoFinsupp X n).hom.hom
+        ((X.ιChainComplex (R := integerCoefficients.{u}) x).hom a) =
+      Finsupp.single x (ULift.moduleEquiv (R := ℤ) (M := ℤ) a) := by
+  have h := ι_chainGroupIsoFinsupp_hom X x
+  have ha := congr($h a)
+  change (chainGroupIsoFinsupp X n).hom.hom
+      ((X.ιChainComplex (R := integerCoefficients.{u}) x).hom a) =
+        Finsupp.single x (ULift.moduleEquiv (R := ℤ) (M := ℤ) a) at ha
+  exact ha
+
 /-- Integral chain coordinates intertwine a simplicial map in each degree with
 pushforward of finitely supported functions along its map on simplices.
 Coefficients with the same image are added; no injectivity is required. -/
