@@ -43,3 +43,6 @@ public import SimplicialObjects.SingularHomologyZeroCoefficientMaps
 public import SimplicialObjects.TensorCoefficientSequences
 
 public import SimplicialObjects.HomologyZero
+
+public import SimplicialObjects.TensorHomologyZeroProducts
+public import SimplicialObjects.TensorHomologyZeroProductNaturality

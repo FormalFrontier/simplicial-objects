@@ -341,7 +341,43 @@ For the full reexport list, see the [public root](../SimplicialObjects.lean).
   The mixed coproduct map reindexes by `SSet.mapπ₀` and sends `ULift.up x` to `ULift.up (g x)` on
   each summand. These coefficient and mixed squares use raw degree-zero generators, not the separate
   simplicial-naturality theorem; simplicial and coefficient maps also commute on homology and on the
-  coproducts.
+  coproducts. The one-factor class-image laws
+  `SSet.tensorNormalizedHomologyZeroMap_class` and
+  `SSet.tensorNormalizedHomologyZeroCoefficientMap_class` compute these induced maps
+  directly on vertex classes and are reused by product naturality.
+
+- **Binary products in degree-zero normalized tensor homology.**
+  [`TensorHomologyZeroProducts`](../SimplicialObjects/TensorHomologyZeroProducts.lean)
+  constructs `SSet.tensorNormalizedHomologyZeroProductIso` for arbitrary abelian
+  groups `A : Type a`, `B : Type b` and simplicial sets `K : SSet.{w}`, `L : SSet.{v}`.
+  Its source is the algebraic integer tensor product of their original degree-zero
+  tensor homology modules with independent paddings `pK`, `pL`. Its target is
+  degree-zero tensor homology with coefficients `A ⊗[ℤ] B` of the categorical
+  product of `(SSet.uliftFunctor.{v,w}).obj K` and
+  `(SSet.uliftFunctor.{w,v}).obj L`, with padding `max pK pL`.
+  No finiteness, flatness, connectedness or nonemptiness is required.
+  The construction uses the component coproduct descriptions, Mathlib's
+  tensor/direct-sum distribution, lifted coefficient equivalences and the
+  component equivalence of a binary product.
+
+  With prefix `SSet.tensorNormalizedHomologyZeroProductIso`, `_hom_class` sends
+  a pure tensor of vertex classes with coefficients `x`, `y` to the paired vertex
+  class with coefficient `x ⊗ₜ[ℤ] y`, and `_inv_class` recovers the source tensor.
+  `SSet.tensorNormalizedHomologyZeroProduct_ext` determines a linear map to any
+  independently-universed integer module from these tensors. The `_hom_unique`
+  and `_inv_unique` statements characterize both comparison maps without an
+  invertibility premise on the competing maps.
+
+  [`TensorHomologyZeroProductNaturality`](../SimplicialObjects/TensorHomologyZeroProductNaturality.lean)
+  gives all four squares: `_hom_naturality` and `_inv_naturality` for arbitrary
+  simplicial maps in both factors, and `_hom_coefficient_naturality` and
+  `_inv_coefficient_naturality` for arbitrary additive coefficient maps
+  `A →+ A'`, `B →+ B'`. The latter use source paddings `max a' pK`, `max b' pL`
+  and target paddings `max a pK`, `max b pL`, retaining all independent universes.
+  The [discrete two-by-two example](../SimplicialObjectsTest/TensorHomologyZeroProducts.lean)
+  separates the four nonzero integer vertex tensors and product classes, evaluates
+  the comparison on all four, and computes the induced flip/collapse and
+  coefficient-doubling/tripling maps.
 
 - **Singular homology in degree zero and path components.**
   [`SingularHomologyZero`](../SimplicialObjects/SingularHomologyZero.lean) constructs

@@ -22,6 +22,10 @@ project:
     isomorphic to the coproduct of the lifted coefficient object over simplicial
     components, with raw vertex and signed boundary formulas, all-map simplicial
     naturality, and universe-balanced additive coefficient and mixed naturality.
+    Binary products give an isomorphism from the tensor of the two degree-zero
+    homology modules to product homology with tensor coefficients, natural in
+    both simplicial and coefficient variables in each direction, with independent
+    coefficient, simplex and padding universes and vertex-class characterizations.
     The component fold agrees with collapse to a terminal simplicial set for every
     source; connected sets have a coefficient isomorphism, and the empty standard
     boundary has zero degree-zero homology. For terminal simplicial sets, degree-zero
@@ -334,6 +338,9 @@ alignment:
     exactness statement. Ordinary zeroth simplicial homology is indexed with the
     all-degree coefficient-generator law, its generated reassociated form, and
     coefficient naturality of Mathlib's homology₀Iso in both directions.
+    Binary products are indexed with their degree-zero tensor homology isomorphism,
+    forward and inverse vertex-class formulas, pure-tensor extensionality,
+    uniqueness, and all four simplicial and additive-coefficient naturality squares.
   statements:
     - lean: AlgebraicTopology.integerCoefficients
       module: SimplicialObjects/ChainCoordinates.lean
@@ -766,6 +773,30 @@ alignment:
       module: SimplicialObjects/HomologyZero.lean
     - lean: SSet.homology₀Iso_inv_coefficient_naturality
       module: SimplicialObjects/HomologyZero.lean
+    - lean: SSet.tensorNormalizedHomologyZeroMap_class
+      module: SimplicialObjects/TensorHomologyZeroNaturality.lean
+    - lean: SSet.tensorNormalizedHomologyZeroCoefficientMap_class
+      module: SimplicialObjects/TensorHomologyZeroCoefficientMaps.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso
+      module: SimplicialObjects/TensorHomologyZeroProducts.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_hom_class
+      module: SimplicialObjects/TensorHomologyZeroProducts.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_inv_class
+      module: SimplicialObjects/TensorHomologyZeroProducts.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProduct_ext
+      module: SimplicialObjects/TensorHomologyZeroProducts.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_hom_unique
+      module: SimplicialObjects/TensorHomologyZeroProducts.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_inv_unique
+      module: SimplicialObjects/TensorHomologyZeroProducts.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_hom_naturality
+      module: SimplicialObjects/TensorHomologyZeroProductNaturality.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_inv_naturality
+      module: SimplicialObjects/TensorHomologyZeroProductNaturality.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_hom_coefficient_naturality
+      module: SimplicialObjects/TensorHomologyZeroProductNaturality.lean
+    - lean: SSet.tensorNormalizedHomologyZeroProductIso_inv_coefficient_naturality
+      module: SimplicialObjects/TensorHomologyZeroProductNaturality.lean
 acknowledgements: >-
   Formal Frontier agents contributed the formalization and documentation; see
   CONTRIBUTORS.md for authorship and role credit. Mathlib supplies the underlying
@@ -793,4 +824,7 @@ acknowledgements: >-
   give finite-limit and finite-colimit preservation of the coefficient functor.
   The ordinary zeroth-homology coefficient laws follow Mathlib's simplicial
   homology and homology₀Iso API by Joël Riou and Andrew Yang, together with its
-  categorical coproduct and isomorphism APIs.
+  categorical coproduct and isomorphism APIs. The binary product comparison reuses
+  Mathlib's tensor/direct-sum distribution by Kenny Lau, Mario Carneiro and Eric
+  Wieser, its universe-lift module equivalence by Kim Morrison, and this library's
+  component-product and lifted-component comparisons.

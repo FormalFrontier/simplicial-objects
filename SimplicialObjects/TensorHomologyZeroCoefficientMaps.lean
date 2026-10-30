@@ -164,6 +164,33 @@ theorem tensorNormalizedHomologyZeroIsoComponents_hom_coefficient_naturality
     Category.id_comp, hπ, Sigma.map'_id] using
     tensorNormalizedHomologyZeroIsoComponents_hom_mixed_naturality.{a, b, w, p} (𝟙 S) f
 
+/-- An additive coefficient map sends a degree-zero vertex class to the class
+of the same vertex with the image coefficient, with balanced independent padding. -/
+theorem tensorNormalizedHomologyZeroCoefficientMap_class
+    (f : A →+ B) (S : SSet.{w}) (v : S _⦋0⦌) (x : A) :
+    HomologicalComplex.homologyMap
+        (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} f S) 0
+        ((tensorNormalizedChainComplex.{a, w, max b p} A S).homologyπ₀
+          (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))) =
+      (tensorNormalizedChainComplex.{b, w, max a p} B S).homologyπ₀
+        (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] f x)) := by
+  have h :
+      HomologicalComplex.homologyMap
+          (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} f S) 0
+          ((tensorNormalizedChainComplex.{a, w, max b p} A S).homologyπ₀
+            (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))) =
+        (tensorNormalizedChainComplex.{b, w, max a p} B S).homologyπ₀
+          ((tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} f S).f 0
+            (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))) :=
+    ConcreteCategory.congr_hom
+      (ChainComplex.homologyπ₀_naturality
+        (tensorNormalizedChainComplexCoefficientMap.{a, b, w, p} f S))
+      (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))
+  exact h.trans (congrArg
+    (fun z : (tensorNormalizedChainComplex.{b, w, max a p} B S).X 0 =>
+      (tensorNormalizedChainComplex.{b, w, max a p} B S).homologyπ₀ z)
+    (tensorNormalizedChainComplexCoefficientMap_f_simplex.{a, b, w, p} f S v x))
+
 /-- The degree-zero homology maps for a simplicial map and an additive
 coefficient map commute, without any restriction on the two coefficient
 universes. This is the homology image of the existing mixed chain square. -/

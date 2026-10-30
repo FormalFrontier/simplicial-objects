@@ -91,6 +91,20 @@ five extra-degeneracy equations are in the [left décalage guide](docs/LeftDecal
   continuous and coefficient maps, without local path connectedness. The direct
   [path-component functor](SimplicialObjects/PathComponents.lean) agrees naturally
   with singular components via Mathlib's equivalence.
+- **Degree-zero normalized homology of binary products**
+  ([`tensorNormalizedHomologyZeroProductIso`](SimplicialObjects/TensorHomologyZeroProducts.lean)).
+  For arbitrary abelian groups `A`, `B` and simplicial sets `K`, `L`,
+  `H₀ᴺ(K; A) ⊗ℤ H₀ᴺ(L; B) ≅ H₀ᴺ(K × L; A ⊗ℤ B)`, using canonical
+  universe lifts with independent coefficient, simplex and padding universes.
+  Pure tensors of vertex classes map to the paired vertex class with pure tensor
+  coefficient; inverse formulas, extensionality and uniqueness characterize the maps.
+  [Forward and inverse naturality](SimplicialObjects/TensorHomologyZeroProductNaturality.lean)
+  hold for simplicial maps in both factors and arbitrary additive maps in both
+  coefficient groups, with balanced padding for coefficient change. No finiteness,
+  flatness, connectedness or nonemptiness is assumed. A
+  [discrete two-by-two example](SimplicialObjectsTest/TensorHomologyZeroProducts.lean)
+  distinguishes the four nonzero vertex tensors and their four product classes,
+  and evaluates simplicial and coefficient maps on them.
 - **Component folds, terminal sets and dimension vanishing**
   ([`TensorHomologyZeroConnected`](SimplicialObjects/TensorHomologyZeroConnected.lean),
   [`TensorHomologyZeroEmpty`](SimplicialObjects/TensorHomologyZeroEmpty.lean),
@@ -202,6 +216,9 @@ measured.
 | `SimplicialObjects.TensorHomologyZeroCoefficientMaps` | Universe-balanced additive coefficient and mixed naturality squares |
 | `SimplicialObjects.TensorHomologyZeroConnected` | All-source fold, connected coefficient isomorphism and terminal compatibility |
 | `SimplicialObjects.TensorHomologyZeroEmpty` | Zero degree-zero homology of the empty standard boundary |
+| `SimplicialObjects.TensorHomologyZeroProducts` | Binary product isomorphism, forward and inverse vertex-class laws, pure-tensor extensionality and uniqueness |
+| `SimplicialObjects.TensorHomologyZeroProductNaturality` | Forward and inverse simplicial and balanced additive-coefficient naturality squares |
+| `SimplicialObjectsTest.TensorHomologyZeroProducts` | Four distinct nonzero classes of a discrete two-by-two product and evaluations of the product comparison and its naturality |
 | `SimplicialObjects.SingularHomologyZero` | Singular normalized tensor homology by path components and the singular-vertex formula |
 | `SimplicialObjects.SingularHomologyZeroNaturality` | Forward and inverse continuous-map naturality |
 | `SimplicialObjects.SingularHomologyZeroCoefficientMaps` | Balanced additive coefficient and mixed naturality |

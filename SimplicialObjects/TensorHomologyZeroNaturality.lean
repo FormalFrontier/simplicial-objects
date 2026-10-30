@@ -32,8 +32,8 @@ comparison. No choice of component representatives is required.
 
 universe a w p
 
-open CategoryTheory Limits
-open scoped Simplicial
+open CategoryTheory Limits Opposite
+open scoped Simplicial TensorProduct
 
 namespace SSet
 
@@ -140,5 +140,29 @@ theorem tensorNormalizedHomologyZeroIsoComponents_inv_naturality
     (congrArg
       (fun q ↦ (tensorNormalizedHomologyZeroIsoComponents.{a, w, p} A S).inv ≫ q)
       (tensorNormalizedHomologyZeroIsoComponents_hom_naturality.{a, w, p} A f)).symm
+
+/-- A simplicial map sends a degree-zero vertex class to the class of its image
+vertex, retaining the coefficient. No nondegeneracy-preservation is required. -/
+theorem tensorNormalizedHomologyZeroMap_class
+    (A : Type a) [AddCommGroup A] (f : S ⟶ T) (v : S _⦋0⦌) (x : A) :
+    HomologicalComplex.homologyMap (tensorNormalizedChainComplexMap.{a, w, p} A f) 0
+        ((tensorNormalizedChainComplex.{a, w, p} A S).homologyπ₀
+          (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))) =
+      (tensorNormalizedChainComplex.{a, w, p} A T).homologyπ₀
+        (ULift.up (T.normalizedIntegralSimplex (f.app (op ⦋0⦌) v) ⊗ₜ[ℤ] x)) := by
+  have h :
+      HomologicalComplex.homologyMap (tensorNormalizedChainComplexMap.{a, w, p} A f) 0
+          ((tensorNormalizedChainComplex.{a, w, p} A S).homologyπ₀
+            (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))) =
+        (tensorNormalizedChainComplex.{a, w, p} A T).homologyπ₀
+          ((tensorNormalizedChainComplexMap.{a, w, p} A f).f 0
+            (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))) :=
+    ConcreteCategory.congr_hom
+      (ChainComplex.homologyπ₀_naturality (tensorNormalizedChainComplexMap.{a, w, p} A f))
+      (ULift.up (S.normalizedIntegralSimplex v ⊗ₜ[ℤ] x))
+  exact h.trans (congrArg
+    (fun z : (tensorNormalizedChainComplex.{a, w, p} A T).X 0 =>
+      (tensorNormalizedChainComplex.{a, w, p} A T).homologyπ₀ z)
+    (tensorNormalizedChainComplexMap_f_simplex.{a, w, p} A f v x))
 
 end SSet
